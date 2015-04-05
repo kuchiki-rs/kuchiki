@@ -6,3 +6,12 @@ authors = ["Simon Sapin <simon.sapin@exyr.org>"]
 [lib]
 name = "kuchiki"
 doctest = false
+
+[dependencies]
+rctree = "0.1"
+
+[dependencies.html5ever]
+git = "https://github.com/servo/html5ever"
+
+[dependencies.string_cache]
+git = "https://github.com/servo/string-cache"
