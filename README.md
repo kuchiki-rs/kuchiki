@@ -1,5 +1,5 @@
-Kuchiki
-=======
+Kuchiki (朽木)
+==============
 
 HTML/XML tree manipulation library for Rust.
 
