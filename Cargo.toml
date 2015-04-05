@@ -1,7 +1,10 @@
 [package]
 name = "kuchiki"
-version = "0.0.1"
+version = "0.1.0"
 authors = ["Simon Sapin <simon.sapin@exyr.org>"]
+license = "MIT"
+description = "HTML/XML tree manipulation library"
+repository = "https://github.com/SimonSapin/kuchiki"
 
 [lib]
 name = "kuchiki"
