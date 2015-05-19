@@ -1,10 +1,10 @@
-extern crate rctree;
+extern crate arena_tree;
 extern crate html5ever;
 extern crate string_cache;
 
 pub use html5ever::tree_builder::QuirksMode;
-pub use rctree::{Ref, RefMut, Ancestors, PrecedingSiblings, FollowingSiblings,
-                 Children, ReverseChildren, Descendants, Traverse, ReverseTraverse, NodeEdge};
+pub use arena_tree::{Ref, RefMut, Ancestors, PrecedingSiblings, FollowingSiblings,
+                     Children, ReverseChildren, Descendants, Traverse, ReverseTraverse, NodeEdge};
 pub use string_cache::{Atom, Namespace, QualName};
 
 use html5ever::Attribute;
@@ -13,10 +13,12 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 
 
-pub type NodeRef = rctree::NodeRef<NodeData>;
+pub type NodeRef<'a> = arena_tree::NodeRef<'a, NodeData>;
+pub type Arena<'a> = arena_tree::Arena<'a, NodeData>;
 
-pub struct Tree {
-    pub document_node: NodeRef,
+pub struct Tree<'a> {
+    arena: &'a Arena<'a>,
+    pub document_node: NodeRef<'a>,
     pub errors: Vec<Cow<'static, str>>,
     pub quirks_mode: QuirksMode,
 }
@@ -45,26 +47,26 @@ pub struct ElementData {
 }
 
 
-impl TreeSink for Tree {
-    type Handle = NodeRef;
+impl<'a> TreeSink for Tree<'a> {
+    type Handle = NodeRef<'a>;
 
     fn parse_error(&mut self, msg: Cow<'static, str>) {
         self.errors.push(msg);
     }
 
-    fn get_document(&mut self) -> NodeRef {
-        self.document_node.clone()
+    fn get_document(&mut self) -> NodeRef<'a> {
+        self.document_node
     }
 
     fn set_quirks_mode(&mut self, mode: QuirksMode) {
         self.quirks_mode = mode;
     }
 
-    fn same_node(&self, x: NodeRef, y: NodeRef) -> bool {
-        x.same_node(&y)
+    fn same_node(&self, x: NodeRef<'a>, y: NodeRef<'a>) -> bool {
+        x.same_node(y)
     }
 
-    fn elem_name(&self, target: NodeRef) -> QualName {
+    fn elem_name(&self, target: NodeRef<'a>) -> QualName {
         let borrow = target.borrow();
         match *borrow {
             NodeData::Element(ref element) => element.name.clone(),
@@ -72,18 +74,18 @@ impl TreeSink for Tree {
         }
     }
 
-    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> NodeRef {
-        NodeRef::new(NodeData::Element(ElementData {
+    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> NodeRef<'a> {
+        self.arena.new_node(NodeData::Element(ElementData {
             name: name,
             attributes: attrs.into_iter().map(|Attribute { name, value }| (name, value)).collect()
         }))
     }
 
-    fn create_comment(&mut self, text: String) -> NodeRef {
-        NodeRef::new(NodeData::Comment(text))
+    fn create_comment(&mut self, text: String) -> NodeRef<'a> {
+        self.arena.new_node(NodeData::Comment(text))
     }
 
-    fn append(&mut self, parent: NodeRef, child: NodeOrText<NodeRef>) {
+    fn append(&mut self, parent: NodeRef<'a>, child: NodeOrText<NodeRef<'a>>) {
         match child {
             NodeOrText::AppendNode(node) => parent.append(node),
             NodeOrText::AppendText(text) => {
@@ -94,13 +96,13 @@ impl TreeSink for Tree {
                         return
                     }
                 }
-                parent.append(NodeRef::new(NodeData::Text(text)))
+                parent.append(self.arena.new_node(NodeData::Text(text)))
             }
         }
     }
 
-    fn append_before_sibling(&mut self, sibling: NodeRef, child: NodeOrText<NodeRef>)
-                             -> Result<(), NodeOrText<NodeRef>> {
+    fn append_before_sibling(&mut self, sibling: NodeRef<'a>, child: NodeOrText<NodeRef<'a>>)
+                             -> Result<(), NodeOrText<NodeRef<'a>>> {
         if sibling.parent().is_none() {
             return Err(child)
         }
@@ -114,21 +116,21 @@ impl TreeSink for Tree {
                         return Ok(())
                     }
                 }
-                sibling.insert_before(NodeRef::new(NodeData::Text(text)))
+                sibling.insert_before(self.arena.new_node(NodeData::Text(text)))
             }
         }
         Ok(())
     }
 
     fn append_doctype_to_document(&mut self, name: String, public_id: String, system_id: String) {
-        self.document_node.append(NodeRef::new(NodeData::Doctype(Doctype {
+        self.document_node.append(self.arena.new_node(NodeData::Doctype(Doctype {
             name: name,
             public_id: public_id,
             system_id: system_id,
         })))
     }
 
-    fn add_attrs_if_missing(&mut self, target: NodeRef, attrs: Vec<Attribute>) {
+    fn add_attrs_if_missing(&mut self, target: NodeRef<'a>, attrs: Vec<Attribute>) {
         let mut borrow = target.borrow_mut();
         // FIXME: https://github.com/servo/html5ever/issues/121
         if let &mut NodeData::Element(ref mut element) = &mut *borrow {
@@ -146,11 +148,11 @@ impl TreeSink for Tree {
         }
     }
 
-    fn remove_from_parent(&mut self, target: NodeRef) {
+    fn remove_from_parent(&mut self, target: NodeRef<'a>) {
         target.detach()
     }
 
-    fn reparent_children(&mut self, node: NodeRef, new_parent: NodeRef) {
+    fn reparent_children(&mut self, node: NodeRef<'a>, new_parent: NodeRef<'a>) {
         // FIXME: Can this be done more effciently in rctree,
         // by moving the whole linked list of children at once?
         for child in node.children() {
@@ -158,7 +160,7 @@ impl TreeSink for Tree {
         }
     }
 
-    fn mark_script_already_started(&mut self, _node: NodeRef) {
+    fn mark_script_already_started(&mut self, _node: NodeRef<'a>) {
         // FIXME: Is this useful outside of a browser?
     }
 }

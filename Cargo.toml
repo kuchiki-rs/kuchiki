@@ -11,7 +11,7 @@ name = "kuchiki"
 doctest = false
 
 [dependencies]
-rctree = "0.1"
+arena-tree = "0.1"
 
 [dependencies.html5ever]
 git = "https://github.com/servo/html5ever"
