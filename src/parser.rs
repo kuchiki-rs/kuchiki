@@ -3,6 +3,7 @@ pub use html5ever::tree_builder::QuirksMode;
 use html5ever::{self, Attribute};
 use html5ever::tree_builder::{TreeSink, NodeOrText};
 use std::borrow::Cow;
+use std::cell::{Cell, RefCell};
 use string_cache::QualName;
 use typed_arena::Arena;
 
@@ -13,7 +14,7 @@ pub fn parse<'a, F, I>(source: I, arena: &'a Arena<Node<'a>>, opts: ParseOpts<F>
                        where I: IntoIterator<Item=String>, F: FnMut(Cow<'static, str>) {
     let parser = Parser {
         arena: arena,
-        document_node: arena.alloc(Node::new(NodeData::Document(QuirksMode::NoQuirks))),
+        document_node: arena.alloc(Node::new(NodeData::Document(Cell::new(QuirksMode::NoQuirks)))),
         on_parse_error: opts.on_parse_error,
     };
     let opts = html5ever::ParseOpts {
@@ -72,8 +73,8 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
     }
 
     fn set_quirks_mode(&mut self, mode: QuirksMode) {
-        if let &mut NodeData::Document(ref mut document_mode) = &mut *self.document_node.data.borrow_mut() {
-            *document_mode = mode;
+        if let NodeData::Document(ref document_mode) = self.document_node.data {
+            document_mode.set(mode);
         } else {
             unreachable!();
         }
@@ -84,8 +85,7 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
     }
 
     fn elem_name(&self, target: &'a Node<'a>) -> QualName {
-        let borrow = target.data.borrow();
-        match *borrow {
+        match target.data {
             NodeData::Element(ref element) => element.name.clone(),
             _ => panic!("not an element!"),
         }
@@ -94,12 +94,12 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
     fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> &'a Node<'a> {
         self.arena.alloc(Node::new(NodeData::Element(ElementData {
             name: name,
-            attributes: attrs.into_iter().map(|Attribute { name, value }| (name, value)).collect()
+            attributes: RefCell::new(attrs.into_iter().map(|Attribute { name, value }| (name, value)).collect())
         })))
     }
 
     fn create_comment(&mut self, text: String) -> &'a Node<'a> {
-        self.arena.alloc(Node::new(NodeData::Comment(text)))
+        self.arena.alloc(Node::new(NodeData::Comment(RefCell::new(text))))
     }
 
     fn append(&mut self, parent: &'a Node<'a>, child: NodeOrText<&'a Node<'a>>) {
@@ -107,13 +107,12 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
             NodeOrText::AppendNode(node) => parent.append(node),
             NodeOrText::AppendText(text) => {
                 if let Some(last_child) = parent.last_child() {
-                    let mut borrow = last_child.data.borrow_mut();
-                    if let &mut NodeData::Text(ref mut existing) = &mut *borrow {
-                        existing.push_str(&text);
+                    if let NodeData::Text(ref existing) = last_child.data {
+                        existing.borrow_mut().push_str(&text);
                         return
                     }
                 }
-                parent.append(self.arena.alloc(Node::new(NodeData::Text(text))))
+                parent.append(self.arena.alloc(Node::new(NodeData::Text(RefCell::new(text)))))
             }
         }
     }
@@ -127,13 +126,12 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
             NodeOrText::AppendNode(node) => sibling.insert_before(node),
             NodeOrText::AppendText(text) => {
                 if let Some(previous_sibling) = sibling.previous_sibling() {
-                    let mut borrow = previous_sibling.data.borrow_mut();
-                    if let &mut NodeData::Text(ref mut existing) = &mut *borrow {
-                        existing.push_str(&text);
+                    if let NodeData::Text(ref existing) = previous_sibling.data {
+                        existing.borrow_mut().push_str(&text);
                         return Ok(())
                     }
                 }
-                sibling.insert_before(self.arena.alloc(Node::new(NodeData::Text(text))))
+                sibling.insert_before(self.arena.alloc(Node::new(NodeData::Text(RefCell::new(text)))))
             }
         }
         Ok(())
@@ -148,12 +146,12 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
     }
 
     fn add_attrs_if_missing(&mut self, target: &'a Node<'a>, attrs: Vec<Attribute>) {
-        let mut borrow = target.data.borrow_mut();
         // FIXME: https://github.com/servo/html5ever/issues/121
-        if let &mut NodeData::Element(ref mut element) = &mut *borrow {
+        if let NodeData::Element(ref element) = target.data {
+            let mut attributes = element.attributes.borrow_mut();
             for Attribute { name, value } in attrs {
                 use std::collections::hash_map::Entry;
-                match element.attributes.entry(name) {
+                match attributes.entry(name) {
                     Entry::Vacant(entry) => {
                         entry.insert(value);
                     }

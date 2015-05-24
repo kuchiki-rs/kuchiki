@@ -8,13 +8,12 @@ use tree::{Node, NodeData};
 impl<'a> Serializable for Node<'a> {
     fn serialize<'wr, Wr: Write>(&self, serializer: &mut Serializer<'wr, Wr>,
                                  traversal_scope: TraversalScope) -> Result<()> {
-        let node = self.data.borrow();
-        match (traversal_scope, &*node) {
+        match (traversal_scope, &self.data) {
             (_, &NodeData::Element(ref element)) => {
                 if traversal_scope == IncludeNode {
                     try!(serializer.start_elem(
                         element.name.clone(),
-                        element.attributes.iter().map(|(name, value)| (name, &**value))));
+                        element.attributes.borrow().iter().map(|(name, value)| (name, &**value))));
                 }
 
                 for child in self.children() {
@@ -37,8 +36,8 @@ impl<'a> Serializable for Node<'a> {
             (ChildrenOnly, _) => Ok(()),
 
             (IncludeNode, &NodeData::Doctype(ref doctype)) => serializer.write_doctype(&doctype.name),
-            (IncludeNode, &NodeData::Text(ref text)) => serializer.write_text(&text),
-            (IncludeNode, &NodeData::Comment(ref text)) => serializer.write_comment(&text),
+            (IncludeNode, &NodeData::Text(ref text)) => serializer.write_text(&text.borrow()),
+            (IncludeNode, &NodeData::Comment(ref text)) => serializer.write_comment(&text.borrow()),
 
             (IncludeNode, &NodeData::Document(_)) => panic!("Can't serialize Document node itself"),
         }

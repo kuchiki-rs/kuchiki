@@ -36,26 +36,26 @@ use std::collections::HashMap;
 use string_cache::QualName;
 
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum NodeData {
     Element(ElementData),
-    Text(String),
-    Comment(String),
+    Text(RefCell<String>),
+    Comment(RefCell<String>),
     Doctype(Doctype),
-    Document(QuirksMode),
+    Document(Cell<QuirksMode>),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Doctype {
     pub name: String,
     pub public_id: String,
     pub system_id: String,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct ElementData {
     pub name: QualName,
-    pub attributes: HashMap<QualName, String>,
+    pub attributes: RefCell<HashMap<QualName, String>>,
 }
 
 /// A node inside a DOM-like tree.
@@ -65,7 +65,7 @@ pub struct Node<'a> {
     next_sibling: Cell<Option<&'a Node<'a>>>,
     first_child: Cell<Option<&'a Node<'a>>>,
     last_child: Cell<Option<&'a Node<'a>>>,
-    pub data: RefCell<NodeData>,
+    pub data: NodeData,
 }
 
 
@@ -97,7 +97,7 @@ impl<'a> Node<'a> {
             last_child: Cell::new(None),
             previous_sibling: Cell::new(None),
             next_sibling: Cell::new(None),
-            data: RefCell::new(data),
+            data: data,
         }
     }
 
