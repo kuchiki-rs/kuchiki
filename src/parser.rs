@@ -31,6 +31,27 @@ pub struct ParseOpts<F> where F: FnMut(Cow<'static, str>) {
     pub on_parse_error: F,
 }
 
+struct IgnoreParseErrors;
+
+impl<Args> FnOnce<Args> for IgnoreParseErrors {
+    type Output = ();
+    extern "rust-call" fn call_once(self, _args: Args) {}
+}
+
+impl<Args> FnMut<Args> for IgnoreParseErrors {
+    extern "rust-call" fn call_mut(&mut self, _args: Args) {}
+}
+
+impl Default for ParseOpts<IgnoreParseErrors> {
+    fn default() -> ParseOpts<IgnoreParseErrors> {
+        ParseOpts {
+            tokenizer: Default::default(),
+            tree_builder: Default::default(),
+            on_parse_error: IgnoreParseErrors,
+        }
+    }
+}
+
 
 struct Parser<'a, F> where F: FnMut(Cow<'static, str>) {
     arena: &'a Arena<Node<'a>>,

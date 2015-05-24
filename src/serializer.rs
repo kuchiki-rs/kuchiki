@@ -1,5 +1,3 @@
-pub use html5ever::serialize::serialize;
-
 use html5ever::serialize::{Serializable, Serializer, TraversalScope};
 use html5ever::serialize::TraversalScope::*;
 use std::io::{Write, Result};
