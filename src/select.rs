@@ -1,5 +1,5 @@
 use selectors::tree::{TNode, TElement};
-use selectors::parser::AttrSelector;
+use selectors::parser::{AttrSelector, NamespaceConstraint};
 use string_cache::{Atom, Namespace, QualName};
 use tree::{Node, NodeData, ElementData};
 
@@ -14,30 +14,38 @@ impl<'a> TNode<'a> for &'a Node<'a> {
     fn next_sibling(self) -> Option<Self> { self.next_sibling() }
     fn is_document(self) -> bool { matches!(self.data, NodeData::Document(_)) }
     fn is_element(self) -> bool { matches!(self.data, NodeData::Element(_)) }
-    fn as_element(self) -> &'a ElementData {
-        match self.data {
-            NodeData::Element(ref element_data) => element_data,
-            _ => panic!("Not an element")
-        }
-    }
+    fn as_element(self) -> &'a ElementData { self.as_element().unwrap() }
     fn match_attr<F>(self, attr: &AttrSelector, test: F) -> bool where F: Fn(&str) -> bool {
-        unimplemented!()
+        let name = if self.is_html_element_in_html_document() {
+            &attr.lower_name
+        } else {
+            &attr.name
+        };
+        if let Some(element) = self.as_element() {
+            element.attributes.borrow().iter().any(|(key, value)| {
+                !matches!(attr.namespace, NamespaceConstraint::Specific(ref ns) if *ns != key.ns) &&
+                key.local == *name &&
+                test(value)
+            })
+        } else {
+            false
+        }
     }
     fn is_html_element_in_html_document(self) -> bool {
         matches!(self.data, NodeData::Element(ref element) if element.name.ns == ns!(html))
     }
 
     fn has_changed(self) -> bool { unimplemented!() }
-    unsafe fn set_changed(self, value: bool) { unimplemented!() }
+    unsafe fn set_changed(self, _value: bool) { unimplemented!() }
 
     fn is_dirty(self) -> bool { unimplemented!() }
-    unsafe fn set_dirty(self, value: bool) { unimplemented!() }
+    unsafe fn set_dirty(self, _value: bool) { unimplemented!() }
 
     fn has_dirty_siblings(self) -> bool { unimplemented!() }
-    unsafe fn set_dirty_siblings(self, value: bool) { unimplemented!() }
+    unsafe fn set_dirty_siblings(self, _value: bool) { unimplemented!() }
 
     fn has_dirty_descendants(self) -> bool { unimplemented!() }
-    unsafe fn set_dirty_descendants(self, value: bool) { unimplemented!() }
+    unsafe fn set_dirty_descendants(self, _value: bool) { unimplemented!() }
 }
 
 impl<'a> TElement<'a> for &'a ElementData {

@@ -1,8 +1,6 @@
 use html5ever::serialize::serialize;
 use html5ever::tree_builder::QuirksMode;
 use selectors::tree::TNode;
-use std::cell::{Cell, RefCell};
-use tree::NodeData;
 use typed_arena::Arena;
 
 
@@ -14,7 +12,7 @@ fn parse_and_serialize() {
 <title>Test case</title>
 <p>Content";
     let document = ::parse(Some(html.into()), &arena, Default::default());
-    assert_eq!(document.data, NodeData::Document(Cell::new(QuirksMode::NoQuirks)));
+    assert_eq!(document.as_document().unwrap().quirks_mode(), QuirksMode::NoQuirks);
     let mut serialized = Vec::new();
     serialize(&mut serialized, document, Default::default()).unwrap();
     assert_eq!(String::from_utf8(serialized).unwrap(), r"<!DOCTYPE html
@@ -37,5 +35,5 @@ fn select() {
     .filter(|node| node.is_element() && ::selectors::matching::matches(&selectors, node, &None))
     .collect::<Vec<_>>();
     assert_eq!(matching.len(), 1);
-    assert_eq!(matching[0].first_child().unwrap().data, NodeData::Text(RefCell::new("Foo\n".into())));
+    assert_eq!(&**matching[0].first_child().unwrap().as_text().unwrap().borrow(), "Foo\n");
 }

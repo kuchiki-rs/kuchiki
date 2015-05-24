@@ -2,6 +2,7 @@ use html5ever::tree_builder::QuirksMode;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use string_cache::QualName;
+use typed_arena::Arena;
 
 
 #[derive(Debug, PartialEq, Clone)]
@@ -10,7 +11,7 @@ pub enum NodeData {
     Text(RefCell<String>),
     Comment(RefCell<String>),
     Doctype(Doctype),
-    Document(Cell<QuirksMode>),
+    Document(DocumentData),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -24,6 +25,17 @@ pub struct Doctype {
 pub struct ElementData {
     pub name: QualName,
     pub attributes: RefCell<HashMap<QualName, String>>,
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct DocumentData {
+    pub _quirks_mode: Cell<QuirksMode>,
+}
+
+impl DocumentData {
+    pub fn quirks_mode(&self) -> QuirksMode {
+        self._quirks_mode.get()
+    }
 }
 
 /// A node inside a DOM-like tree.
@@ -55,17 +67,83 @@ impl<T: Copy> Take<T> for Cell<Option<T>> {
 
 impl<'a> Node<'a> {
     /// Create a new node from its associated data.
-    ///
-    /// Typically, this node needs to be moved into an arena allocator
-    /// before it can be used in a tree.
-    pub fn new(data: NodeData) -> Node<'a> {
-        Node {
+    pub fn new(data: NodeData, arena: &'a Arena<Node<'a>>) -> &'a Node<'a> {
+        arena.alloc(Node {
             parent: Cell::new(None),
             first_child: Cell::new(None),
             last_child: Cell::new(None),
             previous_sibling: Cell::new(None),
             next_sibling: Cell::new(None),
             data: data,
+        })
+    }
+
+    pub fn new_element<I>(name: QualName, attributes: I, arena: &'a Arena<Node<'a>>)
+                          -> &'a Node<'a>
+                          where I: IntoIterator<Item=(QualName, String)> {
+        Node::new(NodeData::Element(ElementData {
+            name: name,
+            attributes: RefCell::new(attributes.into_iter().collect()),
+        }), arena)
+    }
+
+    pub fn new_text<T: Into<String>>(value: T, arena: &'a Arena<Node<'a>>) -> &'a Node<'a> {
+        Node::new(NodeData::Text(RefCell::new(value.into())), arena)
+    }
+
+    pub fn new_comment<T: Into<String>>(value: T, arena: &'a Arena<Node<'a>>) -> &'a Node<'a> {
+        Node::new(NodeData::Comment(RefCell::new(value.into())), arena)
+    }
+
+    pub fn new_doctype<T1, T2, T3>(name: T1, public_id: T2, system_id: T3,
+                                   arena: &'a Arena<Node<'a>>)
+                                   -> &'a Node<'a>
+                                   where T1: Into<String>, T2: Into<String>, T3: Into<String> {
+        Node::new(NodeData::Doctype(Doctype {
+            name: name.into(),
+            public_id: public_id.into(),
+            system_id: system_id.into(),
+        }), arena)
+    }
+
+    pub fn new_document(arena: &'a Arena<Node<'a>>) -> &'a Node<'a> {
+        Node::new(NodeData::Document(DocumentData {
+            _quirks_mode: Cell::new(QuirksMode::NoQuirks),
+        }), arena)
+    }
+
+    pub fn as_element(&self) -> Option<&ElementData> {
+        match self.data {
+            NodeData::Element(ref value) => Some(value),
+            _ => None
+        }
+    }
+
+    pub fn as_text(&self) -> Option<&RefCell<String>> {
+        match self.data {
+            NodeData::Text(ref value) => Some(value),
+            _ => None
+        }
+    }
+
+    pub fn as_comment(&self) -> Option<&RefCell<String>> {
+        match self.data {
+            NodeData::Comment(ref value) => Some(value),
+            _ => None
+        }
+    }
+
+    pub fn as_doctype(&self) -> Option<&Doctype> {
+        match self.data {
+            NodeData::Doctype(ref value) => Some(value),
+            _ => None
+        }
+    }
+
+    pub fn as_document(&self) -> Option<&DocumentData> {
+        match self.data {
+            NodeData::Document(ref value) => Some(value),
+            _ => None
         }
     }
 
