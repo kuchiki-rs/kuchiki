@@ -36,7 +36,7 @@ use std::collections::HashMap;
 use string_cache::QualName;
 
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum NodeData {
     Element(ElementData),
     Text(String),
@@ -45,14 +45,14 @@ pub enum NodeData {
     Document(QuirksMode),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Doctype {
     pub name: String,
     pub public_id: String,
     pub system_id: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ElementData {
     pub name: QualName,
     pub attributes: HashMap<QualName, String>,
