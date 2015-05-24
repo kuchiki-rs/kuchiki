@@ -36,5 +36,5 @@ fn select() {
     .filter(|node| node.is_element() && ::selectors::matching::matches(&selectors, node, &None))
     .collect::<Vec<_>>();
     assert_eq!(matching.len(), 1);
-    assert_eq!(*matching[0].first_child.get().unwrap().data.borrow(), NodeData::Text("Foo\n".into()));
+    assert_eq!(*matching[0].first_child().unwrap().data.borrow(), NodeData::Text("Foo\n".into()));
 }

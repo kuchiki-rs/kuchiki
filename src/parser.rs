@@ -106,7 +106,7 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
         match child {
             NodeOrText::AppendNode(node) => parent.append(node),
             NodeOrText::AppendText(text) => {
-                if let Some(last_child) = parent.last_child.get() {
+                if let Some(last_child) = parent.last_child() {
                     let mut borrow = last_child.data.borrow_mut();
                     if let &mut NodeData::Text(ref mut existing) = &mut *borrow {
                         existing.push_str(&text);
@@ -120,13 +120,13 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
 
     fn append_before_sibling(&mut self, sibling: &'a Node<'a>, child: NodeOrText<&'a Node<'a>>)
                              -> Result<(), NodeOrText<&'a Node<'a>>> {
-        if sibling.parent.get().is_none() {
+        if sibling.parent().is_none() {
             return Err(child)
         }
         match child {
             NodeOrText::AppendNode(node) => sibling.insert_before(node),
             NodeOrText::AppendText(text) => {
-                if let Some(previous_sibling) = sibling.previous_sibling.get() {
+                if let Some(previous_sibling) = sibling.previous_sibling() {
                     let mut borrow = previous_sibling.data.borrow_mut();
                     if let &mut NodeData::Text(ref mut existing) = &mut *borrow {
                         existing.push_str(&text);

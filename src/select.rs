@@ -7,11 +7,11 @@ use tree::{Node, NodeData, ElementData};
 impl<'a> TNode<'a> for &'a Node<'a> {
     type Element = &'a ElementData;
 
-    fn parent_node(self) -> Option<Self> { self.parent.get() }
-    fn first_child(self) -> Option<Self> { self.first_child.get() }
-    fn last_child(self) -> Option<Self> { self.last_child.get() }
-    fn prev_sibling(self) -> Option<Self> { self.previous_sibling.get() }
-    fn next_sibling(self) -> Option<Self> { self.next_sibling.get() }
+    fn parent_node(self) -> Option<Self> { self.parent() }
+    fn first_child(self) -> Option<Self> { self.first_child() }
+    fn last_child(self) -> Option<Self> { self.last_child() }
+    fn prev_sibling(self) -> Option<Self> { self.previous_sibling() }
+    fn next_sibling(self) -> Option<Self> { self.next_sibling() }
     fn is_document(self) -> bool { matches!(&*self.data.borrow(), &NodeData::Document(_)) }
     fn is_element(self) -> bool { matches!(&*self.data.borrow(), &NodeData::Element(_)) }
     fn as_element(self) -> &'a ElementData {
