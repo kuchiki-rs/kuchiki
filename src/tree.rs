@@ -49,8 +49,11 @@ pub struct Node<'a> {
 }
 
 
-fn same_ref<T>(a: &T, b: &T) -> bool {
-    a as *const T == b as *const T
+impl<'a> Eq for Node<'a> {}
+impl<'a> PartialEq for Node<'a> {
+    fn eq(&self, other: &Node<'a>) -> bool {
+        self as *const Node<'a> == other as *const Node<'a>
+    }
 }
 
 trait Take<T> {
@@ -172,11 +175,6 @@ impl<'a> Node<'a> {
         self.next_sibling.get()
     }
 
-    /// Returns whether two references point to the same node.
-    pub fn same_node(&self, other: &Node<'a>) -> bool {
-        same_ref(self, other)
-    }
-
     /// Return an iterator of references to this node and its ancestors.
     ///
     /// Call `.next().unwrap()` once on the iterator to skip the node itself.
@@ -287,11 +285,11 @@ impl<'a> Node<'a> {
         new_sibling.parent.set(self.parent.get());
         new_sibling.previous_sibling.set(Some(self));
         if let Some(next_sibling) = self.next_sibling.take() {
-            debug_assert!(same_ref(next_sibling.previous_sibling.get().unwrap(), self));
+            debug_assert!(next_sibling.previous_sibling.get().unwrap() == self);
             next_sibling.previous_sibling.set(Some(new_sibling));
             new_sibling.next_sibling.set(Some(next_sibling));
         } else if let Some(parent) = self.parent.get() {
-            debug_assert!(same_ref(parent.last_child.get().unwrap(), self));
+            debug_assert!(parent.last_child.get().unwrap() == self);
             parent.last_child.set(Some(new_sibling));
         }
         self.next_sibling.set(Some(new_sibling));
@@ -304,10 +302,10 @@ impl<'a> Node<'a> {
         new_sibling.next_sibling.set(Some(self));
         if let Some(previous_sibling) = self.previous_sibling.take() {
             new_sibling.previous_sibling.set(Some(previous_sibling));
-            debug_assert!(same_ref(previous_sibling.next_sibling.get().unwrap(), self));
+            debug_assert!(previous_sibling.next_sibling.get().unwrap() == self);
             previous_sibling.next_sibling.set(Some(new_sibling));
         } else if let Some(parent) = self.parent.get() {
-            debug_assert!(same_ref(parent.first_child.get().unwrap(), self));
+            debug_assert!(parent.first_child.get().unwrap() == self);
             parent.first_child.set(Some(new_sibling));
         }
         self.previous_sibling.set(Some(new_sibling));
@@ -415,7 +413,7 @@ macro_rules! traverse_iterator {
                                 }
                             }
                             NodeEdge::End(node) => {
-                                if node.same_node(self.root) {
+                                if node == self.root {
                                     None
                                 } else {
                                     match node.$next_sibling.get() {

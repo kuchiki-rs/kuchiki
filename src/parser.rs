@@ -74,7 +74,7 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
     }
 
     fn same_node(&self, x: &'a Node<'a>, y: &'a Node<'a>) -> bool {
-        x.same_node(y)
+        x == y
     }
 
     fn elem_name(&self, target: &'a Node<'a>) -> QualName {
