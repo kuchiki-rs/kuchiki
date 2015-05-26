@@ -381,18 +381,27 @@ impl<'a> Iterator for Ancestors<'a> {
 /// An iterator of references to a given node and its descendants, in tree order.
 pub struct Descendants<'a>(Traverse<'a>);
 
-impl<'a> Iterator for Descendants<'a> {
-    type Item = &'a Node<'a>;
-
-    fn next(&mut self) -> Option<&'a Node<'a>> {
-        loop {
-            match self.0.next() {
-                Some(NodeEdge::Start(node)) => return Some(node),
-                Some(NodeEdge::End(_)) => {}
-                None => return None
+macro_rules! descendants_next {
+    ($next: ident) => {
+        fn $next(&mut self) -> Option<&'a Node<'a>> {
+            loop {
+                match (self.0).$next() {
+                    Some(NodeEdge::Start(node)) => return Some(node),
+                    Some(NodeEdge::End(_)) => {}
+                    None => return None
+                }
             }
         }
     }
+}
+
+impl<'a> Iterator for Descendants<'a> {
+    type Item = &'a Node<'a>;
+    descendants_next!(next);
+}
+
+impl<'a> DoubleEndedIterator for Descendants<'a> {
+    descendants_next!(next_back);
 }
 
 
