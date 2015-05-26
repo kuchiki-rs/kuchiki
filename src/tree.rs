@@ -1,6 +1,7 @@
 use html5ever::tree_builder::QuirksMode;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
+use std::fmt;
 use std::iter::Rev;
 use string_cache::QualName;
 use typed_arena::Arena;
@@ -53,7 +54,13 @@ pub struct Node<'a> {
 impl<'a> Eq for Node<'a> {}
 impl<'a> PartialEq for Node<'a> {
     fn eq(&self, other: &Node<'a>) -> bool {
-        self as *const Node<'a> == other as *const Node<'a>
+        self as *const Node == other as *const Node
+    }
+}
+
+impl<'a> fmt::Debug for Node<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(f, "{:?} @ {:?}", self.data, self as *const Node)
     }
 }
 
@@ -335,6 +342,7 @@ struct State<T> {
 
 
 /// A double-ended iterator of sibling nodes.
+#[derive(Debug, Clone, Copy)]
 pub struct Siblings<'a>(Option<State<&'a Node<'a>>>);
 
 macro_rules! siblings_next {
@@ -364,6 +372,7 @@ impl<'a> DoubleEndedIterator for Siblings<'a> {
 
 
 /// An iterator on ancestor nodes.
+#[derive(Debug, Clone, Copy)]
 pub struct Ancestors<'a>(Option<&'a Node<'a>>);
 
 impl<'a> Iterator for Ancestors<'a> {
@@ -379,6 +388,7 @@ impl<'a> Iterator for Ancestors<'a> {
 
 
 /// An iterator of references to a given node and its descendants, in tree order.
+#[derive(Debug, Clone, Copy)]
 pub struct Descendants<'a>(Traverse<'a>);
 
 macro_rules! descendants_next {
@@ -420,6 +430,7 @@ pub enum NodeEdge<T> {
 
 
 /// An iterator of the start and end edges of the nodes in a given subtree.
+#[derive(Debug, Clone, Copy)]
 pub struct Traverse<'a>(Option<State<NodeEdge<&'a Node<'a>>>>);
 
 macro_rules! traverse_next {
