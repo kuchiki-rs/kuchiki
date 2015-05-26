@@ -1,6 +1,7 @@
 use html5ever::tree_builder::QuirksMode;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
+use std::iter::Rev;
 use string_cache::QualName;
 use typed_arena::Arena;
 
@@ -185,49 +186,60 @@ impl<'a> Node<'a> {
     /// Return an iterator of references to this node and the siblings before it.
     ///
     /// Call `.next().unwrap()` once on the iterator to skip the node itself.
-    pub fn preceding_siblings(&'a self) -> PrecedingSiblings<'a> {
-        PrecedingSiblings(Some(self))
+    pub fn preceding_siblings(&'a self) -> Rev<Siblings<'a>> {
+        match self.parent() {
+            Some(parent) => {
+                let first_sibling = parent.first_child().unwrap();
+                debug_assert!(self.previous_sibling().is_some() || self == first_sibling);
+                Siblings(Some((first_sibling, self)))
+            }
+            None => {
+                debug_assert!(self.previous_sibling().is_none());
+                Siblings(Some((self, self)))
+            }
+        }.rev()
     }
 
     /// Return an iterator of references to this node and the siblings after it.
     ///
     /// Call `.next().unwrap()` once on the iterator to skip the node itself.
-    pub fn following_siblings(&'a self) -> FollowingSiblings<'a> {
-        FollowingSiblings(Some(self))
+    pub fn following_siblings(&'a self) -> Siblings<'a> {
+        match self.parent() {
+            Some(parent) => {
+                let last_sibling = parent.last_child().unwrap();
+                debug_assert!(self.next_sibling().is_some() || self == last_sibling);
+                Siblings(Some((self, last_sibling)))
+            }
+            None => {
+                debug_assert!(self.next_sibling().is_none());
+                Siblings(Some((self, self)))
+            }
+        }
     }
 
     /// Return an iterator of references to this node’s children.
-    pub fn children(&self) -> Children<'a> {
-        Children(self.first_child.get())
-    }
-
-    /// Return an iterator of references to this node’s children, in reverse order.
-    pub fn reverse_children(&self) -> ReverseChildren<'a> {
-        ReverseChildren(self.last_child.get())
+    pub fn children(&self) -> Siblings<'a> {
+        match (self.first_child(), self.last_child()) {
+            (Some(first_child), Some(last_child)) => Siblings(Some((first_child, last_child))),
+            (None, None) => Siblings(None),
+            _ => unreachable!()
+        }
     }
 
     /// Return an iterator of references to this node and its descendants, in tree order.
     ///
     /// Parent nodes appear before the descendants.
     /// Call `.next().unwrap()` once on the iterator to skip the node itself.
+    ///
+    /// Note: this is the `NodeEdge::Start` items from `traverse()`.
     pub fn descendants(&'a self) -> Descendants<'a> {
         Descendants(self.traverse())
     }
 
-    /// Return an iterator of references to this node and its descendants, in tree order.
+    /// Return an iterator of the start and end edges of this node and its descendants,
+    /// in tree order.
     pub fn traverse(&'a self) -> Traverse<'a> {
-        Traverse {
-            root: self,
-            next: Some(NodeEdge::Start(self)),
-        }
-    }
-
-    /// Return an iterator of references to this node and its descendants, in tree order.
-    pub fn reverse_traverse(&'a self) -> ReverseTraverse<'a> {
-        ReverseTraverse {
-            root: self,
-            next: Some(NodeEdge::End(self)),
-        }
+        Traverse(Some((NodeEdge::Start(self), NodeEdge::End(self))))
     }
 
     /// Detach a node from its parent and siblings. Children are not affected.
@@ -255,10 +267,10 @@ impl<'a> Node<'a> {
         new_child.parent.set(Some(self));
         if let Some(last_child) = self.last_child.take() {
             new_child.previous_sibling.set(Some(last_child));
-            debug_assert!(last_child.next_sibling.get().is_none());
+            debug_assert!(last_child.next_sibling().is_none());
             last_child.next_sibling.set(Some(new_child));
         } else {
-            debug_assert!(self.first_child.get().is_none());
+            debug_assert!(self.first_child().is_none());
             self.first_child.set(Some(new_child));
         }
         self.last_child.set(Some(new_child));
@@ -269,11 +281,11 @@ impl<'a> Node<'a> {
         new_child.detach();
         new_child.parent.set(Some(self));
         if let Some(first_child) = self.first_child.take() {
-            debug_assert!(first_child.previous_sibling.get().is_none());
+            debug_assert!(first_child.previous_sibling().is_none());
             first_child.previous_sibling.set(Some(new_child));
             new_child.next_sibling.set(Some(first_child));
         } else {
-            debug_assert!(self.first_child.get().is_none());
+            debug_assert!(self.first_child().is_none());
             self.last_child.set(Some(new_child));
         }
         self.first_child.set(Some(new_child));
@@ -282,14 +294,14 @@ impl<'a> Node<'a> {
     /// Insert a new sibling after this node.
     pub fn insert_after(&'a self, new_sibling: &'a Node<'a>) {
         new_sibling.detach();
-        new_sibling.parent.set(self.parent.get());
+        new_sibling.parent.set(self.parent());
         new_sibling.previous_sibling.set(Some(self));
         if let Some(next_sibling) = self.next_sibling.take() {
-            debug_assert!(next_sibling.previous_sibling.get().unwrap() == self);
+            debug_assert!(next_sibling.previous_sibling().unwrap() == self);
             next_sibling.previous_sibling.set(Some(new_sibling));
             new_sibling.next_sibling.set(Some(next_sibling));
-        } else if let Some(parent) = self.parent.get() {
-            debug_assert!(parent.last_child.get().unwrap() == self);
+        } else if let Some(parent) = self.parent() {
+            debug_assert!(parent.last_child().unwrap() == self);
             parent.last_child.set(Some(new_sibling));
         }
         self.next_sibling.set(Some(new_sibling));
@@ -298,14 +310,14 @@ impl<'a> Node<'a> {
     /// Insert a new sibling before this node.
     pub fn insert_before(&'a self, new_sibling: &'a Node<'a>) {
         new_sibling.detach();
-        new_sibling.parent.set(self.parent.get());
+        new_sibling.parent.set(self.parent());
         new_sibling.next_sibling.set(Some(self));
         if let Some(previous_sibling) = self.previous_sibling.take() {
             new_sibling.previous_sibling.set(Some(previous_sibling));
-            debug_assert!(previous_sibling.next_sibling.get().unwrap() == self);
+            debug_assert!(previous_sibling.next_sibling().unwrap() == self);
             previous_sibling.next_sibling.set(Some(new_sibling));
-        } else if let Some(parent) = self.parent.get() {
-            debug_assert!(parent.first_child.get().unwrap() == self);
+        } else if let Some(parent) = self.parent() {
+            debug_assert!(parent.first_child().unwrap() == self);
             parent.first_child.set(Some(new_sibling));
         }
         self.previous_sibling.set(Some(new_sibling));
@@ -313,50 +325,49 @@ impl<'a> Node<'a> {
 }
 
 
-macro_rules! axis_iterator {
-    (#[$attr:meta] $name: ident: $next: ident) => {
-        #[$attr]
-        pub struct $name<'a>(Option<&'a Node<'a>>);
+/// A double-ended iterator of sibling nodes.
+pub struct Siblings<'a>(Option<(&'a Node<'a>, &'a Node<'a>)>);
 
-        impl<'a> Iterator for $name<'a> {
-            type Item = &'a Node<'a>;
+impl<'a> Iterator for Siblings<'a> {
+    type Item = &'a Node<'a>;
 
-            fn next(&mut self) -> Option<&'a Node<'a>> {
-                match self.0.take() {
-                    Some(node) => {
-                        self.0 = node.$next.get();
-                        Some(node)
-                    }
-                    None => None
+    fn next(&mut self) -> Option<&'a Node<'a>> {
+        self.0.take().map(|(next, next_back)| {
+            if let Some(sibling) = next.next_sibling() {
+                if next != next_back {
+                    self.0 = Some((sibling, next_back))
                 }
             }
-        }
+            next
+        })
     }
 }
 
-axis_iterator! {
-    #[doc = "An iterator of references to the ancestors a given node."]
-    Ancestors: parent
+impl<'a> DoubleEndedIterator for Siblings<'a> {
+    fn next_back(&mut self) -> Option<&'a Node<'a>> {
+        self.0.map(|(next, next_back)| {
+            self.0 = match next_back.previous_sibling() {
+                Some(sibling) if next != next_back => Some((next, sibling)),
+                _ => None
+            };
+            next_back
+        })
+    }
 }
 
-axis_iterator! {
-    #[doc = "An iterator of references to the siblings before a given node."]
-    PrecedingSiblings: previous_sibling
-}
 
-axis_iterator! {
-    #[doc = "An iterator of references to the siblings after a given node."]
-    FollowingSiblings: next_sibling
-}
+/// An iterator on ancestor nodes.
+pub struct Ancestors<'a>(Option<&'a Node<'a>>);
 
-axis_iterator! {
-    #[doc = "An iterator of references to the children of a given node."]
-    Children: next_sibling
-}
+impl<'a> Iterator for Ancestors<'a> {
+    type Item = &'a Node<'a>;
 
-axis_iterator! {
-    #[doc = "An iterator of references to the children of a given node, in reverse order."]
-    ReverseChildren: previous_sibling
+    fn next(&mut self) -> Option<&'a Node<'a>> {
+        self.0.map(|node| {
+            self.0 = node.parent();
+            node
+        })
+    }
 }
 
 
@@ -378,7 +389,7 @@ impl<'a> Iterator for Descendants<'a> {
 }
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum NodeEdge<T> {
     /// Indicates that start of a node that has children.
     /// Yielded by `Traverse::next` before the node’s descendants.
@@ -391,61 +402,60 @@ pub enum NodeEdge<T> {
     End(T),
 }
 
-macro_rules! traverse_iterator {
-    (#[$attr:meta] $name: ident: $first_child: ident, $next_sibling: ident) => {
-        #[$attr]
-        pub struct $name<'a> {
-            root: &'a Node<'a>,
-            next: Option<NodeEdge<&'a Node<'a>>>,
-        }
 
-        impl<'a> Iterator for $name<'a> {
-            type Item = NodeEdge<&'a Node<'a>>;
+/// An iterator of the start and end edges of the nodes in a given subtree.
+pub struct Traverse<'a>(Option<(NodeEdge<&'a Node<'a>>, NodeEdge<&'a Node<'a>>)>);
 
-            fn next(&mut self) -> Option<NodeEdge<&'a Node<'a>>> {
-                match self.next.take() {
-                    Some(item) => {
-                        self.next = match item {
-                            NodeEdge::Start(node) => {
-                                match node.$first_child.get() {
-                                    Some(child) => Some(NodeEdge::Start(child)),
-                                    None => Some(NodeEdge::End(node))
-                                }
-                            }
-                            NodeEdge::End(node) => {
-                                if node == self.root {
-                                    None
-                                } else {
-                                    match node.$next_sibling.get() {
-                                        Some(sibling) => Some(NodeEdge::Start(sibling)),
-                                        None => match node.parent.get() {
-                                            Some(parent) => Some(NodeEdge::End(parent)),
+impl<'a> Iterator for Traverse<'a> {
+    type Item = NodeEdge<&'a Node<'a>>;
 
-                                            // `node.parent()` here can only be `None`
-                                            // if the tree has been modified during iteration,
-                                            // but silently stoping iteration
-                                            // seems a more sensible behavior than panicking.
-                                            None => None
-                                        }
-                                    }
-                                }
-                            }
-                        };
-                        Some(item)
+    fn next(&mut self) -> Option<NodeEdge<&'a Node<'a>>> {
+        self.0.map(|(next, next_back)| {
+            self.0 = if next == next_back {
+                None
+            } else {
+                match next {
+                    NodeEdge::Start(node) => {
+                        match node.first_child() {
+                            Some(child) => Some((NodeEdge::Start(child), next_back)),
+                            None => Some((NodeEdge::End(node), next_back))
+                        }
                     }
-                    None => None
+                    NodeEdge::End(node) => {
+                        match node.next_sibling() {
+                            Some(sibling) => Some((NodeEdge::Start(sibling), next_back)),
+                            None => node.parent().map(|parent| (NodeEdge::End(parent), next_back))
+                        }
+                    }
                 }
-            }
-        }
+            };
+            next
+        })
     }
 }
 
-traverse_iterator! {
-    #[doc = "An iterator of the start and end edges of a given node and its descendants, in tree order."]
-    Traverse: first_child, next_sibling
-}
-
-traverse_iterator! {
-    #[doc = "An iterator of the start and end edges of a given node and its descendants, in reverse tree order."]
-    ReverseTraverse: last_child, previous_sibling
+impl<'a> DoubleEndedIterator for Traverse<'a> {
+    fn next_back(&mut self) -> Option<NodeEdge<&'a Node<'a>>> {
+        self.0.map(|(next, next_back)| {
+            self.0 = if next == next_back {
+                None
+            } else {
+                match next_back {
+                    NodeEdge::End(node) => {
+                        match node.last_child() {
+                            Some(child) => Some((next, NodeEdge::End(child))),
+                            None => Some((next, NodeEdge::Start(node)))
+                        }
+                    }
+                    NodeEdge::Start(node) => {
+                        match node.previous_sibling() {
+                            Some(sibling) => Some((next, NodeEdge::End(sibling))),
+                            None => node.parent().map(|parent| (next, NodeEdge::Start(parent)))
+                        }
+                    }
+                }
+            };
+            next
+        })
+    }
 }
