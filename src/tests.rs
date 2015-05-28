@@ -15,7 +15,7 @@ fn parse_and_serialize() {
     assert_eq!(document.as_document().unwrap().quirks_mode(), QuirksMode::NoQuirks);
     let mut serialized = Vec::new();
     serialize(&mut serialized, document, Default::default()).unwrap();
-    assert_eq!(String::from_utf8(serialized).unwrap(), r"<!DOCTYPE html
+    assert_eq!(String::from_utf8(serialized).unwrap(), r"<!DOCTYPE html>
 <html><head><title>Test case</title>
 </head><body><p>Content</p></body></html>");
 }
