@@ -14,5 +14,3 @@ pub mod tree;
 mod parser;
 mod select;
 mod serializer;
-
-#[cfg(test)] mod tests;
