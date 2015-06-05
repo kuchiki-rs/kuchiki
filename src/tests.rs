@@ -1,6 +1,7 @@
 use html5ever::tree_builder::QuirksMode;
 use selectors::tree::TNode;
 use typed_arena::Arena;
+use std::path::Path;
 use super::{Html};
 
 #[test]
@@ -17,6 +18,25 @@ fn parse_and_serialize() {
 </head><body><p>Content</p></body></html>");
 }
 
+#[test]
+fn parse_file() {
+    let arena = Arena::new();
+    let mut path = Path::new(env!("CARGO_MANIFEST_DIR")).to_path_buf();
+    path.push("test_data".to_string());
+    path.push("foo.html");
+
+    let html = r"<!DOCTYPE html>
+<html><head>
+        <title>Test case</title>
+    </head>
+    <body>
+        <p>Foo</p>
+    
+
+</body></html>";
+    let document = Html::from_file(&path).parse(&arena);
+    assert_eq!(document.to_string(), html);
+}
 
 #[test]
 fn select() {
