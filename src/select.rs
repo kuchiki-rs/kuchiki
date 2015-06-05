@@ -1,7 +1,11 @@
+use std::marker::PhantomData;
+
+use selectors::parser;
+use selectors::matching;
 use selectors::tree::{TNode, TElement};
-use selectors::parser::{AttrSelector, NamespaceConstraint};
+use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
 use string_cache::{Atom, Namespace, QualName};
-use tree::{Node, NodeData, ElementData};
+use tree::{Node, NodeData, ElementData, Descendants};
 
 
 impl<'a> TNode<'a> for &'a Node<'a> {
@@ -88,3 +92,40 @@ impl<'a> TElement<'a> for &'a ElementData {
         }
     }
 }
+
+impl<'a> Node<'a> {
+    pub fn css(&'a self, css_str: &str) -> FilterNodes<'a, Descendants<'a>> {
+        let selectors = match parser::parse_author_origin_selector_list_from_str(css_str) {
+            Ok(vec) => vec,
+            Err(_) => Vec::new(),
+        };
+        FilterNodes{
+            iter: self.descendants(),
+            phantom: PhantomData,
+            filter: selectors,
+        }
+    }
+}
+
+pub struct FilterNodes<'a, T:'a>
+    where T: Iterator<Item=&'a Node<'a>>{
+    iter: T,
+    phantom: PhantomData<&'a T>,
+    filter: Vec<Selector>,
+}
+
+impl<'a,T> Iterator for FilterNodes<'a,T> where T: Iterator<Item=&'a Node<'a>> {
+    type Item = &'a Node<'a>;
+
+    #[inline]
+    fn next(&mut self) -> Option<&'a Node<'a>> {
+        let mut next_node = None;
+        for node in self.iter.by_ref() {
+            if node.is_element() && matching::matches(&self.filter, &node, &None) {
+                next_node = Some(node)
+            }
+        }
+        next_node
+    }
+}
+

@@ -26,11 +26,9 @@ fn select() {
 <p class=foo>Foo
 <p>Bar
 ";
+
     let document = Html::from_string(html).parse(&arena);
-    let selectors = ::selectors::parser::parse_author_origin_selector_list_from_str("p.foo").unwrap();
-    let matching = document.descendants()
-    .filter(|node| node.is_element() && ::selectors::matching::matches(&selectors, node, &None))
-    .collect::<Vec<_>>();
+    let matching = document.css("p.foo").collect::<Vec<_>>();
     assert_eq!(matching.len(), 1);
     assert_eq!(&**matching[0].first_child().unwrap().as_text().unwrap().borrow(), "Foo\n");
 }
