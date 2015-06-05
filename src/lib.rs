@@ -7,7 +7,7 @@ extern crate selectors;
 extern crate string_cache;
 extern crate typed_arena;
 
-pub use parser::{Html, ParseOpts, IgnoreParseErrors};
+pub use parser::{Html, ParseOpts};
 
 pub mod tree;
 
