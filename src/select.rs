@@ -48,12 +48,13 @@ impl<'a> TNode<'a> for &'a Node<'a> {
     unsafe fn set_dirty_descendants(self, _value: bool) { unimplemented!() }
 }
 
+
 impl<'a> TElement<'a> for &'a ElementData {
     fn get_local_name(self) -> &'a Atom { &self.name.local }
     fn get_namespace(self) -> &'a Namespace { &self.name.ns }
     fn get_hover_state(self) -> bool { false }
     fn get_focus_state(self) -> bool { false }
-    fn get_id(self) -> Option<Atom> { 
+    fn get_id(self) -> Option<Atom> {
         self.attributes.borrow().get(&QualName::new(ns!(""), atom!(id))).map(|s| Atom::from_slice(s))
     }
     fn get_disabled_state(self) -> bool { false }
@@ -61,7 +62,7 @@ impl<'a> TElement<'a> for &'a ElementData {
     fn get_checked_state(self) -> bool { false }
     fn get_indeterminate_state(self) -> bool { false }
     fn has_class(self, name: &Atom) -> bool {
-        !name.is_empty() && 
+        !name.is_empty() &&
         if let Some(class_attr) = self.attributes.borrow().get(&QualName::new(ns!(""), atom!(class))) {
             class_attr.split(::selectors::matching::SELECTOR_WHITESPACE)
             .any(|class| name.as_slice() == class )
@@ -71,7 +72,7 @@ impl<'a> TElement<'a> for &'a ElementData {
     }
     fn has_nonzero_border(self) -> bool { false }
     fn is_link(self) -> bool {
-        self.name.ns == ns!(html) && 
+        self.name.ns == ns!(html) &&
         matches!(self.name.local, atom!(a) | atom!(area) | atom!(link)) &&
         self.attributes.borrow().contains_key(&QualName::new(ns!(""), atom!(href)))
     }
