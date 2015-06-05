@@ -1,6 +1,7 @@
-use html5ever::serialize::{Serializable, Serializer, TraversalScope};
+use html5ever::serialize::{Serializable, Serializer, TraversalScope, serialize};
 use html5ever::serialize::TraversalScope::*;
 use std::io::{Write, Result};
+use std::string::ToString;
 
 use tree::{Node, NodeData};
 
@@ -41,5 +42,20 @@ impl<'a> Serializable for Node<'a> {
 
             (IncludeNode, &NodeData::Document(_)) => panic!("Can't serialize Document node itself"),
         }
+    }
+}
+
+
+impl<'a> ToString for Node<'a> {
+    fn to_string(&self) -> String {
+        let mut utf_vec = Vec::new();
+        let result = match serialize(&mut utf_vec, self, Default::default()) {
+            Ok(_) => match String::from_utf8(utf_vec)  {
+                Ok(s) => s,
+                Err(_) => String::new(),
+            },
+            Err(_) => String::new(),
+        };
+        result
     }
 }
