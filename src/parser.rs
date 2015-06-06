@@ -1,35 +1,62 @@
+use std::borrow::Cow;
+use std::fs::File;
+use std::io::{Read, Error};
+use std::option;
+use std::path::Path;
 use html5ever::{self, Attribute};
 use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
-use std::borrow::Cow;
 use string_cache::QualName;
 use typed_arena::Arena;
 
 use tree::Node;
 
-
-pub fn parse<'a, F, I>(source: I, arena: &'a Arena<Node<'a>>, opts: ParseOpts<F>) -> &'a Node<'a>
-                       where I: IntoIterator<Item=String>, F: FnMut(Cow<'static, str>) {
-    let parser = Parser {
-        arena: arena,
-        document_node: Node::new_document(arena),
-        on_parse_error: opts.on_parse_error,
-    };
-    let opts = html5ever::ParseOpts {
-        tokenizer: opts.tokenizer,
-        tree_builder: opts.tree_builder,
-    };
-    let parser = html5ever::parse_to(parser, source.into_iter(), opts);
-    parser.document_node
+pub struct Html<F = IgnoreParseErrors> where F: FnMut(Cow<'static, str>) {
+    opts: ParseOpts<F>,
+    data: option::IntoIter<String>,
 }
 
+impl Html  {
+    pub fn from_string<S: Into<String>>(string: S) -> Html {
+        Html {
+            opts: ParseOpts::default(),
+            data: Some(string.into()).into_iter(),
+        }
+    }
 
-pub struct ParseOpts<F> where F: FnMut(Cow<'static, str>) {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Html, Error> {
+        let mut buf = String::new();
+        let mut file = try!(File::open(&path));
+        file.read_to_string(&mut buf).unwrap();
+        Ok(Html {
+            opts: ParseOpts::default(),
+            data: Some(buf).into_iter(),
+        })
+    }
+}
+
+impl<F> Html <F> where F: FnMut(Cow<'static, str>) {
+    pub fn parse<'a>(self, arena: &'a Arena<Node<'a>>) -> &'a Node<'a> {
+        let parser = Parser {
+            arena : arena,
+            document_node: Node::new_document(arena),
+            on_parse_error: self.opts.on_parse_error,
+        };
+        let html5opts = html5ever::ParseOpts {
+            tokenizer: self.opts.tokenizer,
+            tree_builder: self.opts.tree_builder,
+        };
+        let parser = html5ever::parse_to(parser, self.data, html5opts);
+        parser.document_node
+    }
+}
+
+pub struct ParseOpts<F =IgnoreParseErrors> where F: FnMut(Cow<'static, str>) {
     pub tokenizer: html5ever::tokenizer::TokenizerOpts,
     pub tree_builder: html5ever::tree_builder::TreeBuilderOpts,
     pub on_parse_error: F,
 }
 
-struct IgnoreParseErrors;
+pub struct IgnoreParseErrors;
 
 impl<Args> FnOnce<Args> for IgnoreParseErrors {
     type Output = ();

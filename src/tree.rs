@@ -1,8 +1,8 @@
-use html5ever::tree_builder::QuirksMode;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fmt;
 use std::iter::Rev;
+use html5ever::tree_builder::QuirksMode;
 use string_cache::QualName;
 use typed_arena::Arena;
 
