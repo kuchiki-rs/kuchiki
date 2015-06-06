@@ -1,15 +1,14 @@
-use html5ever::{self, Attribute};
-use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
 use std::borrow::Cow;
 use std::fs::File;
+use std::io::{Read, Error};
+use std::option;
 use std::path::Path;
-use std::io::Read;
+use html5ever::{self, Attribute};
+use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
 use string_cache::QualName;
 use typed_arena::Arena;
 
-
 use tree::Node;
-use std::option;
 
 pub struct Html<F = IgnoreParseErrors> where F: FnMut(Cow<'static, str>) {
     opts: ParseOpts<F>,
@@ -17,21 +16,21 @@ pub struct Html<F = IgnoreParseErrors> where F: FnMut(Cow<'static, str>) {
 }
 
 impl Html  {
-    pub fn from_string(string: &str) -> Html {
+    pub fn from_string<S: Into<String>>(string: S) -> Html {
         Html {
             opts: ParseOpts::default(),
-            data: Some(string.to_string()).into_iter(),
+            data: Some(string.into()).into_iter(),
         }
     }
 
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Html {
+    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Html, Error> {
         let mut buf = String::new();
-        let mut file = File::open(&path).unwrap();
+        let mut file = try!(File::open(&path));
         file.read_to_string(&mut buf).unwrap();
-        Html {
+        Ok(Html {
             opts: ParseOpts::default(),
             data: Some(buf).into_iter(),
-        }
+        })
     }
 }
 

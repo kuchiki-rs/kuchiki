@@ -1,10 +1,9 @@
-use std::marker::PhantomData;
-
 use selectors::parser;
 use selectors::matching;
 use selectors::tree::{TNode, TElement};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
 use string_cache::{Atom, Namespace, QualName};
+
 use tree::{Node, NodeData, ElementData, Descendants};
 
 
@@ -94,27 +93,21 @@ impl<'a> TElement<'a> for &'a ElementData {
 }
 
 impl<'a> Node<'a> {
-    pub fn css(&'a self, css_str: &str) -> FilterNodes<'a, Descendants<'a>> {
-        let selectors = match parser::parse_author_origin_selector_list_from_str(css_str) {
-            Ok(vec) => vec,
-            Err(_) => Vec::new(),
-        };
-        FilterNodes{
+    pub fn select(&'a self, css_str: &str) -> Result<FilterNodes<Descendants<'a>>, ()> {
+        let selectors = try!(parser::parse_author_origin_selector_list_from_str(css_str));
+        Ok(FilterNodes{
             iter: self.descendants(),
-            phantom: PhantomData,
             filter: selectors,
-        }
+        })
     }
 }
 
-pub struct FilterNodes<'a, T:'a>
-    where T: Iterator<Item=&'a Node<'a>>{
+pub struct FilterNodes<T> {
     iter: T,
-    phantom: PhantomData<&'a T>,
     filter: Vec<Selector>,
 }
 
-impl<'a,T> Iterator for FilterNodes<'a,T> where T: Iterator<Item=&'a Node<'a>> {
+impl<'a,T> Iterator for FilterNodes<T> where T: Iterator<Item=&'a Node<'a>> {
     type Item = &'a Node<'a>;
 
     #[inline]

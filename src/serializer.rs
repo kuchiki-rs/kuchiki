@@ -1,7 +1,7 @@
-use html5ever::serialize::{Serializable, Serializer, TraversalScope, serialize};
-use html5ever::serialize::TraversalScope::*;
 use std::io::{Write, Result};
 use std::string::ToString;
+use html5ever::serialize::{Serializable, Serializer, TraversalScope, serialize};
+use html5ever::serialize::TraversalScope::*;
 
 use tree::{Node, NodeData};
 
@@ -48,14 +48,8 @@ impl<'a> Serializable for Node<'a> {
 
 impl<'a> ToString for Node<'a> {
     fn to_string(&self) -> String {
-        let mut utf_vec = Vec::new();
-        let result = match serialize(&mut utf_vec, self, Default::default()) {
-            Ok(_) => match String::from_utf8(utf_vec)  {
-                Ok(s) => s,
-                Err(_) => String::new(),
-            },
-            Err(_) => String::new(),
-        };
-        result
+        let mut u8_vec = Vec::new();
+        serialize(&mut u8_vec, self, Default::default()).unwrap();
+        String::from_utf8(u8_vec).unwrap()
     }
 }

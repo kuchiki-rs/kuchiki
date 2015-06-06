@@ -2,6 +2,7 @@ use html5ever::tree_builder::QuirksMode;
 use selectors::tree::TNode;
 use typed_arena::Arena;
 use std::path::Path;
+
 use super::{Html};
 
 #[test]
@@ -34,7 +35,7 @@ fn parse_file() {
     
 
 </body></html>";
-    let document = Html::from_file(&path).parse(&arena);
+    let document = Html::from_file(&path).unwrap().parse(&arena);
     assert_eq!(document.to_string(), html);
 }
 
@@ -48,7 +49,7 @@ fn select() {
 ";
 
     let document = Html::from_string(html).parse(&arena);
-    let matching = document.css("p.foo").collect::<Vec<_>>();
+    let matching = document.select("p.foo").unwrap().collect::<Vec<_>>();
     assert_eq!(matching.len(), 1);
     assert_eq!(&**matching[0].first_child().unwrap().as_text().unwrap().borrow(), "Foo\n");
 }
