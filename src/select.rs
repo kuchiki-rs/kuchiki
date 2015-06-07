@@ -112,13 +112,12 @@ impl<'a,T> Iterator for FilterNodes<T> where T: Iterator<Item=&'a Node<'a>> {
 
     #[inline]
     fn next(&mut self) -> Option<&'a Node<'a>> {
-        let mut next_node = None;
         for node in self.iter.by_ref() {
             if node.is_element() && matching::matches(&self.filter, &node, &None) {
-                next_node = Some(node)
+                return Some(node)
             }
         }
-        next_node
+        None
     }
 }
 
