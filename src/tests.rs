@@ -46,10 +46,11 @@ fn select() {
 <title>Test case</title>
 <p class=foo>Foo
 <p>Bar
+<p class=foo>Foo
 ";
 
     let document = Html::from_string(html).parse(&arena);
     let matching = document.select("p.foo").unwrap().collect::<Vec<_>>();
-    assert_eq!(matching.len(), 1);
+    assert_eq!(matching.len(), 2);
     assert_eq!(&**matching[0].first_child().unwrap().as_text().unwrap().borrow(), "Foo\n");
 }
