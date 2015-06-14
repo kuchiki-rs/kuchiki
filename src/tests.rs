@@ -54,3 +54,20 @@ fn select() {
     assert_eq!(matching.len(), 2);
     assert_eq!(&**matching[0].first_child().unwrap().as_text().unwrap().borrow(), "Foo\n");
 }
+
+#[test]
+fn to_string() {
+    let arena = Arena::new();
+    let html = r"<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test case</title>
+    </head>
+    <body>
+        <p class=foo>Foo
+    </body>
+</html>";
+
+    let document = Html::from_string(html).parse(&arena);
+    assert_eq!(document.descendants().nth(11).unwrap().to_string(), "<p class=\"foo\">Foo\n    \n</p>");
+}
