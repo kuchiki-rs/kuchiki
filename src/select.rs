@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::iter::FilterMap;
+
 use selectors::parser;
 use selectors::matching;
 use selectors::tree::{TNode, TElement};
@@ -101,6 +104,12 @@ impl<'a> Node<'a> {
         })
     }
 
+    pub fn text_iter(&'a self) -> FilterMap<Descendants<'a>, fn(&'a Node)-> Option<&'a RefCell<String>>> {
+        fn filter_text<'b>(node: &'b Node) -> Option<&'b RefCell<String>> {
+            node.as_text()
+        }
+        self.descendants().filter_map(filter_text)
+    }
 }
 
 pub struct SelectNodes<T> {
