@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::iter::FilterMap;
+
 use selectors::parser;
 use selectors::matching;
 use selectors::tree::{TNode, TElement};
@@ -93,21 +96,28 @@ impl<'a> TElement<'a> for &'a ElementData {
 }
 
 impl<'a> Node<'a> {
-    pub fn select(&'a self, css_str: &str) -> Result<FilterNodes<Descendants<'a>>, ()> {
+    pub fn select(&'a self, css_str: &str) -> Result<SelectNodes<Descendants<'a>>, ()> {
         let selectors = try!(parser::parse_author_origin_selector_list_from_str(css_str));
-        Ok(FilterNodes{
+        Ok(SelectNodes{
             iter: self.descendants(),
             filter: selectors,
         })
     }
+
+    pub fn text_iter(&'a self) -> FilterMap<Descendants<'a>, fn(&'a Node)-> Option<&'a RefCell<String>>> {
+        fn filter_text<'b>(node: &'b Node) -> Option<&'b RefCell<String>> {
+            node.as_text()
+        }
+        self.descendants().filter_map(filter_text)
+    }
 }
 
-pub struct FilterNodes<T> {
+pub struct SelectNodes<T> {
     iter: T,
     filter: Vec<Selector>,
 }
 
-impl<'a,T> Iterator for FilterNodes<T> where T: Iterator<Item=&'a Node<'a>> {
+impl<'a,T> Iterator for SelectNodes<T> where T: Iterator<Item=&'a Node<'a>> {
     type Item = &'a Node<'a>;
 
     #[inline]
