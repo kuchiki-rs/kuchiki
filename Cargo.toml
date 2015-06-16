@@ -13,15 +13,9 @@ doctest = false
 [dependencies]
 typed-arena = "1.0"
 matches = "0.1.2"
-
-[dependencies.html5ever]
-git = "https://github.com/servo/html5ever"
-
-[dependencies.string_cache]
-git = "https://github.com/servo/string-cache"
-
-[dependencies.string_cache_plugin]
-git = "https://github.com/servo/string-cache"
+html5ever = "0.1"
+string_cache = "0.1"
+string_cache_plugin = "0.1"
 
 [dependencies.selectors]
 git = "https://github.com/servo/rust-selectors"
