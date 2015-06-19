@@ -9,8 +9,8 @@ use string_cache::QualName;
 
 use tree::NodeRef;
 
-pub struct Html<F = IgnoreParseErrors> where F: FnMut(Cow<'static, str>) {
-    opts: ParseOpts<F>,
+pub struct Html {
+    opts: ParseOpts,
     data: option::IntoIter<String>,
 }
 
@@ -33,7 +33,7 @@ impl Html  {
     }
 }
 
-impl<F> Html <F> where F: FnMut(Cow<'static, str>) {
+impl Html {
     pub fn parse(self) -> NodeRef {
         let parser = Parser {
             document_node: NodeRef::new_document(),
@@ -48,45 +48,27 @@ impl<F> Html <F> where F: FnMut(Cow<'static, str>) {
     }
 }
 
-pub struct ParseOpts<F =IgnoreParseErrors> where F: FnMut(Cow<'static, str>) {
+#[derive(Default)]
+pub struct ParseOpts {
     pub tokenizer: html5ever::tokenizer::TokenizerOpts,
     pub tree_builder: html5ever::tree_builder::TreeBuilderOpts,
-    pub on_parse_error: F,
-}
-
-pub struct IgnoreParseErrors;
-
-impl<Args> FnOnce<Args> for IgnoreParseErrors {
-    type Output = ();
-    extern "rust-call" fn call_once(self, _args: Args) {}
-}
-
-impl<Args> FnMut<Args> for IgnoreParseErrors {
-    extern "rust-call" fn call_mut(&mut self, _args: Args) {}
-}
-
-impl Default for ParseOpts<IgnoreParseErrors> {
-    fn default() -> ParseOpts<IgnoreParseErrors> {
-        ParseOpts {
-            tokenizer: Default::default(),
-            tree_builder: Default::default(),
-            on_parse_error: IgnoreParseErrors,
-        }
-    }
+    pub on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
 }
 
 
-struct Parser<F> where F: FnMut(Cow<'static, str>) {
+struct Parser {
     document_node: NodeRef,
-    on_parse_error: F,
+    on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
 }
 
 
-impl<F> TreeSink for Parser<F> where F: FnMut(Cow<'static, str>) {
+impl TreeSink for Parser {
     type Handle = NodeRef;
 
     fn parse_error(&mut self, message: Cow<'static, str>) {
-        (self.on_parse_error)(message);
+        if let Some(ref mut handler) = self.on_parse_error {
+            handler(message)
+        }
     }
 
     fn get_document(&mut self) -> NodeRef {
