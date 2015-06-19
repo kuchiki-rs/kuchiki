@@ -40,18 +40,6 @@ impl TNode for NodeRef {
     fn is_html_element_in_html_document(&self) -> bool {
         matches!(self.data, NodeData::Element(ref element) if element.name.ns == ns!(html))
     }
-
-    fn has_changed(&self) -> bool { unimplemented!() }
-    unsafe fn set_changed(&self, _value: bool) { unimplemented!() }
-
-    fn is_dirty(&self) -> bool { unimplemented!() }
-    unsafe fn set_dirty(&self, _value: bool) { unimplemented!() }
-
-    fn has_dirty_siblings(&self) -> bool { unimplemented!() }
-    unsafe fn set_dirty_siblings(&self, _value: bool) { unimplemented!() }
-
-    fn has_dirty_descendants(&self) -> bool { unimplemented!() }
-    unsafe fn set_dirty_descendants(&self, _value: bool) { unimplemented!() }
 }
 
 
@@ -76,7 +64,6 @@ impl TElement for NodeDataRef<ElementData> {
             false
         }
     }
-    fn has_nonzero_border(&self) -> bool { false }
     fn is_link(&self) -> bool {
         self.name.ns == ns!(html) &&
         matches!(self.name.local, atom!(a) | atom!(area) | atom!(link)) &&
