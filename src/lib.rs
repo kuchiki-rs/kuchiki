@@ -4,7 +4,6 @@
 extern crate html5ever;
 #[macro_use] extern crate matches;
 extern crate movecell;
-extern crate rcref;
 extern crate selectors;
 extern crate string_cache;
 

@@ -6,7 +6,6 @@ use std::ops::Deref;
 use std::rc::{Rc, Weak};
 use html5ever::tree_builder::QuirksMode;
 use movecell::MoveCell;
-use rcref::RcRef;
 use string_cache::QualName;
 
 
@@ -182,24 +181,24 @@ impl Node {
 }
 
 impl NodeRef {
-    pub fn as_element_ref(self) -> Option<RcRef<Node, ElementData>> {
-        RcRef::new_opt(self.0, Node::as_element)
+    pub fn as_element_ref(self) -> Option<NodeDataRef<ElementData>> {
+        NodeDataRef::new_opt(self.0, Node::as_element)
     }
 
-    pub fn as_text_ref(self) -> Option<RcRef<Node, RefCell<String>>> {
-        RcRef::new_opt(self.0, Node::as_text)
+    pub fn as_text_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
+        NodeDataRef::new_opt(self.0, Node::as_text)
     }
 
-    pub fn as_comment_ref(self) -> Option<RcRef<Node, RefCell<String>>> {
-        RcRef::new_opt(self.0, Node::as_comment)
+    pub fn as_comment_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
+        NodeDataRef::new_opt(self.0, Node::as_comment)
     }
 
-    pub fn as_doctype_ref(self) -> Option<RcRef<Node, Doctype>> {
-        RcRef::new_opt(self.0, Node::as_doctype)
+    pub fn as_doctype_ref(self) -> Option<NodeDataRef<Doctype>> {
+        NodeDataRef::new_opt(self.0, Node::as_doctype)
     }
 
-    pub fn as_document_ref(self) -> Option<RcRef<Node, DocumentData>> {
-        RcRef::new_opt(self.0, Node::as_document)
+    pub fn as_document_ref(self) -> Option<NodeDataRef<DocumentData>> {
+        NodeDataRef::new_opt(self.0, Node::as_document)
     }
 
     /// Return an iterator of references to this node and its ancestors.
@@ -510,4 +509,34 @@ impl Iterator for Traverse {
 
 impl DoubleEndedIterator for Traverse {
     traverse_next!(next_back, next, last_child, previous_sibling, End, Start);
+}
+
+
+/// Holds a strong reference to a node, but derefs to some component inside of it.
+pub struct NodeDataRef<T> {
+    _keep_alive: Rc<Node>,
+    _reference: *const T
+}
+
+impl<T> NodeDataRef<T> {
+    /// Create a `NodeDataRef` for a component in a given node.
+    pub fn new<F>(rc: Rc<Node>, f: F) -> NodeDataRef<T> where F: FnOnce(&Node) -> &T {
+        NodeDataRef {
+            _reference: f(&*rc),
+            _keep_alive: rc,
+        }
+    }
+
+    /// Create a `NodeDataRef` for and a component that may or may not be in a given node.
+    pub fn new_opt<F>(rc: Rc<Node>, f: F) -> Option<NodeDataRef<T>> where F: FnOnce(&Node) -> Option<&T> {
+        f(&*rc).map(|r| r as *const T).map(move |r| NodeDataRef {
+            _reference: r,
+            _keep_alive: rc,
+        })
+    }
+}
+
+impl<T> Deref for NodeDataRef<T> {
+    type Target = T;
+    fn deref(&self) -> &T { unsafe { &*self._reference } }
 }

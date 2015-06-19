@@ -1,18 +1,17 @@
 use std::cell::RefCell;
 use std::iter::FilterMap;
 
-use rcref::RcRef;
 use selectors::parser;
 use selectors::matching;
 use selectors::tree::{TNode, TElement};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
 use string_cache::{Atom, Namespace, QualName};
 
-use tree::{Node, NodeRef, NodeData, ElementData, Descendants};
+use tree::{Node, NodeRef, NodeData, NodeDataRef, ElementData, Descendants};
 
 
-impl<'a> TNode<'a> for NodeRef {
-    type Element = &'a ElementData;
+impl TNode for NodeRef {
+    type Element = NodeDataRef<ElementData>;
 
     fn parent_node(&self) -> Option<Self> { Node::parent(self) }
     fn first_child(&self) -> Option<Self> { Node::first_child(self) }
@@ -21,7 +20,7 @@ impl<'a> TNode<'a> for NodeRef {
     fn next_sibling(&self) -> Option<Self> { Node::next_sibling(self) }
     fn is_document(&self) -> bool { matches!(self.data, NodeData::Document(_)) }
     fn is_element(&self) -> bool { matches!(self.data, NodeData::Element(_)) }
-    fn as_element(&'a self) -> &'a ElementData { Node::as_element(self).unwrap() }
+    fn as_element(&self) -> NodeDataRef<ElementData> { NodeRef::as_element_ref(self.clone()).unwrap() }
     fn match_attr<F>(&self, attr: &AttrSelector, test: F) -> bool where F: Fn(&str) -> bool {
         let name = if self.is_html_element_in_html_document() {
             &attr.lower_name
@@ -56,7 +55,7 @@ impl<'a> TNode<'a> for NodeRef {
 }
 
 
-impl<'b> TElement for &'b ElementData {
+impl TElement for NodeDataRef<ElementData> {
     fn get_local_name<'a>(&'a self) -> &'a Atom { &self.name.local }
     fn get_namespace<'a>(&'a self) -> &'a Namespace { &self.name.ns }
     fn get_hover_state(&self) -> bool { false }
@@ -105,7 +104,7 @@ impl NodeRef {
         })
     }
 
-    pub fn text_iter<'a>(&self) -> FilterMap<Descendants, fn(NodeRef)-> Option<RcRef<Node, RefCell<String>>>> {
+    pub fn text_iter<'a>(&self) -> FilterMap<Descendants, fn(NodeRef)-> Option<NodeDataRef<RefCell<String>>>> {
         self.descendants().filter_map(NodeRef::as_text_ref)
     }
 }

@@ -16,7 +16,6 @@ matches = "0.1.2"
 html5ever = "0.1"
 string_cache = "0.1"
 string_cache_plugin = "0.1"
-rcref = "0.1"
 
 [dependencies.selectors]
 git = "https://github.com/servo/rust-selectors"
