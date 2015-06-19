@@ -3,10 +3,10 @@ use std::string::ToString;
 use html5ever::serialize::{Serializable, Serializer, TraversalScope, serialize, SerializeOpts};
 use html5ever::serialize::TraversalScope::*;
 
-use tree::{Node, NodeData};
+use tree::{NodeRef, NodeData};
 
 
-impl<'a> Serializable for Node<'a> {
+impl Serializable for NodeRef {
     fn serialize<'wr, Wr: Write>(&self, serializer: &mut Serializer<'wr, Wr>,
                                  traversal_scope: TraversalScope) -> Result<()> {
         match (traversal_scope, &self.data) {
@@ -46,7 +46,7 @@ impl<'a> Serializable for Node<'a> {
 }
 
 
-impl<'a> ToString for Node<'a> {
+impl ToString for NodeRef {
     fn to_string(&self) -> String {
         let mut u8_vec = Vec::new();
 

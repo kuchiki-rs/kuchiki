@@ -6,9 +6,8 @@ use std::path::Path;
 use html5ever::{self, Attribute};
 use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
 use string_cache::QualName;
-use typed_arena::Arena;
 
-use tree::Node;
+use tree::NodeRef;
 
 pub struct Html<F = IgnoreParseErrors> where F: FnMut(Cow<'static, str>) {
     opts: ParseOpts<F>,
@@ -35,10 +34,9 @@ impl Html  {
 }
 
 impl<F> Html <F> where F: FnMut(Cow<'static, str>) {
-    pub fn parse<'a>(self, arena: &'a Arena<Node<'a>>) -> &'a Node<'a> {
+    pub fn parse(self) -> NodeRef {
         let parser = Parser {
-            arena : arena,
-            document_node: Node::new_document(arena),
+            document_node: NodeRef::new_document(),
             on_parse_error: self.opts.on_parse_error,
         };
         let html5opts = html5ever::ParseOpts {
@@ -78,46 +76,45 @@ impl Default for ParseOpts<IgnoreParseErrors> {
 }
 
 
-struct Parser<'a, F> where F: FnMut(Cow<'static, str>) {
-    arena: &'a Arena<Node<'a>>,
-    document_node: &'a Node<'a>,
+struct Parser<F> where F: FnMut(Cow<'static, str>) {
+    document_node: NodeRef,
     on_parse_error: F,
 }
 
 
-impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
-    type Handle = &'a Node<'a>;
+impl<F> TreeSink for Parser<F> where F: FnMut(Cow<'static, str>) {
+    type Handle = NodeRef;
 
     fn parse_error(&mut self, message: Cow<'static, str>) {
         (self.on_parse_error)(message);
     }
 
-    fn get_document(&mut self) -> &'a Node<'a> {
-        self.document_node
+    fn get_document(&mut self) -> NodeRef {
+        self.document_node.clone()
     }
 
     fn set_quirks_mode(&mut self, mode: QuirksMode) {
         self.document_node.as_document().unwrap()._quirks_mode.set(mode)
     }
 
-    fn same_node(&self, x: &'a Node<'a>, y: &'a Node<'a>) -> bool {
+    fn same_node(&self, x: NodeRef, y: NodeRef) -> bool {
         x == y
     }
 
-    fn elem_name(&self, target: &'a Node<'a>) -> QualName {
+    fn elem_name(&self, target: NodeRef) -> QualName {
         target.as_element().unwrap().name.clone()
     }
 
-    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> &'a Node<'a> {
+    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> NodeRef {
         let attrs = attrs.into_iter().map(|Attribute { name, value }| (name, value));
-        Node::new_element(name, attrs, self.arena)
+        NodeRef::new_element(name, attrs)
     }
 
-    fn create_comment(&mut self, text: String) -> &'a Node<'a> {
-        Node::new_comment(text, self.arena)
+    fn create_comment(&mut self, text: String) -> NodeRef {
+        NodeRef::new_comment(text)
     }
 
-    fn append(&mut self, parent: &'a Node<'a>, child: NodeOrText<&'a Node<'a>>) {
+    fn append(&mut self, parent: NodeRef, child: NodeOrText<NodeRef>) {
         match child {
             NodeOrText::AppendNode(node) => parent.append(node),
             NodeOrText::AppendText(text) => {
@@ -127,13 +124,13 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
                         return
                     }
                 }
-                parent.append(Node::new_text(text, self.arena))
+                parent.append(NodeRef::new_text(text))
             }
         }
     }
 
-    fn append_before_sibling(&mut self, sibling: &'a Node<'a>, child: NodeOrText<&'a Node<'a>>)
-                             -> Result<(), NodeOrText<&'a Node<'a>>> {
+    fn append_before_sibling(&mut self, sibling: NodeRef, child: NodeOrText<NodeRef>)
+                             -> Result<(), NodeOrText<NodeRef>> {
         if sibling.parent().is_none() {
             return Err(child)
         }
@@ -146,17 +143,17 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
                         return Ok(())
                     }
                 }
-                sibling.insert_before(Node::new_text(text, self.arena))
+                sibling.insert_before(NodeRef::new_text(text))
             }
         }
         Ok(())
     }
 
     fn append_doctype_to_document(&mut self, name: String, public_id: String, system_id: String) {
-        self.document_node.append(Node::new_doctype(name, public_id, system_id, self.arena))
+        self.document_node.append(NodeRef::new_doctype(name, public_id, system_id))
     }
 
-    fn add_attrs_if_missing(&mut self, target: &'a Node<'a>, attrs: Vec<Attribute>) {
+    fn add_attrs_if_missing(&mut self, target: NodeRef, attrs: Vec<Attribute>) {
         // FIXME: https://github.com/servo/html5ever/issues/121
         if let Some(element) = target.as_element() {
             let mut attributes = element.attributes.borrow_mut();
@@ -174,11 +171,11 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
         }
     }
 
-    fn remove_from_parent(&mut self, target: &'a Node<'a>) {
+    fn remove_from_parent(&mut self, target: NodeRef) {
         target.detach()
     }
 
-    fn reparent_children(&mut self, node: &'a Node<'a>, new_parent: &'a Node<'a>) {
+    fn reparent_children(&mut self, node: NodeRef, new_parent: NodeRef) {
         // FIXME: Can this be done more effciently in rctree,
         // by moving the whole linked list of children at once?
         for child in node.children() {
@@ -186,7 +183,7 @@ impl<'a, F> TreeSink for Parser<'a, F> where F: FnMut(Cow<'static, str>) {
         }
     }
 
-    fn mark_script_already_started(&mut self, _node: &'a Node<'a>) {
+    fn mark_script_already_started(&mut self, _node: NodeRef) {
         // FIXME: Is this useful outside of a browser?
     }
 }

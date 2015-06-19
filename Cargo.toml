@@ -11,7 +11,7 @@ name = "kuchiki"
 doctest = false
 
 [dependencies]
-typed-arena = "1.0"
+movecell = "0.1.1"
 matches = "0.1.2"
 html5ever = "0.1"
 string_cache = "0.1"
