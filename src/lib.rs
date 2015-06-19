@@ -1,4 +1,4 @@
-#![feature(unboxed_closures, core, plugin, alloc)]
+#![feature(unboxed_closures, core, plugin, rc_weak)]
 #![plugin(string_cache_plugin)]
 
 extern crate html5ever;
