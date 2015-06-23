@@ -181,23 +181,23 @@ impl Node {
 }
 
 impl NodeRef {
-    pub fn as_element_ref(self) -> Option<NodeDataRef<ElementData>> {
+    pub fn into_element_ref(self) -> Option<NodeDataRef<ElementData>> {
         NodeDataRef::new_opt(self.0, Node::as_element)
     }
 
-    pub fn as_text_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
+    pub fn into_text_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
         NodeDataRef::new_opt(self.0, Node::as_text)
     }
 
-    pub fn as_comment_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
+    pub fn into_comment_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
         NodeDataRef::new_opt(self.0, Node::as_comment)
     }
 
-    pub fn as_doctype_ref(self) -> Option<NodeDataRef<Doctype>> {
+    pub fn into_doctype_ref(self) -> Option<NodeDataRef<Doctype>> {
         NodeDataRef::new_opt(self.0, Node::as_doctype)
     }
 
-    pub fn as_document_ref(self) -> Option<NodeDataRef<DocumentData>> {
+    pub fn into_document_ref(self) -> Option<NodeDataRef<DocumentData>> {
         NodeDataRef::new_opt(self.0, Node::as_document)
     }
 

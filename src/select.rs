@@ -20,7 +20,7 @@ impl TNode for NodeRef {
     fn next_sibling(&self) -> Option<Self> { Node::next_sibling(self) }
     fn is_document(&self) -> bool { matches!(self.data, NodeData::Document(_)) }
     fn is_element(&self) -> bool { matches!(self.data, NodeData::Element(_)) }
-    fn as_element(&self) -> NodeDataRef<ElementData> { NodeRef::as_element_ref(self.clone()).unwrap() }
+    fn as_element(&self) -> NodeDataRef<ElementData> { self.clone().into_element_ref().unwrap() }
     fn match_attr<F>(&self, attr: &AttrSelector, test: F) -> bool where F: Fn(&str) -> bool {
         let name = if self.is_html_element_in_html_document() {
             &attr.lower_name
@@ -92,7 +92,7 @@ impl NodeRef {
     }
 
     pub fn text_iter<'a>(&self) -> FilterMap<Descendants, fn(NodeRef)-> Option<NodeDataRef<RefCell<String>>>> {
-        self.descendants().filter_map(NodeRef::as_text_ref)
+        self.descendants().filter_map(NodeRef::into_text_ref)
     }
 }
 
