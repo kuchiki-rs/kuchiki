@@ -27,7 +27,7 @@ impl Serializable for NodeRef {
                 Ok(())
             }
 
-            (ChildrenOnly, &NodeData::Document(_)) => {
+            (_, &NodeData::Document(_)) => {
                 for child in self.children() {
                     try!(Serializable::serialize(&child, serializer, IncludeNode));
                 }
@@ -39,8 +39,6 @@ impl Serializable for NodeRef {
             (IncludeNode, &NodeData::Doctype(ref doctype)) => serializer.write_doctype(&doctype.name),
             (IncludeNode, &NodeData::Text(ref text)) => serializer.write_text(&text.borrow()),
             (IncludeNode, &NodeData::Comment(ref text)) => serializer.write_comment(&text.borrow()),
-
-            (IncludeNode, &NodeData::Document(_)) => panic!("Can't serialize Document node itself"),
         }
     }
 }
@@ -56,13 +54,8 @@ impl ToString for NodeRef {
 
 impl NodeRef {
     fn serialize<W: Write>(&self, writer: &mut W) {
-        let traversal_scope = match self.data {
-            NodeData::Document(_) => ChildrenOnly,
-            _ => IncludeNode,
-        };
-
         serialize(writer, self, SerializeOpts {
-            traversal_scope: traversal_scope,
+            traversal_scope: IncludeNode,
             ..Default::default()
         }).unwrap();
     }
