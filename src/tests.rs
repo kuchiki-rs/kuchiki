@@ -2,6 +2,7 @@ use html5ever::tree_builder::QuirksMode;
 use selectors::tree::TNode;
 use std::path::Path;
 
+use tempdir::TempDir;
 use super::{Html};
 
 #[test]
@@ -56,6 +57,20 @@ fn parse_file() {
 </body></html>";
     let document = Html::from_file(&path).unwrap().parse();
     assert_eq!(document.to_string(), html);
+}
+
+#[test]
+fn serialize_and_read_file() {
+    let tempdir = TempDir::new("test_rm_tempdir").unwrap();
+    let mut path = tempdir.path().to_path_buf();
+    path.push("temp.html");
+
+    let html = r"<!DOCTYPE html><html><head><title>Title</title></head><body>Body</body></html>";
+    let document = Html::from_string(html).parse();
+    let _ = document.serialize_to_file(path.clone());
+
+    let document2 = Html::from_file(&path).unwrap().parse();
+    assert_eq!(document.to_string(), document2.to_string());
 }
 
 #[test]

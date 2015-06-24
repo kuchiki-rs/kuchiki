@@ -7,6 +7,7 @@ extern crate movecell;
 extern crate selectors;
 extern crate string_cache;
 extern crate tendril;
+#[cfg(test)] extern crate tempdir;
 
 pub use parser::{Html, ParseOpts};
 
