@@ -47,16 +47,16 @@ impl Serializable for NodeRef {
 impl ToString for NodeRef {
     fn to_string(&self) -> String {
         let mut u8_vec = Vec::new();
-        self.serialize(&mut u8_vec);
+        self.serialize(&mut u8_vec).unwrap();
         String::from_utf8(u8_vec).unwrap()
     }
 }
 
 impl NodeRef {
-    fn serialize<W: Write>(&self, writer: &mut W) {
+    fn serialize<W: Write>(&self, writer: &mut W) -> Result<()> {
         serialize(writer, self, SerializeOpts {
             traversal_scope: IncludeNode,
             ..Default::default()
-        }).unwrap();
+        })
     }
 }
