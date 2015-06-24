@@ -18,7 +18,7 @@ impl Serializable for NodeRef {
                 }
 
                 for child in self.children() {
-                    try!(child.serialize(serializer, IncludeNode));
+                    try!(Serializable::serialize(&child, serializer, IncludeNode));
                 }
 
                 if traversal_scope == IncludeNode {
@@ -29,7 +29,7 @@ impl Serializable for NodeRef {
 
             (ChildrenOnly, &NodeData::Document(_)) => {
                 for child in self.children() {
-                    try!(child.serialize(serializer, IncludeNode));
+                    try!(Serializable::serialize(&child, serializer, IncludeNode));
                 }
                 Ok(())
             }
@@ -49,16 +49,21 @@ impl Serializable for NodeRef {
 impl ToString for NodeRef {
     fn to_string(&self) -> String {
         let mut u8_vec = Vec::new();
+        self.serialize(&mut u8_vec);
+        String::from_utf8(u8_vec).unwrap()
+    }
+}
 
+impl NodeRef {
+    fn serialize<W: Write>(&self, writer: &mut W) {
         let traversal_scope = match self.data {
             NodeData::Document(_) => ChildrenOnly,
             _ => IncludeNode,
         };
 
-        serialize(&mut u8_vec, self, SerializeOpts {
+        serialize(writer, self, SerializeOpts {
             traversal_scope: traversal_scope,
             ..Default::default()
         }).unwrap();
-        String::from_utf8(u8_vec).unwrap()
     }
 }

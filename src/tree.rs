@@ -528,7 +528,8 @@ impl<T> NodeDataRef<T> {
     }
 
     /// Create a `NodeDataRef` for and a component that may or may not be in a given node.
-    pub fn new_opt<F>(rc: Rc<Node>, f: F) -> Option<NodeDataRef<T>> where F: FnOnce(&Node) -> Option<&T> {
+    pub fn new_opt<F>(rc: Rc<Node>, f: F) -> Option<NodeDataRef<T>>
+        where F: FnOnce(&Node) -> Option<&T> {
         f(&*rc).map(|r| r as *const T).map(move |r| NodeDataRef {
             _reference: r,
             _keep_alive: rc,
