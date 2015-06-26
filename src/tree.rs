@@ -182,23 +182,23 @@ impl Node {
 
 impl NodeRef {
     pub fn into_element_ref(self) -> Option<NodeDataRef<ElementData>> {
-        NodeDataRef::new_opt(self.0, Node::as_element)
+        NodeDataRef::new_opt(self, Node::as_element)
     }
 
     pub fn into_text_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
-        NodeDataRef::new_opt(self.0, Node::as_text)
+        NodeDataRef::new_opt(self, Node::as_text)
     }
 
     pub fn into_comment_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
-        NodeDataRef::new_opt(self.0, Node::as_comment)
+        NodeDataRef::new_opt(self, Node::as_comment)
     }
 
     pub fn into_doctype_ref(self) -> Option<NodeDataRef<Doctype>> {
-        NodeDataRef::new_opt(self.0, Node::as_doctype)
+        NodeDataRef::new_opt(self, Node::as_doctype)
     }
 
     pub fn into_document_ref(self) -> Option<NodeDataRef<DocumentData>> {
-        NodeDataRef::new_opt(self.0, Node::as_document)
+        NodeDataRef::new_opt(self, Node::as_document)
     }
 
     /// Return an iterator of references to this node and its ancestors.
@@ -514,13 +514,13 @@ impl DoubleEndedIterator for Traverse {
 
 /// Holds a strong reference to a node, but derefs to some component inside of it.
 pub struct NodeDataRef<T> {
-    _keep_alive: Rc<Node>,
+    _keep_alive: NodeRef,
     _reference: *const T
 }
 
 impl<T> NodeDataRef<T> {
     /// Create a `NodeDataRef` for a component in a given node.
-    pub fn new<F>(rc: Rc<Node>, f: F) -> NodeDataRef<T> where F: FnOnce(&Node) -> &T {
+    pub fn new<F>(rc: NodeRef, f: F) -> NodeDataRef<T> where F: FnOnce(&Node) -> &T {
         NodeDataRef {
             _reference: f(&*rc),
             _keep_alive: rc,
@@ -528,12 +528,16 @@ impl<T> NodeDataRef<T> {
     }
 
     /// Create a `NodeDataRef` for and a component that may or may not be in a given node.
-    pub fn new_opt<F>(rc: Rc<Node>, f: F) -> Option<NodeDataRef<T>>
+    pub fn new_opt<F>(rc: NodeRef, f: F) -> Option<NodeDataRef<T>>
         where F: FnOnce(&Node) -> Option<&T> {
         f(&*rc).map(|r| r as *const T).map(move |r| NodeDataRef {
             _reference: r,
             _keep_alive: rc,
         })
+    }
+
+    pub fn as_node(&self) -> &NodeRef {
+        &self._keep_alive
     }
 }
 

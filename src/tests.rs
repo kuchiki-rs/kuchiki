@@ -1,5 +1,4 @@
 use html5ever::tree_builder::QuirksMode;
-use selectors::tree::TNode;
 use std::path::Path;
 
 use tempdir::TempDir;
@@ -14,7 +13,7 @@ fn text_iter() {
     let document = Html::from_string(html).parse();
     let paragraph = document.select("p").unwrap().collect::<Vec<_>>();
     assert_eq!(paragraph.len(), 1);
-    let texts = paragraph[0].text_iter().collect::<Vec<_>>();
+    let texts = paragraph[0].as_node().text_iter().collect::<Vec<_>>();
     assert_eq!(texts.len(), 3);
     assert_eq!(&*texts[0].borrow(), "Content contains ");
     assert_eq!(&*texts[1].borrow(), "Important");
@@ -85,7 +84,7 @@ fn select() {
     let document = Html::from_string(html).parse();
     let matching = document.select("p.foo").unwrap().collect::<Vec<_>>();
     assert_eq!(matching.len(), 2);
-    let child = matching[0].first_child().unwrap();
+    let child = matching[0].as_node().first_child().unwrap();
     assert_eq!(&**child.as_text().unwrap().borrow(), "Foo\n");
 }
 
