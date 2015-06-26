@@ -6,6 +6,7 @@ extern crate html5ever;
 extern crate movecell;
 extern crate selectors;
 extern crate string_cache;
+extern crate tendril;
 
 pub use parser::{Html, ParseOpts};
 

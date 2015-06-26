@@ -1,21 +1,22 @@
 use std::borrow::Cow;
 use std::fs::File;
-use std::io::{Read, Error};
+use std::io::{Error, ErrorKind};
 use std::option;
 use std::path::Path;
 use html5ever::{self, Attribute};
 use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
 use string_cache::QualName;
+use tendril::{StrTendril, ReadExt, Tendril};
 
 use tree::NodeRef;
 
 pub struct Html {
     opts: ParseOpts,
-    data: option::IntoIter<String>,
+    data: option::IntoIter<StrTendril>,
 }
 
 impl Html  {
-    pub fn from_string<S: Into<String>>(string: S) -> Html {
+    pub fn from_string<S: Into<StrTendril>>(string: S) -> Html {
         Html {
             opts: ParseOpts::default(),
             data: Some(string.into()).into_iter(),
@@ -23,12 +24,14 @@ impl Html  {
     }
 
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Html, Error> {
-        let mut buf = String::new();
+        let mut buf = Tendril::new();
         let mut file = try!(File::open(&path));
-        file.read_to_string(&mut buf).unwrap();
+        file.read_to_tendril(&mut buf).unwrap();
         Ok(Html {
             opts: ParseOpts::default(),
-            data: Some(buf).into_iter(),
+            data: Some(try!(buf.try_reinterpret().map_err(|_| {
+                Error::new(ErrorKind::Other, "Invalid UTF-8.")
+            }))).into_iter(),
         })
     }
 }
@@ -88,11 +91,11 @@ impl TreeSink for Parser {
     }
 
     fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> NodeRef {
-        let attrs = attrs.into_iter().map(|Attribute { name, value }| (name, value));
+        let attrs = attrs.into_iter().map(|Attribute { name, value }| (name, value.into()));
         NodeRef::new_element(name, attrs)
     }
 
-    fn create_comment(&mut self, text: String) -> NodeRef {
+    fn create_comment(&mut self, text: StrTendril) -> NodeRef {
         NodeRef::new_comment(text)
     }
 
@@ -131,7 +134,8 @@ impl TreeSink for Parser {
         Ok(())
     }
 
-    fn append_doctype_to_document(&mut self, name: String, public_id: String, system_id: String) {
+    fn append_doctype_to_document(&mut self, name: StrTendril, public_id: StrTendril,
+                                  system_id: StrTendril) {
         self.document_node.append(NodeRef::new_doctype(name, public_id, system_id))
     }
 
@@ -143,10 +147,10 @@ impl TreeSink for Parser {
                 use std::collections::hash_map::Entry;
                 match attributes.entry(name) {
                     Entry::Vacant(entry) => {
-                        entry.insert(value);
+                        entry.insert(value.into());
                     }
                     Entry::Occupied(mut entry) => {
-                        *entry.get_mut() = value;
+                        *entry.get_mut() = value.into();
                     }
                 }
             }
