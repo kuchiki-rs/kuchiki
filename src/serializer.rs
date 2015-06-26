@@ -1,4 +1,6 @@
+use std::fs::File;
 use std::io::{Write, Result};
+use std::path::Path;
 use std::string::ToString;
 use html5ever::serialize::{Serializable, Serializer, TraversalScope, serialize, SerializeOpts};
 use html5ever::serialize::TraversalScope::*;
@@ -58,5 +60,10 @@ impl NodeRef {
             traversal_scope: IncludeNode,
             ..Default::default()
         })
+    }
+
+    pub fn serialize_to_file<P: AsRef<Path>>(&self, path: P) -> Result<()>{
+        let mut file = try!(File::create(&path));
+        self.serialize(&mut file)
     }
 }

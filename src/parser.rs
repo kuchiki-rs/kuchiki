@@ -34,9 +34,7 @@ impl Html  {
             }))).into_iter(),
         })
     }
-}
 
-impl Html {
     pub fn parse(self) -> NodeRef {
         let parser = Parser {
             document_node: NodeRef::new_document(),
@@ -49,6 +47,7 @@ impl Html {
         let parser = html5ever::parse_to(parser, self.data, html5opts);
         parser.document_node
     }
+
 }
 
 #[derive(Default)]
