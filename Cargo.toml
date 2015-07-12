@@ -17,9 +17,7 @@ html5ever = "0.2"
 string_cache = "0.1"
 string_cache_plugin = "0.1"
 tendril = "0.1.1"
+selectors = { git = "https://github.com/servo/rust-selectors" }
 
 [dev-dependencies]
 tempdir = "0.3"
-
-[dependencies.selectors]
-git = "https://github.com/servo/rust-selectors"

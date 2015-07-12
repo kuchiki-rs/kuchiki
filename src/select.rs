@@ -8,7 +8,9 @@ use string_cache::{Atom, Namespace, QualName};
 use tree::{Node, NodeRef, NodeData, NodeDataRef, ElementData, Descendants};
 
 
-impl selectors::Node<NodeDataRef<ElementData>> for NodeRef {
+impl selectors::Node for NodeRef {
+    type Element = NodeDataRef<ElementData>;
+
     fn parent_node(&self) -> Option<Self> { Node::parent(self) }
     fn first_child(&self) -> Option<Self> { Node::first_child(self) }
     fn last_child(&self) -> Option<Self> { Node::last_child(self) }
