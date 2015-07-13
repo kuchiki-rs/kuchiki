@@ -18,6 +18,13 @@ impl selectors::Node for NodeRef {
     fn next_sibling(&self) -> Option<Self> { Node::next_sibling(self) }
     fn is_document(&self) -> bool { matches!(self.data, NodeData::Document(_)) }
     fn as_element(&self) -> Option<NodeDataRef<ElementData>> { self.clone().into_element_ref() }
+    fn is_element_or_non_empty_text(&self) -> bool {
+        match self.data {
+            NodeData::Element(_) => true,
+            NodeData::Text(ref text) => !text.borrow().is_empty(),
+            _ => false,
+        }
+    }
 }
 
 
