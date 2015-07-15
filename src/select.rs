@@ -2,33 +2,39 @@ use selectors::{self, parser, matching};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
 use string_cache::{Atom, Namespace, QualName};
 
-use tree::{Node, NodeRef, NodeData, NodeDataRef, ElementData};
-
-
-impl selectors::Node for NodeRef {
-    type Element = NodeDataRef<ElementData>;
-
-    fn parent_node(&self) -> Option<Self> { Node::parent(self) }
-    fn first_child(&self) -> Option<Self> { Node::first_child(self) }
-    fn last_child(&self) -> Option<Self> { Node::last_child(self) }
-    fn prev_sibling(&self) -> Option<Self> { Node::previous_sibling(self) }
-    fn next_sibling(&self) -> Option<Self> { Node::next_sibling(self) }
-    fn is_document(&self) -> bool { matches!(self.data, NodeData::Document(_)) }
-    fn as_element(&self) -> Option<NodeDataRef<ElementData>> { self.clone().into_element_ref() }
-    fn is_element_or_non_empty_text(&self) -> bool {
-        match self.data {
-            NodeData::Element(_) => true,
-            NodeData::Text(ref text) => !text.borrow().is_empty(),
-            _ => false,
-        }
-    }
-}
+use tree::{NodeRef, NodeData, NodeDataRef, ElementData, NodeIterator};
 
 
 impl selectors::Element for NodeDataRef<ElementData> {
-    type Node = NodeRef;
+    fn parent_element(&self) -> Option<Self> {
+        self.as_node().parent().and_then(NodeRef::into_element_ref)
+    }
+    fn first_child_element(&self) -> Option<Self> {
+        self.as_node().children().elements().next()
+    }
+    fn last_child_element(&self) -> Option<Self> {
+        self.as_node().children().rev().elements().next()
+    }
+    fn prev_sibling_element(&self) -> Option<Self> {
+        self.as_node().preceding_siblings().elements().next()
+    }
+    fn next_sibling_element(&self) -> Option<Self> {
+        self.as_node().following_siblings().elements().next()
+    }
+    fn is_empty(&self) -> bool {
+        self.as_node().children().all(|child| match child.data {
+            NodeData::Element(_) => false,
+            NodeData::Text(ref text) => text.borrow().is_empty(),
+            _ => true,
+        })
+    }
+    fn is_root(&self) -> bool {
+        match self.as_node().parent() {
+            None => true,
+            Some(parent) => matches!(parent.data, NodeData::Document(_))
+        }
+    }
 
-    fn as_node(&self) -> NodeRef { NodeDataRef::as_node(self).clone() }
     fn is_html_element_in_html_document(&self) -> bool {
         // FIXME: Have a notion of HTML document v.s. XML document?
         self.name.ns == ns!(html)
@@ -111,7 +117,7 @@ impl<T> Iterator for Select<T> where T: Iterator<Item=NodeDataRef<ElementData>> 
     #[inline]
     fn next(&mut self) -> Option<NodeDataRef<ElementData>> {
         for element in self.iter.by_ref() {
-            if matching::matches(&self.selectors.0, &element, &None) {
+            if matching::matches(&self.selectors.0, &element, None) {
                 return Some(element)
             }
         }
@@ -123,7 +129,7 @@ impl<T> DoubleEndedIterator for Select<T> where T: DoubleEndedIterator<Item=Node
     #[inline]
     fn next_back(&mut self) -> Option<NodeDataRef<ElementData>> {
         for element in self.iter.by_ref().rev() {
-            if matching::matches(&self.selectors.0, &element, &None) {
+            if matching::matches(&self.selectors.0, &element, None) {
                 return Some(element)
             }
         }
