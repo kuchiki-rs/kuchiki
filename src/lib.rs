@@ -10,6 +10,7 @@ extern crate tendril;
 #[cfg(test)] extern crate tempdir;
 
 pub use parser::{Html, ParseOpts};
+pub use select::{Selectors, Select};
 
 pub mod tree;
 

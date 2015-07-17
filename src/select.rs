@@ -1,11 +1,8 @@
-use std::cell::RefCell;
-use std::iter::FilterMap;
-
 use selectors::{self, parser, matching};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
 use string_cache::{Atom, Namespace, QualName};
 
-use tree::{Node, NodeRef, NodeData, NodeDataRef, ElementData, Descendants};
+use tree::{Node, NodeRef, NodeData, NodeDataRef, ElementData};
 
 
 impl selectors::Node for NodeRef {
@@ -86,38 +83,50 @@ impl selectors::Element for NodeDataRef<ElementData> {
     }
 }
 
-impl NodeRef {
-    pub fn select(&self, css_str: &str) -> Result<SelectNodes<Descendants>, ()> {
-        let selectors = try!(parser::parse_author_origin_selector_list_from_str(css_str));
-        Ok(SelectNodes{
-            iter: self.descendants(),
-            filter: selectors,
-        })
+
+pub struct Selectors(Vec<Selector>);
+
+impl Selectors {
+    pub fn compile(s: &str) -> Result<Selectors, ()> {
+        parser::parse_author_origin_selector_list_from_str(s).map(Selectors)
     }
 
-    pub fn text_iter<'a>(&self) -> FilterMap<Descendants, fn(NodeRef)-> Option<NodeDataRef<RefCell<String>>>> {
-        self.descendants().filter_map(NodeRef::into_text_ref)
+    pub fn filter<I>(self, iter: I) -> Select<I>
+    where I: Iterator<Item=NodeDataRef<ElementData>> {
+        Select {
+            iter: iter,
+            selectors: self,
+        }
     }
 }
 
-pub struct SelectNodes<T> {
-    iter: T,
-    filter: Vec<Selector>,
+pub struct Select<T> {
+    pub iter: T,
+    pub selectors: Selectors,
 }
 
-impl<'a,T> Iterator for SelectNodes<T> where T: Iterator<Item=NodeRef> {
+impl<T> Iterator for Select<T> where T: Iterator<Item=NodeDataRef<ElementData>> {
     type Item = NodeDataRef<ElementData>;
 
     #[inline]
     fn next(&mut self) -> Option<NodeDataRef<ElementData>> {
-        for node in self.iter.by_ref() {
-            if let Some(element) = node.into_element_ref() {
-                if matching::matches(&self.filter, &element, &None) {
-                    return Some(element)
-                }
+        for element in self.iter.by_ref() {
+            if matching::matches(&self.selectors.0, &element, &None) {
+                return Some(element)
             }
         }
         None
     }
 }
 
+impl<T> DoubleEndedIterator for Select<T> where T: DoubleEndedIterator<Item=NodeDataRef<ElementData>> {
+    #[inline]
+    fn next_back(&mut self) -> Option<NodeDataRef<ElementData>> {
+        for element in self.iter.by_ref().rev() {
+            if matching::matches(&self.selectors.0, &element, &None) {
+                return Some(element)
+            }
+        }
+        None
+    }
+}

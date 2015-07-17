@@ -2,10 +2,12 @@ use html5ever::tree_builder::QuirksMode;
 use std::path::Path;
 
 use tempdir::TempDir;
-use super::{Html};
+
+use Html;
+use tree::NodeIterator;
 
 #[test]
-fn text_iter() {
+fn text_nodes() {
     let html = r"
 <!doctype html>
 <title>Test case</title>
@@ -13,7 +15,7 @@ fn text_iter() {
     let document = Html::from_string(html).parse();
     let paragraph = document.select("p").unwrap().collect::<Vec<_>>();
     assert_eq!(paragraph.len(), 1);
-    let texts = paragraph[0].as_node().text_iter().collect::<Vec<_>>();
+    let texts = paragraph[0].as_node().descendants().text_nodes().collect::<Vec<_>>();
     assert_eq!(texts.len(), 3);
     assert_eq!(&*texts[0].borrow(), "Content contains ");
     assert_eq!(&*texts[1].borrow(), "Important");

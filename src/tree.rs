@@ -8,6 +8,8 @@ use html5ever::tree_builder::QuirksMode;
 use movecell::MoveCell;
 use string_cache::QualName;
 
+use select::{Selectors, Select};
+
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum NodeData {
@@ -271,6 +273,11 @@ impl NodeRef {
             next_back: NodeEdge::End(self.clone())
         }))
     }
+
+    pub fn select(&self, selectors: &str) -> Result<Select<Elements<Descendants>>, ()> {
+        self.descendants().select(selectors)
+    }
+
 }
 
 impl Node {
@@ -510,6 +517,70 @@ impl Iterator for Traverse {
 impl DoubleEndedIterator for Traverse {
     traverse_next!(next_back, next, last_child, previous_sibling, End, Start);
 }
+
+
+macro_rules! filter_map_like_iterator {
+    ($name: ident, $f: expr, $from: ty, $to: ty) => {
+        #[derive(Debug, Clone)]
+        pub struct $name<I>(pub I);
+
+        impl<I> Iterator for $name<I> where I: Iterator<Item=$from> {
+            type Item = $to;
+
+            #[inline]
+            fn next(&mut self) -> Option<$to> {
+                for x in self.0.by_ref() {
+                    if let Some(y) = ($f)(x) {
+                        return Some(y)
+                    }
+                }
+                None
+            }
+        }
+
+        impl<I> DoubleEndedIterator for $name<I> where I: DoubleEndedIterator<Item=$from> {
+            #[inline]
+            fn next_back(&mut self) -> Option<$to> {
+                for x in self.0.by_ref().rev() {
+                    if let Some(y) = ($f)(x) {
+                        return Some(y)
+                    }
+                }
+                None
+            }
+        }
+    }
+}
+
+filter_map_like_iterator!(Elements, NodeRef::into_element_ref, NodeRef, NodeDataRef<ElementData>);
+filter_map_like_iterator!(Comments, NodeRef::into_comment_ref, NodeRef, NodeDataRef<RefCell<String>>);
+filter_map_like_iterator!(TextNodes, NodeRef::into_text_ref, NodeRef, NodeDataRef<RefCell<String>>);
+
+pub trait NodeIterator: Sized + Iterator<Item=NodeRef> {
+    fn elements(self) -> Elements<Self> {
+        Elements(self)
+    }
+    fn text_nodes(self) -> TextNodes<Self> {
+        TextNodes(self)
+    }
+    fn comments(self) -> Comments<Self> {
+        Comments(self)
+    }
+    fn select(self, selectors: &str) -> Result<Select<Elements<Self>>, ()> {
+        self.elements().select(selectors)
+    }
+}
+
+
+pub trait ElementIterator: Sized + Iterator<Item=NodeDataRef<ElementData>> {
+    fn select(self, selectors: &str) -> Result<Select<Self>, ()> {
+        Selectors::compile(selectors).map(|s| s.filter(self))
+    }
+}
+
+impl<I> NodeIterator for I where I: Iterator<Item=NodeRef> {}
+impl<I> ElementIterator for I where I: Iterator<Item=NodeDataRef<ElementData>> {}
+
 
 
 /// Holds a strong reference to a node, but derefs to some component inside of it.
