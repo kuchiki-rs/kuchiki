@@ -103,5 +103,5 @@ fn to_string() {
 </html>";
 
     let document = Html::from_string(html).parse();
-    assert_eq!(document.descendants().nth(11).unwrap().to_string(), "<p class=\"foo\">Foo\n    \n</p>");
+    assert_eq!(document.inclusive_descendants().nth(11).unwrap().to_string(), "<p class=\"foo\">Foo\n    \n</p>");
 }

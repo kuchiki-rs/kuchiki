@@ -204,16 +204,17 @@ impl NodeRef {
     }
 
     /// Return an iterator of references to this node and its ancestors.
-    ///
-    /// Call `.next().unwrap()` once on the iterator to skip the node itself.
-    pub fn ancestors(&self) -> Ancestors {
+    pub fn inclusive_ancestors(&self) -> Ancestors {
         Ancestors(Some(self.clone()))
     }
 
+    /// Return an iterator of references to this node’s ancestors.
+    pub fn ancestors(&self) -> Ancestors {
+        Ancestors(self.parent())
+    }
+
     /// Return an iterator of references to this node and the siblings before it.
-    ///
-    /// Call `.next().unwrap()` once on the iterator to skip the node itself.
-    pub fn preceding_siblings(&self) -> Rev<Siblings> {
+    pub fn inclusive_preceding_siblings(&self) -> Rev<Siblings> {
         match self.parent() {
             Some(parent) => {
                 let first_sibling = parent.first_child().unwrap();
@@ -227,10 +228,19 @@ impl NodeRef {
         }.rev()
     }
 
+    /// Return an iterator of references to this node’s siblings before it.
+    pub fn preceding_siblings(&self) -> Rev<Siblings> {
+        match (self.parent(), self.previous_sibling()) {
+            (Some(parent), Some(previous_sibling)) => {
+                let first_sibling = parent.first_child().unwrap();
+                Siblings(Some(State { next: first_sibling, next_back: previous_sibling }))
+            }
+            _ => Siblings(None)
+        }.rev()
+    }
+
     /// Return an iterator of references to this node and the siblings after it.
-    ///
-    /// Call `.next().unwrap()` once on the iterator to skip the node itself.
-    pub fn following_siblings(&self) -> Siblings {
+    pub fn inclusive_following_siblings(&self) -> Siblings {
         match self.parent() {
             Some(parent) => {
                 let last_sibling = parent.last_child().unwrap();
@@ -241,6 +251,17 @@ impl NodeRef {
                 debug_assert!(self.next_sibling().is_none());
                 Siblings(Some(State { next: self.clone(), next_back: self.clone() }))
             }
+        }
+    }
+
+    /// Return an iterator of references to this node’s siblings after it.
+    pub fn following_siblings(&self) -> Siblings {
+        match (self.parent(), self.next_sibling()) {
+            (Some(parent), Some(next_sibling)) => {
+                let last_sibling = parent.last_child().unwrap();
+                Siblings(Some(State { next: next_sibling, next_back: last_sibling }))
+            }
+            _ => Siblings(None)
         }
     }
 
@@ -258,7 +279,15 @@ impl NodeRef {
     /// Return an iterator of references to this node and its descendants, in tree order.
     ///
     /// Parent nodes appear before the descendants.
-    /// Call `.next().unwrap()` once on the iterator to skip the node itself.
+    ///
+    /// Note: this is the `NodeEdge::Start` items from `traverse()`.
+    pub fn inclusive_descendants(&self) -> Descendants {
+        Descendants(self.traverse_inclusive())
+    }
+
+    /// Return an iterator of references to this node’s descendants, in tree order.
+    ///
+    /// Parent nodes appear before the descendants.
     ///
     /// Note: this is the `NodeEdge::Start` items from `traverse()`.
     pub fn descendants(&self) -> Descendants {
@@ -267,15 +296,30 @@ impl NodeRef {
 
     /// Return an iterator of the start and end edges of this node and its descendants,
     /// in tree order.
-    pub fn traverse(&self) -> Traverse {
+    pub fn traverse_inclusive(&self) -> Traverse {
         Traverse(Some(State {
             next: NodeEdge::Start(self.clone()),
-            next_back: NodeEdge::End(self.clone())
+            next_back: NodeEdge::End(self.clone()),
         }))
     }
 
+    /// Return an iterator of the start and end edges of this node’s descendants,
+    /// in tree order.
+    pub fn traverse(&self) -> Traverse {
+        match (self.first_child(), self.last_child()) {
+            (Some(first_child), Some(last_child)) => {
+                Traverse(Some(State {
+                    next: NodeEdge::Start(first_child),
+                    next_back: NodeEdge::End(last_child)
+                }))
+            }
+            (None, None) => Traverse(None),
+            _ => unreachable!()
+        }
+    }
+
     pub fn select(&self, selectors: &str) -> Result<Select<Elements<Descendants>>, ()> {
-        self.descendants().select(selectors)
+        self.inclusive_descendants().select(selectors)
     }
 
 }
