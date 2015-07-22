@@ -30,7 +30,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     }
     fn is_root(&self) -> bool {
         match self.as_node().parent() {
-            None => true,
+            None => false,
             Some(parent) => matches!(parent.data, NodeData::Document(_))
         }
     }
