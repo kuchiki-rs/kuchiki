@@ -660,3 +660,9 @@ impl<T> Deref for NodeDataRef<T> {
     type Target = T;
     fn deref(&self) -> &T { unsafe { &*self._reference } }
 }
+
+impl<T: fmt::Debug> fmt::Debug for NodeDataRef<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        fmt::Debug::fmt(&**self, f)
+    }
+}
