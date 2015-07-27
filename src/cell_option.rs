@@ -1,9 +1,9 @@
 //! Like `Cell<Option<T>>`, but doesn’t require `T: Copy`.
 //! Specialization of https://github.com/SimonSapin/rust-movecell
 
+use rc::{Rc, Weak};
 use std::cell::UnsafeCell;
 use std::mem;
-use std::rc::{Rc, Weak};
 
 pub struct CellOption<T>(UnsafeCell<Option<T>>);
 

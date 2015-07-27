@@ -4,8 +4,8 @@ use std::collections::HashMap;
 use std::fmt;
 use std::iter::Rev;
 use std::ops::Deref;
-use std::rc::{Rc, Weak};
 use html5ever::tree_builder::QuirksMode;
+use rc::{Rc, Weak};
 use string_cache::QualName;
 
 use select::{Selectors, Select};
