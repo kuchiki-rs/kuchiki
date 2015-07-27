@@ -1,4 +1,4 @@
-#![feature(unboxed_closures, plugin, rc_weak)]
+#![feature(unboxed_closures, plugin, rc_weak, rc_counts)]
 #![plugin(string_cache_plugin)]
 
 extern crate html5ever;
@@ -10,6 +10,7 @@ extern crate tendril;
 
 pub use parser::{Html, ParseOpts};
 pub use select::{Selectors, Select};
+pub use tree::NodeRef;
 
 pub mod tree;
 

@@ -75,6 +75,60 @@ impl fmt::Debug for Node {
     }
 }
 
+/// Prevent implicit recursion when dropping nodes to avoid overflowing the stack.
+///
+/// The implict drop is correct, but recursive.
+/// In the worst case (where no node has both a next sibling and a child),
+/// a tree of a few tens of thousands of nodes could cause a stack overflow.
+///
+/// This `Drop` implementations makes sure the recursion does not happen.
+/// Instead, at has a explicit `Vec<Rc<Node>>` stack to traverse the subtree,
+/// but only following `Rc<Node>` references that are "unique":
+/// that have a strong reference count of 1.
+/// Those are the nodes that would have been dropped recursively.
+///
+/// The stack holds ancestors of the current node rather than previous siblings,
+/// on the assumption that large document trees are typically wider than deep.
+impl Drop for Node {
+    fn drop(&mut self) {
+        let mut stack = Vec::new();
+        if let Some(rc) = self.first_child.take_if_unique_strong() {
+            non_recursive_drop_unique_rc(rc, &mut stack);
+        }
+        if let Some(rc) = self.next_sibling.take_if_unique_strong() {
+            non_recursive_drop_unique_rc(rc, &mut stack);
+        }
+
+        fn non_recursive_drop_unique_rc(mut rc: Rc<Node>, stack: &mut Vec<Rc<Node>>) {
+            loop {
+                if let Some(child) = rc.first_child.take_if_unique_strong() {
+                    stack.push(rc);
+                    rc = child;
+                    continue
+                }
+                if let Some(sibling) = rc.next_sibling.take_if_unique_strong() {
+                    // The previous  value of `rc: Rc<Node>` is dropped here.
+                    // Since it was unique, the corresponding `Node` is dropped as well.
+                    // `<Node as Drop>::drop` does not call `drop_rc`
+                    // as both the first child and next sibling were already taken.
+                    // Weak reference counts decremented here for `CellOption` that are `Some`:
+                    // * `rc.parent`: still has a strong reference in `stack` or elsewhere
+                    // * `rc.last_child`: this is the last weak ref. Deallocated now.
+                    // * `rc.previous_sibling`: this is the last weak ref. Deallocated now.
+                    rc = sibling;
+                    continue
+                }
+                if let Some(parent) = stack.pop() {
+                    // Same as in the above comment.
+                    rc = parent;
+                    continue
+                }
+                return
+            }
+        }
+    }
+}
+
 impl NodeRef {
     /// Create a new node from its associated data.
     pub fn new(data: NodeData) -> NodeRef {

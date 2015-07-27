@@ -54,6 +54,23 @@ impl<T> CellOption<Weak<T>> {
     }
 }
 
+impl<T> CellOption<Rc<T>> {
+    /// Return `Some` if this `Rc` is the only strong reference count,
+    /// even if there are weak references.
+    #[inline]
+    pub fn take_if_unique_strong(&self) -> Option<Rc<T>> {
+        unsafe {
+            match *self.0.get() {
+                None => None,
+                Some(ref rc) if Rc::strong_count(rc) > 1 => None,
+                // Not borrowing the `Rc<T>` here
+                // as we would be invalidating that borrow while it is outstanding:
+                Some(_) => self.take(),
+            }
+        }
+    }
+}
+
 impl<T> CellOption<T> where T: WellBehavedClone {
     #[inline]
     pub fn clone_inner(&self) -> Option<T> {
