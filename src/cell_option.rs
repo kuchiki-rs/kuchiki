@@ -21,6 +21,13 @@ impl<T> CellOption<T> {
     }
 
     #[inline]
+    pub fn set(&self, x: Option<T>) {
+        unsafe {
+            *self.0.get() = x;
+        }
+    }
+
+    #[inline]
     pub fn replace(&self, x: Option<T>) -> Option<T> {
         unsafe {
             mem::replace(&mut *self.0.get(), x)
