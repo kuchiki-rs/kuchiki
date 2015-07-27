@@ -1,3 +1,4 @@
+use cell_option::CellOption;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fmt;
@@ -5,7 +6,6 @@ use std::iter::Rev;
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
 use html5ever::tree_builder::QuirksMode;
-use movecell::MoveCell;
 use string_cache::QualName;
 
 use select::{Selectors, Select};
@@ -54,11 +54,11 @@ impl Deref for NodeRef {
 
 /// A node inside a DOM-like tree.
 pub struct Node {
-    parent: MoveCell<Option<Weak<Node>>>,
-    previous_sibling: MoveCell<Option<Weak<Node>>>,
-    next_sibling: MoveCell<Option<Rc<Node>>>,
-    first_child: MoveCell<Option<Rc<Node>>>,
-    last_child: MoveCell<Option<Weak<Node>>>,
+    parent: CellOption<Weak<Node>>,
+    previous_sibling: CellOption<Weak<Node>>,
+    next_sibling: CellOption<Rc<Node>>,
+    first_child: CellOption<Rc<Node>>,
+    last_child: CellOption<Weak<Node>>,
     pub data: NodeData,
 }
 
@@ -79,11 +79,11 @@ impl NodeRef {
     /// Create a new node from its associated data.
     pub fn new(data: NodeData) -> NodeRef {
         NodeRef(Rc::new(Node {
-            parent: MoveCell::new(None),
-            first_child: MoveCell::new(None),
-            last_child: MoveCell::new(None),
-            previous_sibling: MoveCell::new(None),
-            next_sibling: MoveCell::new(None),
+            parent: CellOption::new(None),
+            first_child: CellOption::new(None),
+            last_child: CellOption::new(None),
+            previous_sibling: CellOption::new(None),
+            next_sibling: CellOption::new(None),
             data: data,
         }))
     }
@@ -158,7 +158,7 @@ impl Node {
 
     /// Return a reference to the parent node, unless this node is the root of the tree.
     pub fn parent(&self) -> Option<NodeRef> {
-        self.parent.and_then(|weak| weak.upgrade()).map(NodeRef)
+        self.parent.upgrade().map(NodeRef)
     }
 
     /// Return a reference to the first child of this node, unless it has no child.
@@ -168,12 +168,12 @@ impl Node {
 
     /// Return a reference to the last child of this node, unless it has no child.
     pub fn last_child(&self) -> Option<NodeRef> {
-        self.last_child.and_then(|weak| weak.upgrade()).map(NodeRef)
+        self.last_child.upgrade().map(NodeRef)
     }
 
     /// Return a reference to the previous sibling of this node, unless it is a first child.
     pub fn previous_sibling(&self) -> Option<NodeRef> {
-        self.previous_sibling.and_then(|weak| weak.upgrade()).map(NodeRef)
+        self.previous_sibling.upgrade().map(NodeRef)
     }
 
     /// Return a reference to the previous sibling of this node, unless it is a last child.

@@ -3,7 +3,6 @@
 
 extern crate html5ever;
 #[macro_use] extern crate matches;
-extern crate movecell;
 extern crate selectors;
 extern crate string_cache;
 extern crate tendril;
@@ -17,5 +16,6 @@ pub mod tree;
 mod parser;
 mod select;
 mod serializer;
+mod cell_option;
 
 #[cfg(test)] mod tests;
