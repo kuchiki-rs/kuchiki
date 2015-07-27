@@ -77,7 +77,7 @@ impl fmt::Debug for Node {
 
 /// Prevent implicit recursion when dropping nodes to avoid overflowing the stack.
 ///
-/// The implict drop is correct, but recursive.
+/// The implicit drop is correct, but recursive.
 /// In the worst case (where no node has both a next sibling and a child),
 /// a tree of a few tens of thousands of nodes could cause a stack overflow.
 ///
@@ -91,6 +91,11 @@ impl fmt::Debug for Node {
 /// on the assumption that large document trees are typically wider than deep.
 impl Drop for Node {
     fn drop(&mut self) {
+        // `.take_if_unique_strong()` temporarily leaves the tree in an inconsistent state,
+        // as the corresponding `Weak` reference in the other direction is not removed.
+        // It is important that all `Some(_)` strong references it returns
+        // are dropped by the end of this `drop` call,
+        // and that no user code is invoked in-between.
         let mut stack = Vec::new();
         if let Some(rc) = self.first_child.take_if_unique_strong() {
             non_recursive_drop_unique_rc(rc, &mut stack);
