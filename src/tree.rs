@@ -82,12 +82,12 @@ impl fmt::Debug for Node {
 /// a tree of a few tens of thousands of nodes could cause a stack overflow.
 ///
 /// This `Drop` implementations makes sure the recursion does not happen.
-/// Instead, at has a explicit `Vec<Rc<Node>>` stack to traverse the subtree,
+/// Instead, it has an explicit `Vec<Rc<Node>>` stack to traverse the subtree,
 /// but only following `Rc<Node>` references that are "unique":
 /// that have a strong reference count of 1.
 /// Those are the nodes that would have been dropped recursively.
 ///
-/// The stack holds ancestors of the current node rather than previous siblings,
+/// The stack holds ancestors of the current node rather than preceding siblings,
 /// on the assumption that large document trees are typically wider than deep.
 impl Drop for Node {
     fn drop(&mut self) {
