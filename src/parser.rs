@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use std::fs::File;
-use std::io::{Error, ErrorKind};
+use std::io::{Error, ErrorKind, Read};
 use std::option;
 use std::path::Path;
 use html5ever::{self, Attribute};
@@ -24,9 +24,12 @@ impl Html  {
     }
 
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Html, Error> {
+        Html::from_stream(&mut try!(File::open(&path)))
+    }
+
+    pub fn from_stream<S: Read>(stream: &mut S) -> Result<Html, Error> {
         let mut buf = Tendril::new();
-        let mut file = try!(File::open(&path));
-        file.read_to_tendril(&mut buf).unwrap();
+        stream.read_to_tendril(&mut buf).unwrap();
         Ok(Html {
             opts: ParseOpts::default(),
             data: Some(try!(buf.try_reinterpret().map_err(|_| {
