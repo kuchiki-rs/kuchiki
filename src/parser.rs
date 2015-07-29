@@ -29,9 +29,10 @@ impl Html  {
 
     pub fn from_stream<S: Read>(stream: &mut S) -> Result<Html, Error> {
         let mut buf = Tendril::new();
-        stream.read_to_tendril(&mut buf).unwrap();
+        try!(stream.read_to_tendril(&mut buf));
         Ok(Html {
             opts: ParseOpts::default(),
+            // FIXME: Make UTF-8 decoding lossy, but try to minimize copying.
             data: Some(try!(buf.try_reinterpret().map_err(|_| {
                 Error::new(ErrorKind::Other, "Invalid UTF-8.")
             }))).into_iter(),
