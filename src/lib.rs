@@ -19,5 +19,6 @@ mod parser;
 mod select;
 mod serializer;
 mod cell_option;
+mod iter;
 
 #[cfg(test)] mod tests;

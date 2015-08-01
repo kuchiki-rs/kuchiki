@@ -4,7 +4,7 @@ use std::path::Path;
 use tempdir::TempDir;
 
 use Html;
-use tree::NodeIterator;
+use iter::NodeIterator;
 
 #[test]
 fn text_nodes() {

@@ -2,7 +2,8 @@ use selectors::{self, parser, matching};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
 use string_cache::{Atom, Namespace, QualName};
 
-use tree::{NodeRef, NodeData, NodeDataRef, ElementData, NodeIterator};
+use tree::{NodeRef, NodeData, NodeDataRef, ElementData};
+use iter::NodeIterator;
 
 
 impl selectors::Element for NodeDataRef<ElementData> {
