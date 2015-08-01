@@ -3,7 +3,7 @@ use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
 use string_cache::{Atom, Namespace, QualName};
 
 use tree::{NodeRef, NodeData, ElementData};
-use iter::NodeIterator;
+use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
 
 
@@ -99,42 +99,15 @@ impl Selectors {
         parser::parse_author_origin_selector_list_from_str(s).map(Selectors)
     }
 
+    pub fn matches(&self, element: &NodeDataRef<ElementData>) -> bool {
+        matching::matches(&self.0, element, None)
+    }
+
     pub fn filter<I>(self, iter: I) -> Select<I>
     where I: Iterator<Item=NodeDataRef<ElementData>> {
         Select {
             iter: iter,
             selectors: self,
         }
-    }
-}
-
-pub struct Select<T> {
-    pub iter: T,
-    pub selectors: Selectors,
-}
-
-impl<T> Iterator for Select<T> where T: Iterator<Item=NodeDataRef<ElementData>> {
-    type Item = NodeDataRef<ElementData>;
-
-    #[inline]
-    fn next(&mut self) -> Option<NodeDataRef<ElementData>> {
-        for element in self.iter.by_ref() {
-            if matching::matches(&self.selectors.0, &element, None) {
-                return Some(element)
-            }
-        }
-        None
-    }
-}
-
-impl<T> DoubleEndedIterator for Select<T> where T: DoubleEndedIterator<Item=NodeDataRef<ElementData>> {
-    #[inline]
-    fn next_back(&mut self) -> Option<NodeDataRef<ElementData>> {
-        for element in self.iter.by_ref().rev() {
-            if matching::matches(&self.selectors.0, &element, None) {
-                return Some(element)
-            }
-        }
-        None
     }
 }

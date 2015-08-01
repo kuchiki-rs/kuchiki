@@ -18,8 +18,8 @@ mod serializer;
 #[cfg(test)] mod tests;
 mod tree;
 
-pub use iter::NodeIterator;
+pub use iter::{NodeIterator, ElementIterator};
 pub use node_data_ref::NodeDataRef;
 pub use parser::{Html, ParseOpts};
-pub use select::{Selectors, Select};
+pub use select::Selectors;
 pub use tree::{NodeRef, Node, NodeData, ElementData, Doctype, DocumentData};

@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::iter::Rev;
 
 use tree::{NodeRef, ElementData};
-use select::{Selectors, Select};
+use select::Selectors;
 use node_data_ref::NodeDataRef;
 
 impl NodeRef {
@@ -308,21 +308,56 @@ filter_map_like_iterator!(Elements, NodeRef::into_element_ref, NodeRef, NodeData
 filter_map_like_iterator!(Comments, NodeRef::into_comment_ref, NodeRef, NodeDataRef<RefCell<String>>);
 filter_map_like_iterator!(TextNodes, NodeRef::into_text_ref, NodeRef, NodeDataRef<RefCell<String>>);
 
+
+pub struct Select<T> {
+    pub iter: T,
+    pub selectors: Selectors,
+}
+
+impl<T> Iterator for Select<T> where T: Iterator<Item=NodeDataRef<ElementData>> {
+    type Item = NodeDataRef<ElementData>;
+
+    #[inline]
+    fn next(&mut self) -> Option<NodeDataRef<ElementData>> {
+        for element in self.iter.by_ref() {
+            if self.selectors.matches(&element) {
+                return Some(element)
+            }
+        }
+        None
+    }
+}
+
+impl<T> DoubleEndedIterator for Select<T> where T: DoubleEndedIterator<Item=NodeDataRef<ElementData>> {
+    #[inline]
+    fn next_back(&mut self) -> Option<NodeDataRef<ElementData>> {
+        for element in self.iter.by_ref().rev() {
+            if self.selectors.matches(&element) {
+                return Some(element)
+            }
+        }
+        None
+    }
+}
+
+
 pub trait NodeIterator: Sized + Iterator<Item=NodeRef> {
     fn elements(self) -> Elements<Self> {
         Elements(self)
     }
+
     fn text_nodes(self) -> TextNodes<Self> {
         TextNodes(self)
     }
+
     fn comments(self) -> Comments<Self> {
         Comments(self)
     }
+
     fn select(self, selectors: &str) -> Result<Select<Elements<Self>>, ()> {
         self.elements().select(selectors)
     }
 }
-
 
 pub trait ElementIterator: Sized + Iterator<Item=NodeDataRef<ElementData>> {
     fn select(self, selectors: &str) -> Result<Select<Self>, ()> {
