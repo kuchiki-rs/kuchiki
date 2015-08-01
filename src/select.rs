@@ -103,7 +103,7 @@ impl Selectors {
         matching::matches(&self.0, element, None)
     }
 
-    pub fn filter<I>(self, iter: I) -> Select<I>
+    pub fn filter<I>(&self, iter: I) -> Select<I, &Selectors>
     where I: Iterator<Item=NodeDataRef<ElementData>> {
         Select {
             iter: iter,

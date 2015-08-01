@@ -1,5 +1,6 @@
 //! Node iterators
 
+use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::iter::Rev;
 
@@ -309,18 +310,22 @@ filter_map_like_iterator!(Comments, NodeRef::into_comment_ref, NodeRef, NodeData
 filter_map_like_iterator!(TextNodes, NodeRef::into_text_ref, NodeRef, NodeDataRef<RefCell<String>>);
 
 
-pub struct Select<T> {
-    pub iter: T,
-    pub selectors: Selectors,
+pub struct Select<I, S=Selectors>
+where I: Iterator<Item=NodeDataRef<ElementData>>,
+      S: Borrow<Selectors> {
+    pub iter: I,
+    pub selectors: S,
 }
 
-impl<T> Iterator for Select<T> where T: Iterator<Item=NodeDataRef<ElementData>> {
+impl<I, S> Iterator for Select<I, S>
+where I: Iterator<Item=NodeDataRef<ElementData>>,
+      S: Borrow<Selectors> {
     type Item = NodeDataRef<ElementData>;
 
     #[inline]
     fn next(&mut self) -> Option<NodeDataRef<ElementData>> {
         for element in self.iter.by_ref() {
-            if self.selectors.matches(&element) {
+            if self.selectors.borrow().matches(&element) {
                 return Some(element)
             }
         }
@@ -328,11 +333,13 @@ impl<T> Iterator for Select<T> where T: Iterator<Item=NodeDataRef<ElementData>> 
     }
 }
 
-impl<T> DoubleEndedIterator for Select<T> where T: DoubleEndedIterator<Item=NodeDataRef<ElementData>> {
+impl<I, S> DoubleEndedIterator for Select<I, S>
+where I: DoubleEndedIterator<Item=NodeDataRef<ElementData>>,
+      S: Borrow<Selectors> {
     #[inline]
     fn next_back(&mut self) -> Option<NodeDataRef<ElementData>> {
         for element in self.iter.by_ref().rev() {
-            if self.selectors.matches(&element) {
+            if self.selectors.borrow().matches(&element) {
                 return Some(element)
             }
         }
@@ -361,7 +368,10 @@ pub trait NodeIterator: Sized + Iterator<Item=NodeRef> {
 
 pub trait ElementIterator: Sized + Iterator<Item=NodeDataRef<ElementData>> {
     fn select(self, selectors: &str) -> Result<Select<Self>, ()> {
-        Selectors::compile(selectors).map(|s| s.filter(self))
+        Selectors::compile(selectors).map(|s| Select {
+            iter: self,
+            selectors: s,
+        })
     }
 }
 
