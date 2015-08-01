@@ -1,4 +1,4 @@
-use cell_option::CellOption;
+use move_cell::MoveCell;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fmt;
@@ -51,11 +51,11 @@ impl Deref for NodeRef {
 
 /// A node inside a DOM-like tree.
 pub struct Node {
-    parent: CellOption<Weak<Node>>,
-    previous_sibling: CellOption<Weak<Node>>,
-    next_sibling: CellOption<Rc<Node>>,
-    first_child: CellOption<Rc<Node>>,
-    last_child: CellOption<Weak<Node>>,
+    parent: MoveCell<Option<Weak<Node>>>,
+    previous_sibling: MoveCell<Option<Weak<Node>>>,
+    next_sibling: MoveCell<Option<Rc<Node>>>,
+    first_child: MoveCell<Option<Rc<Node>>>,
+    last_child: MoveCell<Option<Weak<Node>>>,
     pub data: NodeData,
 }
 
@@ -113,7 +113,7 @@ impl Drop for Node {
                     // Since it was unique, the corresponding `Node` is dropped as well.
                     // `<Node as Drop>::drop` does not call `drop_rc`
                     // as both the first child and next sibling were already taken.
-                    // Weak reference counts decremented here for `CellOption` that are `Some`:
+                    // Weak reference counts decremented here for `MoveCell`s that are `Some`:
                     // * `rc.parent`: still has a strong reference in `stack` or elsewhere
                     // * `rc.last_child`: this is the last weak ref. Deallocated now.
                     // * `rc.previous_sibling`: this is the last weak ref. Deallocated now.
@@ -135,11 +135,11 @@ impl NodeRef {
     /// Create a new node from its associated data.
     pub fn new(data: NodeData) -> NodeRef {
         NodeRef(Rc::new(Node {
-            parent: CellOption::new(None),
-            first_child: CellOption::new(None),
-            last_child: CellOption::new(None),
-            previous_sibling: CellOption::new(None),
-            next_sibling: CellOption::new(None),
+            parent: MoveCell::new(None),
+            first_child: MoveCell::new(None),
+            last_child: MoveCell::new(None),
+            previous_sibling: MoveCell::new(None),
+            next_sibling: MoveCell::new(None),
             data: data,
         }))
     }

@@ -18,7 +18,7 @@ pub mod tree;
 mod parser;
 mod select;
 mod serializer;
-mod cell_option;
+mod move_cell;
 mod iter;
 
 #[cfg(test)] mod tests;

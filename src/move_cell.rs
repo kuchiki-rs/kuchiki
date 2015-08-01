@@ -1,36 +1,37 @@
-//! Like `Cell<Option<T>>`, but doesn’t require `T: Copy`.
-//! Specialization of https://github.com/SimonSapin/rust-movecell
-
 use rc::{Rc, Weak};
 use std::cell::UnsafeCell;
 use std::mem;
 
-pub struct CellOption<T>(UnsafeCell<Option<T>>);
+/// Like `Cell<T>`, but doesn’t require `T: Copy`.
+/// Specialization of https://github.com/SimonSapin/rust-movecell
+pub struct MoveCell<T>(UnsafeCell<T>);
 
-impl<T> CellOption<T> {
+impl<T> MoveCell<T> {
     #[inline]
-    pub fn new(x: Option<T>) -> Self {
-        CellOption(UnsafeCell::new(x))
+    pub fn new(x: T) -> Self {
+        MoveCell(UnsafeCell::new(x))
     }
 
     #[inline]
-    pub fn is_none(&self) -> bool {
-        unsafe {
-            (*self.0.get()).is_none()
-        }
-    }
-
-    #[inline]
-    pub fn set(&self, x: Option<T>) {
+    pub fn set(&self, x: T) {
         unsafe {
             *self.0.get() = x;
         }
     }
 
     #[inline]
-    pub fn replace(&self, x: Option<T>) -> Option<T> {
+    pub fn replace(&self, x: T) -> T {
         unsafe {
             mem::replace(&mut *self.0.get(), x)
+        }
+    }
+}
+
+impl<T> MoveCell<Option<T>> {
+    #[inline]
+    pub fn is_none(&self) -> bool {
+        unsafe {
+            (*self.0.get()).is_none()
         }
     }
 
@@ -42,7 +43,7 @@ impl<T> CellOption<T> {
     }
 }
 
-impl<T> CellOption<Weak<T>> {
+impl<T> MoveCell<Option<Weak<T>>> {
     #[inline]
     pub fn upgrade(&self) -> Option<Rc<T>> {
         unsafe {
@@ -54,7 +55,7 @@ impl<T> CellOption<Weak<T>> {
     }
 }
 
-impl<T> CellOption<Rc<T>> {
+impl<T> MoveCell<Option<Rc<T>>> {
     /// Return `Some` if this `Rc` is the only strong reference count,
     /// even if there are weak references.
     #[inline]
@@ -71,9 +72,9 @@ impl<T> CellOption<Rc<T>> {
     }
 }
 
-impl<T> CellOption<T> where T: WellBehavedClone {
+impl<T> MoveCell<T> where T: WellBehavedClone {
     #[inline]
-    pub fn clone_inner(&self) -> Option<T> {
+    pub fn clone_inner(&self) -> T {
         unsafe {
             (*self.0.get()).clone()
         }
@@ -87,19 +88,19 @@ impl<T> CellOption<T> where T: WellBehavedClone {
     Incorrect example:
 
     ```rust
-    struct Evil(Box<u32>, Rc<CellOption<Evil>>);
+    struct Evil(Box<u32>, Rc<MoveCell<Option<<Evil>>>);
     impl Clone for Evil {
         fn clone(&self) -> Self {
             mem::drop(self.1.take());  // Mess with the "other" node, which might be `self`.
             Evil(
                 self.0.clone(),  // use after free!
-                Rc::new(CellOption::new(None))
+                Rc::new(MoveCell::new(None))
             )
         }
     }
     unsafe impl WellBehavedClone for Evil {}  // Wrong.
 
-    let a = Rc::new(CellOption::new(None));
+    let a = Rc::new(MoveCell::new(None));
     a.set(Some(Evil(Box::new(5), a.clone())));  // Make a reference cycle.
     a.clone_inner();
     ```
@@ -108,3 +109,4 @@ impl<T> CellOption<T> where T: WellBehavedClone {
 unsafe trait WellBehavedClone: Clone {}
 unsafe impl<T> WellBehavedClone for Rc<T> {}
 unsafe impl<T> WellBehavedClone for Weak<T> {}
+unsafe impl<T> WellBehavedClone for Option<T> where T: WellBehavedClone {}
