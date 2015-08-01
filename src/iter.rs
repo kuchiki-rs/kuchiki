@@ -3,8 +3,9 @@
 use std::cell::RefCell;
 use std::iter::Rev;
 
-use tree::{NodeRef, NodeDataRef, ElementData};
+use tree::{NodeRef, ElementData};
 use select::{Selectors, Select};
+use node_data_ref::NodeDataRef;
 
 impl NodeRef {
     /// Return an iterator of references to this node and its ancestors.

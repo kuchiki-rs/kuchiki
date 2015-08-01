@@ -6,19 +6,20 @@ extern crate html5ever;
 extern crate selectors;
 extern crate rc;
 #[macro_use] extern crate string_cache;
-extern crate tendril;
 #[cfg(test)] extern crate tempdir;
+extern crate tendril;
 
-pub use parser::{Html, ParseOpts};
-pub use select::{Selectors, Select};
-pub use tree::NodeRef;
-
-pub mod tree;
-
+pub mod iter;
+mod move_cell;
+mod node_data_ref;
 mod parser;
 mod select;
 mod serializer;
-mod move_cell;
-mod iter;
-
 #[cfg(test)] mod tests;
+mod tree;
+
+pub use iter::NodeIterator;
+pub use node_data_ref::NodeDataRef;
+pub use parser::{Html, ParseOpts};
+pub use select::{Selectors, Select};
+pub use tree::{NodeRef, Node, NodeData, ElementData, Doctype, DocumentData};
