@@ -1,7 +1,11 @@
 sudo: false
 language: rust
-rust: nightly
+rust:
+  - nightly
+  - beta
+  - stable
 script:
+  - ([ $TRAVIS_RUST_VERSION != nightly ] || cargo test --features unstable)
   - cargo test
   - cargo doc
 after_success: |
