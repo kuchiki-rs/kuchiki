@@ -80,12 +80,21 @@ impl DocumentData {
 /// To avoid detroying nodes prematurely,
 /// programs typically hold a strong reference to the root of a document
 /// until they’re done with that document.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, Debug)]
 pub struct NodeRef(pub Rc<Node>);
 
 impl Deref for NodeRef {
     type Target = Node;
     fn deref(&self) -> &Node { &*self.0 }
+}
+
+impl Eq for NodeRef {}
+impl PartialEq for NodeRef {
+    fn eq(&self, other: &NodeRef) -> bool {
+        let a: *const Node = &*self.0;
+        let b: *const Node = &*other.0;
+        a == b
+    }
 }
 
 /// A node inside a DOM-like tree.
@@ -96,13 +105,6 @@ pub struct Node {
     first_child: MoveCell<Option<Rc<Node>>>,
     last_child: MoveCell<Option<Weak<Node>>>,
     data: NodeData,
-}
-
-impl Eq for Node {}
-impl PartialEq for Node {
-    fn eq(&self, other: &Node) -> bool {
-        self as *const Node == other as *const Node
-    }
 }
 
 impl fmt::Debug for Node {
