@@ -92,17 +92,21 @@ impl selectors::Element for NodeDataRef<ElementData> {
 }
 
 
+/// A pre-compiled list of CSS Selectors.
 pub struct Selectors(Vec<Selector>);
 
 impl Selectors {
+    /// Compile a list of selectors. This may fail on syntax errors or unsupported selectors.
     pub fn compile(s: &str) -> Result<Selectors, ()> {
         parser::parse_author_origin_selector_list_from_str(s).map(Selectors)
     }
 
+    /// Returns whether the given element matches this list of selectors.
     pub fn matches(&self, element: &NodeDataRef<ElementData>) -> bool {
         matching::matches(&self.0, element, None)
     }
 
+    /// Filter an element iterator, yielding those matching this list of selectors.
     pub fn filter<I>(&self, iter: I) -> Select<I, &Selectors>
     where I: Iterator<Item=NodeDataRef<ElementData>> {
         Select {

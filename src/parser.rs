@@ -10,12 +10,14 @@ use tendril::{StrTendril, ReadExt, Tendril};
 
 use tree::NodeRef;
 
+/// The HTML parser.
 pub struct Html {
     opts: ParseOpts,
     data: option::IntoIter<StrTendril>,
 }
 
 impl Html  {
+    /// Parse from a single string in memory.
     pub fn from_string<S: Into<StrTendril>>(string: S) -> Html {
         Html {
             opts: ParseOpts::default(),
@@ -23,10 +25,12 @@ impl Html  {
         }
     }
 
+    /// Parse from reading a file.
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Html, Error> {
         Html::from_stream(&mut try!(File::open(&path)))
     }
 
+    /// Parse from reading a stream of bytes.
     pub fn from_stream<S: Read>(stream: &mut S) -> Result<Html, Error> {
         let mut buf = Tendril::new();
         try!(stream.read_to_tendril(&mut buf));
@@ -39,6 +43,7 @@ impl Html  {
         })
     }
 
+    /// Run the parser and return a reference to the document node, the root of the tree.
     pub fn parse(self) -> NodeRef {
         let parser = Parser {
             document_node: NodeRef::new_document(),
@@ -54,10 +59,16 @@ impl Html  {
 
 }
 
+/// Options for the HTML parser.
 #[derive(Default)]
 pub struct ParseOpts {
+    /// Options for the HTML tokenizer.
     pub tokenizer: html5ever::tokenizer::TokenizerOpts,
+
+    /// Options for the HTML tree builder.
     pub tree_builder: html5ever::tree_builder::TreeBuilderOpts,
+
+    /// A callback for HTML parse errors (which are never fatal).
     pub on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
 }
 

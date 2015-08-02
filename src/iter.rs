@@ -124,6 +124,7 @@ impl NodeRef {
         }
     }
 
+    /// Return an iterator of the inclusive descendants element that match the given selector list.
     pub fn select(&self, selectors: &str) -> Result<Select<Elements<Descendants>>, ()> {
         self.inclusive_descendants().select(selectors)
     }
@@ -210,7 +211,7 @@ impl DoubleEndedIterator for Descendants {
     descendants_next!(next_back);
 }
 
-
+/// Marks either the start or the end of a node.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum NodeEdge<T> {
     /// Indicates that start of a node that has children.
@@ -273,7 +274,8 @@ impl DoubleEndedIterator for Traverse {
 
 
 macro_rules! filter_map_like_iterator {
-    ($name: ident, $f: expr, $from: ty, $to: ty) => {
+    (#[$doc: meta] $name: ident: $f: expr, $from: ty => $to: ty) => {
+        #[$doc]
         #[derive(Debug, Clone)]
         pub struct $name<I>(pub I);
 
@@ -305,15 +307,30 @@ macro_rules! filter_map_like_iterator {
     }
 }
 
-filter_map_like_iterator!(Elements, NodeRef::into_element_ref, NodeRef, NodeDataRef<ElementData>);
-filter_map_like_iterator!(Comments, NodeRef::into_comment_ref, NodeRef, NodeDataRef<RefCell<String>>);
-filter_map_like_iterator!(TextNodes, NodeRef::into_text_ref, NodeRef, NodeDataRef<RefCell<String>>);
+filter_map_like_iterator! {
+    /// A node iterator adaptor that yields element nodes.
+    Elements: NodeRef::into_element_ref, NodeRef => NodeDataRef<ElementData>
+}
+
+filter_map_like_iterator! {
+    /// A node iterator adaptor that yields comment nodes.
+    Comments: NodeRef::into_comment_ref, NodeRef => NodeDataRef<RefCell<String>>
+}
+
+filter_map_like_iterator! {
+    /// A node iterator adaptor that yields text nodes.
+    TextNodes: NodeRef::into_text_ref, NodeRef => NodeDataRef<RefCell<String>>
+}
 
 
+/// An element iterator adaptor that yields elements maching given selectors.
 pub struct Select<I, S=Selectors>
 where I: Iterator<Item=NodeDataRef<ElementData>>,
       S: Borrow<Selectors> {
+    /// The underlying iterator.
     pub iter: I,
+
+    /// The selectors to be matched.
     pub selectors: S,
 }
 
@@ -348,25 +365,32 @@ where I: DoubleEndedIterator<Item=NodeDataRef<ElementData>>,
 }
 
 
+/// Convenience methods for node iterators.
 pub trait NodeIterator: Sized + Iterator<Item=NodeRef> {
+    /// Filter this element iterator to elements.
     fn elements(self) -> Elements<Self> {
         Elements(self)
     }
 
+    /// Filter this node iterator to text nodes.
     fn text_nodes(self) -> TextNodes<Self> {
         TextNodes(self)
     }
 
+    /// Filter this node iterator to comment nodes.
     fn comments(self) -> Comments<Self> {
         Comments(self)
     }
 
+    /// Filter this node iterator to elements maching the given selectors.
     fn select(self, selectors: &str) -> Result<Select<Elements<Self>>, ()> {
         self.elements().select(selectors)
     }
 }
 
+/// Convenience methods for element iterators.
 pub trait ElementIterator: Sized + Iterator<Item=NodeDataRef<ElementData>> {
+    /// Filter this element iterator to elements maching the given selectors.
     fn select(self, selectors: &str) -> Result<Select<Self>, ()> {
         Selectors::compile(selectors).map(|s| Select {
             iter: self,

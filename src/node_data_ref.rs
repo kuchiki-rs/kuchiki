@@ -4,29 +4,34 @@ use std::ops::Deref;
 use tree::{Node, NodeRef, ElementData, Doctype, DocumentData};
 
 impl NodeRef {
+    /// If this node is an element, return a strong reference to element-specific data.
     pub fn into_element_ref(self) -> Option<NodeDataRef<ElementData>> {
         NodeDataRef::new_opt(self, Node::as_element)
     }
 
+    /// If this node is a text node, return a strong reference to its contents.
     pub fn into_text_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
         NodeDataRef::new_opt(self, Node::as_text)
     }
 
+    /// If this node is a comment, return a strong reference to its contents.
     pub fn into_comment_ref(self) -> Option<NodeDataRef<RefCell<String>>> {
         NodeDataRef::new_opt(self, Node::as_comment)
     }
 
+    /// If this node is a doctype, return a strong reference to doctype-specific data.
     pub fn into_doctype_ref(self) -> Option<NodeDataRef<Doctype>> {
         NodeDataRef::new_opt(self, Node::as_doctype)
     }
 
+    /// If this node is a document, return a strong reference to document-specific data.
     pub fn into_document_ref(self) -> Option<NodeDataRef<DocumentData>> {
         NodeDataRef::new_opt(self, Node::as_document)
     }
 }
 
 
-/// Holds a strong reference to a node, but derefs to some component inside of it.
+/// Holds a strong reference to a node, but dereferences to some component inside of it.
 pub struct NodeDataRef<T> {
     _keep_alive: NodeRef,
     _reference: *const T
@@ -50,6 +55,7 @@ impl<T> NodeDataRef<T> {
         })
     }
 
+    /// Access the corresponding node.
     pub fn as_node(&self) -> &NodeRef {
         &self._keep_alive
     }

@@ -55,13 +55,15 @@ impl ToString for NodeRef {
 }
 
 impl NodeRef {
-    fn serialize<W: Write>(&self, writer: &mut W) -> Result<()> {
+    /// Serialize this node and its descendants in HTML syntax to the given stream.
+    pub fn serialize<W: Write>(&self, writer: &mut W) -> Result<()> {
         serialize(writer, self, SerializeOpts {
             traversal_scope: IncludeNode,
             ..Default::default()
         })
     }
 
+    /// Serialize this node and its descendants in HTML syntax to a new file at the given path.
     pub fn serialize_to_file<P: AsRef<Path>>(&self, path: P) -> Result<()>{
         let mut file = try!(File::create(&path));
         self.serialize(&mut file)

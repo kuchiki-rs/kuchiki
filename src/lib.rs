@@ -1,5 +1,15 @@
+/*!
+
+Kuchiki (朽木)
+==============
+
+HTML/XML tree manipulation library for Rust.
+
+*/
+
 #![cfg_attr(feature = "unstable", feature(rc_weak, rc_counts, plugin))]
 #![cfg_attr(feature = "unstable", plugin(string_cache_plugin))]
+#![deny(missing_docs)]
 
 extern crate html5ever;
 #[macro_use] extern crate matches;

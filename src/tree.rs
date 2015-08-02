@@ -8,39 +8,78 @@ use rc::{Rc, Weak};
 use string_cache::QualName;
 
 
+/// Node data specific to the node type.
 #[derive(Debug, PartialEq, Clone)]
 pub enum NodeData {
+    /// Element node
     Element(ElementData),
+
+    /// Text node
     Text(RefCell<String>),
+
+    /// Comment node
     Comment(RefCell<String>),
+
+    /// Doctype node
     Doctype(Doctype),
+
+    /// Document node
     Document(DocumentData),
 }
 
+/// Data specific to doctype nodes.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Doctype {
+    /// The name of the doctype
     pub name: String,
+
+    /// The public ID of the doctype
     pub public_id: String,
+
+    /// The system ID of the doctype
     pub system_id: String,
 }
 
+/// Data specific to element nodes.
 #[derive(Debug, PartialEq, Clone)]
 pub struct ElementData {
+    /// The namespace and local name of the element, such as `ns!(html)` and `body`.
     pub name: QualName,
+
+    /// The attributes of the elements.
     pub attributes: RefCell<HashMap<QualName, String>>,
 }
 
+/// Data specific to document nodes.
 #[derive(Debug, PartialEq, Clone)]
 pub struct DocumentData {
+    #[doc(hidden)]
     pub _quirks_mode: Cell<QuirksMode>,
 }
 
 impl DocumentData {
+    /// The quirks mode of the document, as determined by the HTML parser.
     pub fn quirks_mode(&self) -> QuirksMode {
         self._quirks_mode.get()
     }
 }
 
+/// A strong reference to a node.
+///
+/// A node is destroyed when the last strong reference to it dropped.
+///
+/// Each node holds a strong reference to its first child and next sibling (if any),
+/// but only a weak reference to its last child, previous sibling, and parent.
+/// This is to avoid strong reference cycles, which would cause memory leaks.
+///
+/// As a result, a single `NodeRef` is sufficient to keep alive a node
+/// and nodes that are after it in tree order
+/// (its descendants, its following siblings, and their descendants)
+/// but not other nodes in a tree.
+///
+/// To avoid detroying nodes prematurely,
+/// programs typically hold a strong reference to the root of a document
+/// until they’re done with that document.
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct NodeRef(pub Rc<Node>);
 
@@ -132,7 +171,7 @@ impl Drop for Node {
 }
 
 impl NodeRef {
-    /// Create a new node from its associated data.
+    /// Create a new node.
     pub fn new(data: NodeData) -> NodeRef {
         NodeRef(Rc::new(Node {
             parent: MoveCell::new(None),
@@ -144,6 +183,7 @@ impl NodeRef {
         }))
     }
 
+    /// Create a new element node.
     pub fn new_element<I>(name: QualName, attributes: I) -> NodeRef
                           where I: IntoIterator<Item=(QualName, String)> {
         NodeRef::new(NodeData::Element(ElementData {
@@ -152,14 +192,17 @@ impl NodeRef {
         }))
     }
 
+    /// Create a new text node.
     pub fn new_text<T: Into<String>>(value: T) -> NodeRef {
         NodeRef::new(NodeData::Text(RefCell::new(value.into())))
     }
 
+    /// Create a new comment node.
     pub fn new_comment<T: Into<String>>(value: T) -> NodeRef {
         NodeRef::new(NodeData::Comment(RefCell::new(value.into())))
     }
 
+    /// Create a new doctype node.
     pub fn new_doctype<T1, T2, T3>(name: T1, public_id: T2, system_id: T3) -> NodeRef
                                    where T1: Into<String>, T2: Into<String>, T3: Into<String> {
         NodeRef::new(NodeData::Doctype(Doctype {
@@ -169,6 +212,7 @@ impl NodeRef {
         }))
     }
 
+    /// Create a new document node.
     pub fn new_document() -> NodeRef {
         NodeRef::new(NodeData::Document(DocumentData {
             _quirks_mode: Cell::new(QuirksMode::NoQuirks),
@@ -182,6 +226,7 @@ impl Node {
         &self.data
     }
 
+    /// If this node is an element, return a reference to element-specific data.
     pub fn as_element(&self) -> Option<&ElementData> {
         match self.data {
             NodeData::Element(ref value) => Some(value),
@@ -189,6 +234,7 @@ impl Node {
         }
     }
 
+    /// If this node is a text node, return a reference to its contents.
     pub fn as_text(&self) -> Option<&RefCell<String>> {
         match self.data {
             NodeData::Text(ref value) => Some(value),
@@ -196,6 +242,7 @@ impl Node {
         }
     }
 
+    /// If this node is a comment, return a reference to its contents.
     pub fn as_comment(&self) -> Option<&RefCell<String>> {
         match self.data {
             NodeData::Comment(ref value) => Some(value),
@@ -203,6 +250,7 @@ impl Node {
         }
     }
 
+    /// If this node is a document, return a reference to doctype-specific data.
     pub fn as_doctype(&self) -> Option<&Doctype> {
         match self.data {
             NodeData::Doctype(ref value) => Some(value),
@@ -210,6 +258,7 @@ impl Node {
         }
     }
 
+    /// If this node is a document, return a reference to document-specific data.
     pub fn as_document(&self) -> Option<&DocumentData> {
         match self.data {
             NodeData::Document(ref value) => Some(value),
@@ -243,6 +292,8 @@ impl Node {
     }
 
     /// Detach a node from its parent and siblings. Children are not affected.
+    ///
+    /// To remove a node and its descendants, detach it and drop any strong reference to it.
     pub fn detach(&self) {
         let parent_weak = self.parent.take();
         let previous_sibling_weak = self.previous_sibling.take();
@@ -270,6 +321,8 @@ impl Node {
 
 impl NodeRef {
     /// Append a new child to this node, after existing children.
+    ///
+    /// The new child is detached from its previous position.
     pub fn append(&self, new_child: NodeRef) {
         new_child.detach();
         new_child.parent.set(Some(self.0.downgrade()));
@@ -286,6 +339,8 @@ impl NodeRef {
     }
 
     /// Prepend a new child to this node, before existing children.
+    ///
+    /// The new child is detached from its previous position.
     pub fn prepend(&self, new_child: NodeRef) {
         new_child.detach();
         new_child.parent.set(Some(self.0.downgrade()));
@@ -301,6 +356,8 @@ impl NodeRef {
     }
 
     /// Insert a new sibling after this node.
+    ///
+    /// The new sibling is detached from its previous position.
     pub fn insert_after(&self, new_sibling: NodeRef) {
         new_sibling.detach();
         new_sibling.parent.set(self.parent.clone_inner());
@@ -317,6 +374,8 @@ impl NodeRef {
     }
 
     /// Insert a new sibling before this node.
+    ///
+    /// The new sibling is detached from its previous position.
     pub fn insert_before(&self, new_sibling: NodeRef) {
         new_sibling.detach();
         new_sibling.parent.set(self.parent.clone_inner());
