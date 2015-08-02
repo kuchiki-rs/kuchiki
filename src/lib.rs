@@ -1,9 +1,6 @@
 /*!
 
-Kuchiki (朽木)
-==============
-
-HTML/XML tree manipulation library for Rust.
+Kuchiki (朽木), a HTML/XML tree manipulation library for Rust.
 
 */
 
