@@ -111,3 +111,10 @@ impl Selectors {
         }
     }
 }
+
+impl ::std::str::FromStr for Selectors {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Selectors, ()> {
+        Selectors::compile(s)
+    }
+}
