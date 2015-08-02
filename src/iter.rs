@@ -10,16 +10,19 @@ use node_data_ref::NodeDataRef;
 
 impl NodeRef {
     /// Return an iterator of references to this node and its ancestors.
+    #[inline]
     pub fn inclusive_ancestors(&self) -> Ancestors {
         Ancestors(Some(self.clone()))
     }
 
     /// Return an iterator of references to this node’s ancestors.
+    #[inline]
     pub fn ancestors(&self) -> Ancestors {
         Ancestors(self.parent())
     }
 
     /// Return an iterator of references to this node and the siblings before it.
+    #[inline]
     pub fn inclusive_preceding_siblings(&self) -> Rev<Siblings> {
         match self.parent() {
             Some(parent) => {
@@ -35,6 +38,7 @@ impl NodeRef {
     }
 
     /// Return an iterator of references to this node’s siblings before it.
+    #[inline]
     pub fn preceding_siblings(&self) -> Rev<Siblings> {
         match (self.parent(), self.previous_sibling()) {
             (Some(parent), Some(previous_sibling)) => {
@@ -46,6 +50,7 @@ impl NodeRef {
     }
 
     /// Return an iterator of references to this node and the siblings after it.
+    #[inline]
     pub fn inclusive_following_siblings(&self) -> Siblings {
         match self.parent() {
             Some(parent) => {
@@ -61,6 +66,7 @@ impl NodeRef {
     }
 
     /// Return an iterator of references to this node’s siblings after it.
+    #[inline]
     pub fn following_siblings(&self) -> Siblings {
         match (self.parent(), self.next_sibling()) {
             (Some(parent), Some(next_sibling)) => {
@@ -72,6 +78,7 @@ impl NodeRef {
     }
 
     /// Return an iterator of references to this node’s children.
+    #[inline]
     pub fn children(&self) -> Siblings {
         match (self.first_child(), self.last_child()) {
             (Some(first_child), Some(last_child)) => {
@@ -87,6 +94,7 @@ impl NodeRef {
     /// Parent nodes appear before the descendants.
     ///
     /// Note: this is the `NodeEdge::Start` items from `traverse()`.
+    #[inline]
     pub fn inclusive_descendants(&self) -> Descendants {
         Descendants(self.traverse_inclusive())
     }
@@ -96,12 +104,14 @@ impl NodeRef {
     /// Parent nodes appear before the descendants.
     ///
     /// Note: this is the `NodeEdge::Start` items from `traverse()`.
+    #[inline]
     pub fn descendants(&self) -> Descendants {
         Descendants(self.traverse())
     }
 
     /// Return an iterator of the start and end edges of this node and its descendants,
     /// in tree order.
+    #[inline]
     pub fn traverse_inclusive(&self) -> Traverse {
         Traverse(Some(State {
             next: NodeEdge::Start(self.clone()),
@@ -111,6 +121,7 @@ impl NodeRef {
 
     /// Return an iterator of the start and end edges of this node’s descendants,
     /// in tree order.
+    #[inline]
     pub fn traverse(&self) -> Traverse {
         match (self.first_child(), self.last_child()) {
             (Some(first_child), Some(last_child)) => {
@@ -125,6 +136,7 @@ impl NodeRef {
     }
 
     /// Return an iterator of the inclusive descendants element that match the given selector list.
+    #[inline]
     pub fn select(&self, selectors: &str) -> Result<Select<Elements<Descendants>>, ()> {
         self.inclusive_descendants().select(selectors)
     }
@@ -175,6 +187,7 @@ pub struct Ancestors(Option<NodeRef>);
 impl Iterator for Ancestors {
     type Item = NodeRef;
 
+    #[inline]
     fn next(&mut self) -> Option<NodeRef> {
         self.0.take().map(|node| {
             self.0 = node.parent();
@@ -190,6 +203,7 @@ pub struct Descendants(Traverse);
 
 macro_rules! descendants_next {
     ($next: ident) => {
+        #[inline]
         fn $next(&mut self) -> Option<NodeRef> {
             loop {
                 match (self.0).$next() {
@@ -368,21 +382,25 @@ where I: DoubleEndedIterator<Item=NodeDataRef<ElementData>>,
 /// Convenience methods for node iterators.
 pub trait NodeIterator: Sized + Iterator<Item=NodeRef> {
     /// Filter this element iterator to elements.
+    #[inline]
     fn elements(self) -> Elements<Self> {
         Elements(self)
     }
 
     /// Filter this node iterator to text nodes.
+    #[inline]
     fn text_nodes(self) -> TextNodes<Self> {
         TextNodes(self)
     }
 
     /// Filter this node iterator to comment nodes.
+    #[inline]
     fn comments(self) -> Comments<Self> {
         Comments(self)
     }
 
     /// Filter this node iterator to elements maching the given selectors.
+    #[inline]
     fn select(self, selectors: &str) -> Result<Select<Elements<Self>>, ()> {
         self.elements().select(selectors)
     }
@@ -391,6 +409,7 @@ pub trait NodeIterator: Sized + Iterator<Item=NodeRef> {
 /// Convenience methods for element iterators.
 pub trait ElementIterator: Sized + Iterator<Item=NodeDataRef<ElementData>> {
     /// Filter this element iterator to elements maching the given selectors.
+    #[inline]
     fn select(self, selectors: &str) -> Result<Select<Self>, ()> {
         Selectors::compile(selectors).map(|s| Select {
             iter: self,

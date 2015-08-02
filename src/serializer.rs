@@ -47,6 +47,7 @@ impl Serializable for NodeRef {
 
 
 impl ToString for NodeRef {
+    #[inline]
     fn to_string(&self) -> String {
         let mut u8_vec = Vec::new();
         self.serialize(&mut u8_vec).unwrap();
@@ -56,6 +57,7 @@ impl ToString for NodeRef {
 
 impl NodeRef {
     /// Serialize this node and its descendants in HTML syntax to the given stream.
+    #[inline]
     pub fn serialize<W: Write>(&self, writer: &mut W) -> Result<()> {
         serialize(writer, self, SerializeOpts {
             traversal_scope: IncludeNode,
@@ -64,6 +66,7 @@ impl NodeRef {
     }
 
     /// Serialize this node and its descendants in HTML syntax to a new file at the given path.
+    #[inline]
     pub fn serialize_to_file<P: AsRef<Path>>(&self, path: P) -> Result<()>{
         let mut file = try!(File::create(&path));
         self.serialize(&mut file)

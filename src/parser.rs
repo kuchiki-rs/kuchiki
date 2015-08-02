@@ -18,6 +18,7 @@ pub struct Html {
 
 impl Html  {
     /// Parse from a single string in memory.
+    #[inline]
     pub fn from_string<S: Into<StrTendril>>(string: S) -> Html {
         Html {
             opts: ParseOpts::default(),
@@ -26,11 +27,13 @@ impl Html  {
     }
 
     /// Parse from reading a file.
+    #[inline]
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Html, Error> {
         Html::from_stream(&mut try!(File::open(&path)))
     }
 
     /// Parse from reading a stream of bytes.
+    #[inline]
     pub fn from_stream<S: Read>(stream: &mut S) -> Result<Html, Error> {
         let mut buf = Tendril::new();
         try!(stream.read_to_tendril(&mut buf));
@@ -44,6 +47,7 @@ impl Html  {
     }
 
     /// Run the parser and return a reference to the document node, the root of the tree.
+    #[inline]
     pub fn parse(self) -> NodeRef {
         let parser = Parser {
             document_node: NodeRef::new_document(),
@@ -82,37 +86,45 @@ struct Parser {
 impl TreeSink for Parser {
     type Handle = NodeRef;
 
+    #[inline]
     fn parse_error(&mut self, message: Cow<'static, str>) {
         if let Some(ref mut handler) = self.on_parse_error {
             handler(message)
         }
     }
 
+    #[inline]
     fn get_document(&mut self) -> NodeRef {
         self.document_node.clone()
     }
 
+    #[inline]
     fn set_quirks_mode(&mut self, mode: QuirksMode) {
         self.document_node.as_document().unwrap()._quirks_mode.set(mode)
     }
 
+    #[inline]
     fn same_node(&self, x: NodeRef, y: NodeRef) -> bool {
         x == y
     }
 
+    #[inline]
     fn elem_name(&self, target: NodeRef) -> QualName {
         target.as_element().unwrap().name.clone()
     }
 
+    #[inline]
     fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> NodeRef {
         let attrs = attrs.into_iter().map(|Attribute { name, value }| (name, value.into()));
         NodeRef::new_element(name, attrs)
     }
 
+    #[inline]
     fn create_comment(&mut self, text: StrTendril) -> NodeRef {
         NodeRef::new_comment(text)
     }
 
+    #[inline]
     fn append(&mut self, parent: NodeRef, child: NodeOrText<NodeRef>) {
         match child {
             NodeOrText::AppendNode(node) => parent.append(node),
@@ -128,6 +140,7 @@ impl TreeSink for Parser {
         }
     }
 
+    #[inline]
     fn append_before_sibling(&mut self, sibling: NodeRef, child: NodeOrText<NodeRef>)
                              -> Result<(), NodeOrText<NodeRef>> {
         if sibling.parent().is_none() {
@@ -148,11 +161,13 @@ impl TreeSink for Parser {
         Ok(())
     }
 
+    #[inline]
     fn append_doctype_to_document(&mut self, name: StrTendril, public_id: StrTendril,
                                   system_id: StrTendril) {
         self.document_node.append(NodeRef::new_doctype(name, public_id, system_id))
     }
 
+    #[inline]
     fn add_attrs_if_missing(&mut self, target: NodeRef, attrs: Vec<Attribute>) {
         // FIXME: https://github.com/servo/html5ever/issues/121
         if let Some(element) = target.as_element() {
@@ -171,10 +186,12 @@ impl TreeSink for Parser {
         }
     }
 
+    #[inline]
     fn remove_from_parent(&mut self, target: NodeRef) {
         target.detach()
     }
 
+    #[inline]
     fn reparent_children(&mut self, node: NodeRef, new_parent: NodeRef) {
         // FIXME: Can this be done more effciently in rctree,
         // by moving the whole linked list of children at once?
@@ -183,6 +200,7 @@ impl TreeSink for Parser {
         }
     }
 
+    #[inline]
     fn mark_script_already_started(&mut self, _node: NodeRef) {
         // FIXME: Is this useful outside of a browser?
     }
