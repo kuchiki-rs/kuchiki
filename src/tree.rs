@@ -56,7 +56,7 @@ pub struct Node {
     next_sibling: MoveCell<Option<Rc<Node>>>,
     first_child: MoveCell<Option<Rc<Node>>>,
     last_child: MoveCell<Option<Weak<Node>>>,
-    pub data: NodeData,
+    data: NodeData,
 }
 
 impl Eq for Node {}
@@ -177,6 +177,11 @@ impl NodeRef {
 }
 
 impl Node {
+    /// Return a reference to this node’s node-type-specific data.
+    pub fn data(&self) -> &NodeData {
+        &self.data
+    }
+
     pub fn as_element(&self) -> Option<&ElementData> {
         match self.data {
             NodeData::Element(ref value) => Some(value),

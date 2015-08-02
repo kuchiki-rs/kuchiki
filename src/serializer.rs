@@ -11,7 +11,7 @@ use tree::{NodeRef, NodeData};
 impl Serializable for NodeRef {
     fn serialize<'wr, Wr: Write>(&self, serializer: &mut Serializer<'wr, Wr>,
                                  traversal_scope: TraversalScope) -> Result<()> {
-        match (traversal_scope, &self.data) {
+        match (traversal_scope, self.data()) {
             (_, &NodeData::Element(ref element)) => {
                 if traversal_scope == IncludeNode {
                     try!(serializer.start_elem(

@@ -24,7 +24,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
         self.as_node().following_siblings().elements().next()
     }
     fn is_empty(&self) -> bool {
-        self.as_node().children().all(|child| match child.data {
+        self.as_node().children().all(|child| match *child.data() {
             NodeData::Element(_) => false,
             NodeData::Text(ref text) => text.borrow().is_empty(),
             _ => true,
@@ -33,7 +33,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     fn is_root(&self) -> bool {
         match self.as_node().parent() {
             None => false,
-            Some(parent) => matches!(parent.data, NodeData::Document(_))
+            Some(parent) => matches!(*parent.data(), NodeData::Document(_))
         }
     }
 
