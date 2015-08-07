@@ -7,6 +7,8 @@ use html5ever::tree_builder::QuirksMode;
 use rc::{Rc, Weak};
 use string_cache::QualName;
 
+use iter::NodeIterator;
+
 
 /// Node data specific to the node type.
 #[derive(Debug, PartialEq, Clone)]
@@ -234,6 +236,15 @@ impl NodeRef {
         NodeRef::new(NodeData::Document(DocumentData {
             _quirks_mode: Cell::new(QuirksMode::NoQuirks),
         }))
+    }
+
+    /// Return the concatenation of all text nodes in this subtree.
+    pub fn text_contents(&self) -> String {
+        let mut s = String::new();
+        for text_node in self.inclusive_descendants().text_nodes() {
+            s.push_str(&text_node.borrow());
+        }
+        s
     }
 }
 

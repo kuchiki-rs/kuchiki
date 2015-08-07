@@ -80,3 +80,10 @@ impl<T: fmt::Debug> fmt::Debug for NodeDataRef<T> {
         fmt::Debug::fmt(&**self, f)
     }
 }
+
+impl NodeDataRef<ElementData> {
+    /// Return the concatenation of all text nodes in this subtree.
+    pub fn text_contents(&self) -> String {
+        self.as_node().text_contents()
+    }
+}

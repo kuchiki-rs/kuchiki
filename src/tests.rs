@@ -15,6 +15,7 @@ fn text_nodes() {
     let document = Html::from_string(html).parse();
     let paragraph = document.select("p").unwrap().collect::<Vec<_>>();
     assert_eq!(paragraph.len(), 1);
+    assert_eq!(paragraph[0].text_contents(), "Content contains Important data");
     let texts = paragraph[0].as_node().descendants().text_nodes().collect::<Vec<_>>();
     assert_eq!(texts.len(), 3);
     assert_eq!(&*texts[0].borrow(), "Content contains ");
