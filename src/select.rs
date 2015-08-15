@@ -51,6 +51,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     }
     #[inline] fn get_local_name<'a>(&'a self) -> &'a Atom { &self.name.local }
     #[inline] fn get_namespace<'a>(&'a self) -> &'a Namespace { &self.name.ns }
+    #[inline] fn get_active_state(&self) -> bool { false }
     #[inline] fn get_hover_state(&self) -> bool { false }
     #[inline] fn get_focus_state(&self) -> bool { false }
     #[inline]
