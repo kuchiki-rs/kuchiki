@@ -364,8 +364,8 @@ impl NodeRef {
     /// The new child is detached from its previous position.
     pub fn append(&self, new_child: NodeRef) {
         new_child.detach();
-        new_child.parent.set(Some(self.0.downgrade()));
-        if let Some(last_child_weak) = self.last_child.replace(Some(new_child.0.downgrade())) {
+        new_child.parent.set(Some(Rc::downgrade(&self.0)));
+        if let Some(last_child_weak) = self.last_child.replace(Some(Rc::downgrade(&new_child.0))) {
             if let Some(last_child) = last_child_weak.upgrade() {
                 new_child.previous_sibling.set(Some(last_child_weak));
                 debug_assert!(last_child.next_sibling.is_none());
@@ -382,14 +382,14 @@ impl NodeRef {
     /// The new child is detached from its previous position.
     pub fn prepend(&self, new_child: NodeRef) {
         new_child.detach();
-        new_child.parent.set(Some(self.0.downgrade()));
+        new_child.parent.set(Some(Rc::downgrade(&self.0)));
         if let Some(first_child) = self.first_child.take() {
             debug_assert!(first_child.previous_sibling.is_none());
-            first_child.previous_sibling.set(Some(new_child.0.downgrade()));
+            first_child.previous_sibling.set(Some(Rc::downgrade(&new_child.0)));
             new_child.next_sibling.set(Some(first_child));
         } else {
             debug_assert!(self.first_child.is_none());
-            self.last_child.set(Some(new_child.0.downgrade()));
+            self.last_child.set(Some(Rc::downgrade(&new_child.0)));
         }
         self.first_child.set(Some(new_child.0));
     }
@@ -400,14 +400,14 @@ impl NodeRef {
     pub fn insert_after(&self, new_sibling: NodeRef) {
         new_sibling.detach();
         new_sibling.parent.set(self.parent.clone_inner());
-        new_sibling.previous_sibling.set(Some(self.0.downgrade()));
+        new_sibling.previous_sibling.set(Some(Rc::downgrade(&self.0)));
         if let Some(next_sibling) = self.next_sibling.take() {
             debug_assert!(next_sibling.previous_sibling().unwrap() == *self);
-            next_sibling.previous_sibling.set(Some(new_sibling.0.downgrade()));
+            next_sibling.previous_sibling.set(Some(Rc::downgrade(&new_sibling.0)));
             new_sibling.next_sibling.set(Some(next_sibling));
         } else if let Some(parent) = self.parent() {
             debug_assert!(parent.last_child().unwrap() == *self);
-            parent.last_child.set(Some(new_sibling.0.downgrade()));
+            parent.last_child.set(Some(Rc::downgrade(&new_sibling.0)));
         }
         self.next_sibling.set(Some(new_sibling.0));
     }
@@ -420,7 +420,7 @@ impl NodeRef {
         new_sibling.parent.set(self.parent.clone_inner());
         new_sibling.next_sibling.set(Some(self.0.clone()));
         if let Some(previous_sibling_weak) = self.previous_sibling.replace(
-                Some(new_sibling.0.downgrade())) {
+                Some(Rc::downgrade(&new_sibling.0))) {
             if let Some(previous_sibling) = previous_sibling_weak.upgrade() {
                 new_sibling.previous_sibling.set(Some(previous_sibling_weak));
                 debug_assert!(previous_sibling.next_sibling().unwrap() == *self);
