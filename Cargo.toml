@@ -15,7 +15,6 @@ unstable = [
     "string_cache/unstable",
     "string_cache_plugin",
     "tendril/unstable",
-    "rc/unstable",
     "html5ever/unstable",
     "selectors/unstable",
 ]
@@ -27,7 +26,8 @@ string_cache = "0.1"
 string_cache_plugin = { version = "0.1", optional = true }
 tendril = "0.1.1"
 selectors = { git = "https://github.com/servo/rust-selectors" }
-rc = "0.1.0"
+gc = "0.0.*"
+gc_plugin = "0.0.*"
 
 [dev-dependencies]
 tempdir = "0.3"

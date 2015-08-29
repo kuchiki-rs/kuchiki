@@ -1,10 +1,10 @@
+use gc::Gc;
 use move_cell::MoveCell;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::fmt;
 use std::ops::Deref;
 use html5ever::tree_builder::QuirksMode;
-use rc::{Rc, Weak};
 use string_cache::QualName;
 
 use iter::NodeIterator;
@@ -67,24 +67,16 @@ impl DocumentData {
     }
 }
 
-/// A strong reference to a node.
-///
-/// A node is destroyed when the last strong reference to it dropped.
-///
-/// Each node holds a strong reference to its first child and next sibling (if any),
-/// but only a weak reference to its last child, previous sibling, and parent.
-/// This is to avoid strong reference cycles, which would cause memory leaks.
-///
-/// As a result, a single `NodeRef` is sufficient to keep alive a node
-/// and nodes that are after it in tree order
-/// (its descendants, its following siblings, and their descendants)
-/// but not other nodes in a tree.
-///
-/// To avoid detroying nodes prematurely,
-/// programs typically hold a strong reference to the root of a document
-/// until they’re done with that document.
-#[derive(Clone, Debug)]
-pub struct NodeRef(pub Rc<Node>);
+/// A garbage-collected reference to a node.
+#[derive(Clone)]
+pub struct NodeRef(pub Gc<Node>);
+
+impl fmt::Debug for NodeRef {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Debug::fmt(&*self.0, f)
+    }
+}
 
 impl Deref for NodeRef {
     type Target = Node;
@@ -105,13 +97,14 @@ impl PartialEq for NodeRef {
 }
 
 /// A node inside a DOM-like tree.
+#[derive(Trace)]
 pub struct Node {
-    parent: MoveCell<Option<Weak<Node>>>,
-    previous_sibling: MoveCell<Option<Weak<Node>>>,
-    next_sibling: MoveCell<Option<Rc<Node>>>,
-    first_child: MoveCell<Option<Rc<Node>>>,
-    last_child: MoveCell<Option<Weak<Node>>>,
-    data: NodeData,
+    parent: MoveCell<Option<Gc<Node>>>,
+    previous_sibling: MoveCell<Option<Gc<Node>>>,
+    next_sibling: MoveCell<Option<Gc<Node>>>,
+    first_child: MoveCell<Option<Gc<Node>>>,
+    last_child: MoveCell<Option<Gc<Node>>>,
+    #[unsafe_ignore_trace] data: NodeData,
 }
 
 impl fmt::Debug for Node {
@@ -121,73 +114,11 @@ impl fmt::Debug for Node {
     }
 }
 
-/// Prevent implicit recursion when dropping nodes to avoid overflowing the stack.
-///
-/// The implicit drop is correct, but recursive.
-/// In the worst case (where no node has both a next sibling and a child),
-/// a tree of a few tens of thousands of nodes could cause a stack overflow.
-///
-/// This `Drop` implementations makes sure the recursion does not happen.
-/// Instead, it has an explicit `Vec<Rc<Node>>` stack to traverse the subtree,
-/// but only following `Rc<Node>` references that are "unique":
-/// that have a strong reference count of 1.
-/// Those are the nodes that would have been dropped recursively.
-///
-/// The stack holds ancestors of the current node rather than preceding siblings,
-/// on the assumption that large document trees are typically wider than deep.
-impl Drop for Node {
-    fn drop(&mut self) {
-        // `.take_if_unique_strong()` temporarily leaves the tree in an inconsistent state,
-        // as the corresponding `Weak` reference in the other direction is not removed.
-        // It is important that all `Some(_)` strong references it returns
-        // are dropped by the end of this `drop` call,
-        // and that no user code is invoked in-between.
-
-        // Sharing `stack` between these two calls is not necessary,
-        // but it allows re-using memory allocations.
-        let mut stack = Vec::new();
-        if let Some(rc) = self.first_child.take_if_unique_strong() {
-            non_recursive_drop_unique_rc(rc, &mut stack);
-        }
-        if let Some(rc) = self.next_sibling.take_if_unique_strong() {
-            non_recursive_drop_unique_rc(rc, &mut stack);
-        }
-
-        fn non_recursive_drop_unique_rc(mut rc: Rc<Node>, stack: &mut Vec<Rc<Node>>) {
-            loop {
-                if let Some(child) = rc.first_child.take_if_unique_strong() {
-                    stack.push(rc);
-                    rc = child;
-                    continue
-                }
-                if let Some(sibling) = rc.next_sibling.take_if_unique_strong() {
-                    // The previous value of `rc: Rc<Node>` is dropped here.
-                    // Since it was unique, the corresponding `Node` is dropped as well.
-                    // `<Node as Drop>::drop` does not call `drop_rc`
-                    // as both the first child and next sibling were already taken.
-                    // Weak reference counts decremented here for `MoveCell`s that are `Some`:
-                    // * `rc.parent`: still has a strong reference in `stack` or elsewhere
-                    // * `rc.last_child`: this is the last weak ref. Deallocated now.
-                    // * `rc.previous_sibling`: this is the last weak ref. Deallocated now.
-                    rc = sibling;
-                    continue
-                }
-                if let Some(parent) = stack.pop() {
-                    // Same as in the above comment.
-                    rc = parent;
-                    continue
-                }
-                return
-            }
-        }
-    }
-}
-
 impl NodeRef {
     /// Create a new node.
     #[inline]
     pub fn new(data: NodeData) -> NodeRef {
-        NodeRef(Rc::new(Node {
+        NodeRef(Gc::new(Node {
             parent: MoveCell::new(None),
             first_child: MoveCell::new(None),
             last_child: MoveCell::new(None),
@@ -303,7 +234,7 @@ impl Node {
     /// Return a reference to the parent node, unless this node is the root of the tree.
     #[inline]
     pub fn parent(&self) -> Option<NodeRef> {
-        self.parent.upgrade().map(NodeRef)
+        self.parent.clone_inner().map(NodeRef)
     }
 
     /// Return a reference to the first child of this node, unless it has no child.
@@ -315,13 +246,13 @@ impl Node {
     /// Return a reference to the last child of this node, unless it has no child.
     #[inline]
     pub fn last_child(&self) -> Option<NodeRef> {
-        self.last_child.upgrade().map(NodeRef)
+        self.last_child.clone_inner().map(NodeRef)
     }
 
     /// Return a reference to the previous sibling of this node, unless it is a first child.
     #[inline]
     pub fn previous_sibling(&self) -> Option<NodeRef> {
-        self.previous_sibling.upgrade().map(NodeRef)
+        self.previous_sibling.clone_inner().map(NodeRef)
     }
 
     /// Return a reference to the previous sibling of this node, unless it is a last child.
@@ -334,26 +265,20 @@ impl Node {
     ///
     /// To remove a node and its descendants, detach it and drop any strong reference to it.
     pub fn detach(&self) {
-        let parent_weak = self.parent.take();
-        let previous_sibling_weak = self.previous_sibling.take();
-        let next_sibling_strong = self.next_sibling.take();
+        let parent_opt = self.parent.take();
+        let previous_sibling_opt = self.previous_sibling.take();
+        let next_sibling_opt = self.next_sibling.take();
 
-        let previous_sibling_opt = previous_sibling_weak.as_ref().and_then(|weak| weak.upgrade());
-
-        if let Some(next_sibling_ref) = next_sibling_strong.as_ref() {
-            next_sibling_ref.previous_sibling.set(previous_sibling_weak);
-        } else if let Some(parent_ref) = parent_weak.as_ref() {
-            if let Some(parent_strong) = parent_ref.upgrade() {
-                parent_strong.last_child.set(previous_sibling_weak);
-            }
+        if let Some(ref next_sibling) = next_sibling_opt {
+            next_sibling.previous_sibling.set(previous_sibling_opt.clone());
+        } else if let Some(ref parent) = parent_opt {
+            parent.last_child.set(previous_sibling_opt.clone());
         }
 
-        if let Some(previous_sibling_strong) = previous_sibling_opt {
-            previous_sibling_strong.next_sibling.set(next_sibling_strong);
-        } else if let Some(parent_ref) = parent_weak.as_ref() {
-            if let Some(parent_strong) = parent_ref.upgrade() {
-                parent_strong.first_child.set(next_sibling_strong);
-            }
+        if let Some(previous_sibling) = previous_sibling_opt {
+            previous_sibling.next_sibling.set(next_sibling_opt);
+        } else if let Some(parent) = parent_opt {
+            parent.first_child.set(next_sibling_opt);
         }
     }
 }
@@ -364,17 +289,15 @@ impl NodeRef {
     /// The new child is detached from its previous position.
     pub fn append(&self, new_child: NodeRef) {
         new_child.detach();
-        new_child.parent.set(Some(Rc::downgrade(&self.0)));
-        if let Some(last_child_weak) = self.last_child.replace(Some(Rc::downgrade(&new_child.0))) {
-            if let Some(last_child) = last_child_weak.upgrade() {
-                new_child.previous_sibling.set(Some(last_child_weak));
-                debug_assert!(last_child.next_sibling.is_none());
-                last_child.next_sibling.set(Some(new_child.0));
-                return
-            }
+        new_child.parent.set(Some(self.0.clone()));
+        if let Some(last_child) = self.last_child.replace(Some(new_child.0.clone())) {
+            debug_assert!(last_child.next_sibling.is_none());
+            last_child.next_sibling.set(Some(new_child.0.clone()));
+            new_child.previous_sibling.set(Some(last_child));
+        } else {
+            debug_assert!(self.first_child.is_none());
+            self.first_child.set(Some(new_child.0));
         }
-        debug_assert!(self.first_child.is_none());
-        self.first_child.set(Some(new_child.0));
     }
 
     /// Prepend a new child to this node, before existing children.
@@ -382,14 +305,14 @@ impl NodeRef {
     /// The new child is detached from its previous position.
     pub fn prepend(&self, new_child: NodeRef) {
         new_child.detach();
-        new_child.parent.set(Some(Rc::downgrade(&self.0)));
+        new_child.parent.set(Some(self.0.clone()));
         if let Some(first_child) = self.first_child.take() {
             debug_assert!(first_child.previous_sibling.is_none());
-            first_child.previous_sibling.set(Some(Rc::downgrade(&new_child.0)));
+            first_child.previous_sibling.set(Some(new_child.0.clone()));
             new_child.next_sibling.set(Some(first_child));
         } else {
             debug_assert!(self.first_child.is_none());
-            self.last_child.set(Some(Rc::downgrade(&new_child.0)));
+            self.last_child.set(Some(new_child.0.clone()));
         }
         self.first_child.set(Some(new_child.0));
     }
@@ -400,14 +323,14 @@ impl NodeRef {
     pub fn insert_after(&self, new_sibling: NodeRef) {
         new_sibling.detach();
         new_sibling.parent.set(self.parent.clone_inner());
-        new_sibling.previous_sibling.set(Some(Rc::downgrade(&self.0)));
+        new_sibling.previous_sibling.set(Some(self.0.clone()));
         if let Some(next_sibling) = self.next_sibling.take() {
             debug_assert!(next_sibling.previous_sibling().unwrap() == *self);
-            next_sibling.previous_sibling.set(Some(Rc::downgrade(&new_sibling.0)));
+            next_sibling.previous_sibling.set(Some(new_sibling.0.clone()));
             new_sibling.next_sibling.set(Some(next_sibling));
         } else if let Some(parent) = self.parent() {
             debug_assert!(parent.last_child().unwrap() == *self);
-            parent.last_child.set(Some(Rc::downgrade(&new_sibling.0)));
+            parent.last_child.set(Some(new_sibling.0.clone()));
         }
         self.next_sibling.set(Some(new_sibling.0));
     }
@@ -419,16 +342,11 @@ impl NodeRef {
         new_sibling.detach();
         new_sibling.parent.set(self.parent.clone_inner());
         new_sibling.next_sibling.set(Some(self.0.clone()));
-        if let Some(previous_sibling_weak) = self.previous_sibling.replace(
-                Some(Rc::downgrade(&new_sibling.0))) {
-            if let Some(previous_sibling) = previous_sibling_weak.upgrade() {
-                new_sibling.previous_sibling.set(Some(previous_sibling_weak));
-                debug_assert!(previous_sibling.next_sibling().unwrap() == *self);
-                previous_sibling.next_sibling.set(Some(new_sibling.0));
-                return
-            }
-        }
-        if let Some(parent) = self.parent() {
+        if let Some(previous_sibling) = self.previous_sibling.replace(Some(new_sibling.0.clone())) {
+            debug_assert!(previous_sibling.next_sibling().unwrap() == *self);
+            previous_sibling.next_sibling.set(Some(new_sibling.0.clone()));
+            new_sibling.previous_sibling.set(Some(previous_sibling));
+        } else if let Some(parent) = self.parent() {
             debug_assert!(parent.first_child().unwrap() == *self);
             parent.first_child.set(Some(new_sibling.0));
         }

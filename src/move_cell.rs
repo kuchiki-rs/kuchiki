@@ -1,4 +1,4 @@
-use rc::{Rc, Weak};
+use gc::{Gc, Trace};
 use std::cell::UnsafeCell;
 use std::mem;
 
@@ -43,35 +43,6 @@ impl<T> MoveCell<Option<T>> {
     }
 }
 
-impl<T> MoveCell<Option<Weak<T>>> {
-    #[inline]
-    pub fn upgrade(&self) -> Option<Rc<T>> {
-        unsafe {
-            match *self.0.get() {
-                Some(ref weak) => weak.upgrade(),
-                None => None,
-            }
-        }
-    }
-}
-
-impl<T> MoveCell<Option<Rc<T>>> {
-    /// Return `Some` if this `Rc` is the only strong reference count,
-    /// even if there are weak references.
-    #[inline]
-    pub fn take_if_unique_strong(&self) -> Option<Rc<T>> {
-        unsafe {
-            match *self.0.get() {
-                None => None,
-                Some(ref rc) if Rc::strong_count(rc) > 1 => None,
-                // Not borrowing the `Rc<T>` here
-                // as we would be invalidating that borrow while it is outstanding:
-                Some(_) => self.take(),
-            }
-        }
-    }
-}
-
 impl<T> MoveCell<T> where T: WellBehavedClone {
     #[inline]
     pub fn clone_inner(&self) -> T {
@@ -82,13 +53,13 @@ impl<T> MoveCell<T> where T: WellBehavedClone {
 }
 
 /**
-    A Clone impl that will not access the cell again through reference cycles,
+    A `Clone` impl that will not access the cell again through reference cycles,
     which would introduce mutable aliasing.
 
     Incorrect example:
 
     ```rust
-    struct Evil(Box<u32>, Rc<MoveCell<Option<<Evil>>>);
+    struct Evil(Box<u32>, Rc<MoveCell<Option<Evil>>>);
     impl Clone for Evil {
         fn clone(&self) -> Self {
             mem::drop(self.1.take());  // Mess with the "other" node, which might be `self`.
@@ -107,6 +78,40 @@ impl<T> MoveCell<T> where T: WellBehavedClone {
 
 */
 unsafe trait WellBehavedClone: Clone {}
-unsafe impl<T> WellBehavedClone for Rc<T> {}
-unsafe impl<T> WellBehavedClone for Weak<T> {}
+unsafe impl<T> WellBehavedClone for Gc<T> where T: Trace {}
 unsafe impl<T> WellBehavedClone for Option<T> where T: WellBehavedClone {}
+
+impl<T> Trace for MoveCell<T> where T: WellBehavedTrace {
+    custom_trace!(this, {
+        // XXX is this safe?
+        mark(&*this.0.get());
+    });
+}
+
+/**
+    A `Trace` impl that will not access the cell again through reference cycles,
+    which would introduce mutable aliasing.
+
+    Incorrect example:
+
+    ```
+    struct Evil(Box<u32>, Gc<MoveCell<Option<Evil>>>);
+    impl Trace for Evil {
+        custom_trace!(this, {
+            mem::drop(this.1.take());  // Mess with the "other" node, which might be `this`.
+            let _x: u32 = *this.0;  // use after free!
+            mark(&this.0);
+            panic!()
+        });
+    }
+    unsafe impl WellBehavedTrace for Evil {}  // Wrong.
+
+    let a = Gc::new(MoveCell::new(None));
+    a.set(Some(Evil(Box::new(5), a.clone())));  // Make a reference cycle.
+    ::gc::force_collect();
+    ```
+*/
+unsafe trait WellBehavedTrace: Trace {}
+unsafe impl WellBehavedTrace for ::tree::Node {}
+unsafe impl<T> WellBehavedTrace for Gc<T> where T: WellBehavedTrace {}
+unsafe impl<T> WellBehavedTrace for Option<T> where T: WellBehavedTrace {}
