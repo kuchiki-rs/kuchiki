@@ -204,4 +204,9 @@ impl TreeSink for Parser {
     fn mark_script_already_started(&mut self, _node: NodeRef) {
         // FIXME: Is this useful outside of a browser?
     }
+
+    #[inline]
+    fn get_template_contents(&self, target: NodeRef) -> NodeRef {
+        target.as_element().unwrap().template_contents.clone().unwrap()
+    }
 }

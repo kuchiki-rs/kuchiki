@@ -29,6 +29,7 @@ impl Serializable for NodeRef {
                 Ok(())
             }
 
+            (_, &NodeData::DocumentFragment) |
             (_, &NodeData::Document(_)) => {
                 for child in self.children() {
                     try!(Serializable::serialize(&child, serializer, IncludeNode));

@@ -27,6 +27,9 @@ pub enum NodeData {
 
     /// Document node
     Document(DocumentData),
+
+    /// Document fragment node
+    DocumentFragment,
 }
 
 /// Data specific to doctype nodes.
@@ -50,6 +53,10 @@ pub struct ElementData {
 
     /// The attributes of the elements.
     pub attributes: RefCell<HashMap<QualName, String>>,
+
+    /// If the element is an HTML `<template>` element,
+    /// the document fragment node that is the root of template contents.
+    pub template_contents: Option<NodeRef>,
 }
 
 /// Data specific to document nodes.
@@ -202,6 +209,11 @@ impl NodeRef {
     pub fn new_element<I>(name: QualName, attributes: I) -> NodeRef
                           where I: IntoIterator<Item=(QualName, String)> {
         NodeRef::new(NodeData::Element(ElementData {
+            template_contents: if name == qualname!(HTML, template) {
+                Some(NodeRef::new(NodeData::DocumentFragment))
+            } else {
+                None
+            },
             name: name,
             attributes: RefCell::new(attributes.into_iter().collect()),
         }))
