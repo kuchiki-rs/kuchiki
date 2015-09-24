@@ -9,6 +9,10 @@ use node_data_ref::NodeDataRef;
 
 impl selectors::Element for NodeDataRef<ElementData> {
     #[inline]
+    fn get_target_state(&self) -> bool {
+        false
+    }
+    #[inline]
     fn parent_element(&self) -> Option<Self> {
         self.as_node().parent().and_then(NodeRef::into_element_ref)
     }
