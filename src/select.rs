@@ -9,10 +9,6 @@ use node_data_ref::NodeDataRef;
 
 impl selectors::Element for NodeDataRef<ElementData> {
     #[inline]
-    fn get_target_state(&self) -> bool {
-        false
-    }
-    #[inline]
     fn parent_element(&self) -> Option<Self> {
         self.as_node().parent().and_then(NodeRef::into_element_ref)
     }
@@ -65,7 +61,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     #[inline] fn get_disabled_state(&self) -> bool { false }
     #[inline] fn get_enabled_state(&self) -> bool { false }
     #[inline] fn get_checked_state(&self) -> bool { false }
-    #[inline] fn get_indeterminate_state(&self) -> bool { false }
+    #[inline] fn get_intermediate_state(&self) -> bool { false }
     #[inline]
     fn has_class(&self, name: &Atom) -> bool {
         !name.is_empty() &&
