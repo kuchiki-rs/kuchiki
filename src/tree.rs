@@ -209,7 +209,7 @@ impl NodeRef {
     pub fn new_element<I>(name: QualName, attributes: I) -> NodeRef
                           where I: IntoIterator<Item=(QualName, String)> {
         NodeRef::new(NodeData::Element(ElementData {
-            template_contents: if name == qualname!(HTML, template) {
+            template_contents: if name == qualname!(html, "template") {
                 Some(NodeRef::new(NodeData::DocumentFragment))
             } else {
                 None

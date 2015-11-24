@@ -56,7 +56,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     #[inline] fn get_focus_state(&self) -> bool { false }
     #[inline]
     fn get_id(&self) -> Option<Atom> {
-        self.attributes.borrow().get(&QualName::new(ns!(""), atom!(id))).map(|s| Atom::from_slice(s))
+        self.attributes.borrow().get(&QualName::new(ns!(), atom!("id"))).map(|s| Atom::from(&**s))
     }
     #[inline] fn get_disabled_state(&self) -> bool { false }
     #[inline] fn get_enabled_state(&self) -> bool { false }
@@ -65,9 +65,9 @@ impl selectors::Element for NodeDataRef<ElementData> {
     #[inline]
     fn has_class(&self, name: &Atom) -> bool {
         !name.is_empty() &&
-        if let Some(class_attr) = self.attributes.borrow().get(&QualName::new(ns!(""), atom!(class))) {
+        if let Some(class_attr) = self.attributes.borrow().get(&QualName::new(ns!(), atom!("class"))) {
             class_attr.split(::selectors::matching::SELECTOR_WHITESPACE)
-            .any(|class| name.as_slice() == class )
+            .any(|class| &**name == class )
         } else {
             false
         }
@@ -75,17 +75,17 @@ impl selectors::Element for NodeDataRef<ElementData> {
     #[inline]
     fn is_link(&self) -> bool {
         self.name.ns == ns!(html) &&
-        matches!(self.name.local, atom!(a) | atom!(area) | atom!(link)) &&
-        self.attributes.borrow().contains_key(&QualName::new(ns!(""), atom!(href)))
+        matches!(self.name.local, atom!("a") | atom!("area") | atom!("link")) &&
+        self.attributes.borrow().contains_key(&QualName::new(ns!(), atom!("href")))
     }
     #[inline] fn is_visited_link(&self) -> bool { false }
     #[inline] fn is_unvisited_link(&self) -> bool { self.is_link() }
     #[inline]
     fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {
-        if let Some(class_attr) = self.attributes.borrow().get(&QualName::new(ns!(""), atom!(class))) {
+        if let Some(class_attr) = self.attributes.borrow().get(&QualName::new(ns!(), atom!("class"))) {
             for class in class_attr.split(::selectors::matching::SELECTOR_WHITESPACE) {
                 if !class.is_empty() {
-                    callback(&Atom::from_slice(class))
+                    callback(&Atom::from(class))
                 }
             }
         }

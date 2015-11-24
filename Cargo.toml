@@ -1,6 +1,6 @@
 [package]
 name = "kuchiki"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Simon Sapin <simon.sapin@exyr.org>"]
 license = "MIT"
 description = "(朽木) HTML/XML tree manipulation library"
@@ -13,7 +13,6 @@ doctest = false
 [features]
 unstable = [
     "string_cache/unstable",
-    "string_cache_plugin",
     "tendril/unstable",
     "rc/unstable",
     "html5ever/unstable",
@@ -22,9 +21,8 @@ unstable = [
 
 [dependencies]
 matches = "0.1.2"
-html5ever = "0.2.1"
-string_cache = "0.1"
-string_cache_plugin = { version = "0.1", optional = true }
+html5ever = "0.2.11"
+string_cache = "0.2"
 tendril = "0.1.1"
 selectors = "0.2.0"
 rc = "0.1.0"
