@@ -5,6 +5,7 @@ use std::option;
 use std::path::Path;
 use html5ever::{self, Attribute};
 use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
+#[cfg(feature = "with-hyper")] use hyper::client::IntoUrl;
 use string_cache::QualName;
 use tendril::{StrTendril, ReadExt, Tendril};
 
@@ -30,6 +31,13 @@ impl Html  {
     #[inline]
     pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Html, Error> {
         Html::from_stream(&mut try!(File::open(&path)))
+    }
+
+    /// Fetch an HTTP or HTTPS URL with Hyper and parse.
+    #[cfg(feature = "with-hyper")]
+    pub fn from_http<U: IntoUrl>(url: U) -> Result<Html, ::hyper::Error> {
+        let mut response = try!(::hyper::Client::new().get(url).send());
+        Ok(try!(Html::from_stream(&mut response)))
     }
 
     /// Parse from reading a stream of bytes.
