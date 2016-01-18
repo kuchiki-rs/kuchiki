@@ -106,7 +106,7 @@ impl<T> MoveCell<T> where T: WellBehavedClone {
     ```
 
 */
-unsafe trait WellBehavedClone: Clone {}
+pub unsafe trait WellBehavedClone: Clone {}
 unsafe impl<T> WellBehavedClone for Rc<T> {}
 unsafe impl<T> WellBehavedClone for Weak<T> {}
 unsafe impl<T> WellBehavedClone for Option<T> where T: WellBehavedClone {}
