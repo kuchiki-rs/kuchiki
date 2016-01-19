@@ -177,20 +177,10 @@ impl TreeSink for Parser {
 
     #[inline]
     fn add_attrs_if_missing(&mut self, target: NodeRef, attrs: Vec<Attribute>) {
-        // FIXME: https://github.com/servo/html5ever/issues/121
-        if let Some(element) = target.as_element() {
-            let mut attributes = element.attributes.borrow_mut();
-            for Attribute { name, value } in attrs {
-                use std::collections::hash_map::Entry;
-                match attributes.map.entry(name) {
-                    Entry::Vacant(entry) => {
-                        entry.insert(value.into());
-                    }
-                    Entry::Occupied(mut entry) => {
-                        *entry.get_mut() = value.into();
-                    }
-                }
-            }
+        let element = target.as_element().unwrap();
+        let mut attributes = element.attributes.borrow_mut();
+        for Attribute { name, value } in attrs {
+            attributes.map.entry(name).or_insert_with(|| value.into());
         }
     }
 
