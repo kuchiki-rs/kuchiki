@@ -182,7 +182,7 @@ impl TreeSink for Parser {
             let mut attributes = element.attributes.borrow_mut();
             for Attribute { name, value } in attrs {
                 use std::collections::hash_map::Entry;
-                match attributes.entry(name) {
+                match attributes.map.entry(name) {
                     Entry::Vacant(entry) => {
                         entry.insert(value.into());
                     }

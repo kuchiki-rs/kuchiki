@@ -89,6 +89,8 @@ fn select() {
     assert_eq!(matching.len(), 2);
     let child = matching[0].as_node().first_child().unwrap();
     assert_eq!(&**child.as_text().unwrap().borrow(), "Foo\n");
+    assert_eq!(matching[0].attributes.borrow().get("class"), Some("foo"));
+    assert_eq!(matching[0].attributes.borrow().get(atom!("class")), Some("foo"));
 }
 
 #[test]

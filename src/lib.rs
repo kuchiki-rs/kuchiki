@@ -16,6 +16,7 @@ extern crate rc;
 #[cfg(test)] extern crate tempdir;
 extern crate tendril;
 
+mod attributes;
 pub mod iter;
 mod move_cell;
 mod node_data_ref;
@@ -25,6 +26,7 @@ mod serializer;
 #[cfg(test)] mod tests;
 mod tree;
 
+pub use attributes::Attributes;
 pub use iter::{NodeIterator, ElementIterator};
 pub use node_data_ref::NodeDataRef;
 pub use parser::{Html, ParseOpts};

@@ -1,12 +1,12 @@
 use move_cell::MoveCell;
 use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
 use std::fmt;
 use std::ops::Deref;
 use html5ever::tree_builder::QuirksMode;
 use rc::{Rc, Weak};
 use string_cache::QualName;
 
+use attributes::Attributes;
 use iter::NodeIterator;
 
 
@@ -52,7 +52,7 @@ pub struct ElementData {
     pub name: QualName,
 
     /// The attributes of the elements.
-    pub attributes: RefCell<HashMap<QualName, String>>,
+    pub attributes: RefCell<Attributes>,
 
     /// If the element is an HTML `<template>` element,
     /// the document fragment node that is the root of template contents.
@@ -215,7 +215,9 @@ impl NodeRef {
                 None
             },
             name: name,
-            attributes: RefCell::new(attributes.into_iter().collect()),
+            attributes: RefCell::new(Attributes {
+                map: attributes.into_iter().collect()
+            }),
         }))
     }
 

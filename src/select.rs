@@ -1,6 +1,6 @@
 use selectors::{self, parser, matching};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
-use string_cache::{Atom, Namespace, QualName};
+use string_cache::{Atom, Namespace};
 
 use tree::{NodeRef, NodeData, ElementData};
 use iter::{NodeIterator, Select};
@@ -56,7 +56,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     #[inline] fn get_focus_state(&self) -> bool { false }
     #[inline]
     fn get_id(&self) -> Option<Atom> {
-        self.attributes.borrow().get(&QualName::new(ns!(), atom!("id"))).map(|s| Atom::from(&**s))
+        self.attributes.borrow().get(atom!("id")).map(Atom::from)
     }
     #[inline] fn get_disabled_state(&self) -> bool { false }
     #[inline] fn get_enabled_state(&self) -> bool { false }
@@ -65,7 +65,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     #[inline]
     fn has_class(&self, name: &Atom) -> bool {
         !name.is_empty() &&
-        if let Some(class_attr) = self.attributes.borrow().get(&QualName::new(ns!(), atom!("class"))) {
+        if let Some(class_attr) = self.attributes.borrow().get(atom!("class")) {
             class_attr.split(::selectors::matching::SELECTOR_WHITESPACE)
             .any(|class| &**name == class )
         } else {
@@ -76,13 +76,13 @@ impl selectors::Element for NodeDataRef<ElementData> {
     fn is_link(&self) -> bool {
         self.name.ns == ns!(html) &&
         matches!(self.name.local, atom!("a") | atom!("area") | atom!("link")) &&
-        self.attributes.borrow().contains_key(&QualName::new(ns!(), atom!("href")))
+        self.attributes.borrow().contains(atom!("href"))
     }
     #[inline] fn is_visited_link(&self) -> bool { false }
     #[inline] fn is_unvisited_link(&self) -> bool { self.is_link() }
     #[inline]
     fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {
-        if let Some(class_attr) = self.attributes.borrow().get(&QualName::new(ns!(), atom!("class"))) {
+        if let Some(class_attr) = self.attributes.borrow().get(atom!("class")) {
             for class in class_attr.split(::selectors::matching::SELECTOR_WHITESPACE) {
                 if !class.is_empty() {
                     callback(&Atom::from(class))
@@ -97,7 +97,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
         } else {
             &attr.name
         };
-        self.attributes.borrow().iter().any(|(key, value)| {
+        self.attributes.borrow().map.iter().any(|(key, value)| {
             !matches!(attr.namespace, NamespaceConstraint::Specific(ref ns) if *ns != key.ns) &&
             key.local == *name &&
             test(value)

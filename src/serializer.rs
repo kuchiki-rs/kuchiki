@@ -16,7 +16,7 @@ impl Serializable for NodeRef {
                 if traversal_scope == IncludeNode {
                     try!(serializer.start_elem(
                         element.name.clone(),
-                        element.attributes.borrow().iter().map(|(name, value)| (name, &**value))));
+                        element.attributes.borrow().map.iter().map(|(name, value)| (name, &**value))));
                 }
 
                 for child in self.children() {
