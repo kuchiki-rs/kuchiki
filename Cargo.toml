@@ -13,22 +13,19 @@ doctest = false
 [features]
 unstable = [
     "string_cache/unstable",
-    "tendril/unstable",
     "rc/unstable",
     "html5ever/unstable",
     "selectors/unstable",
 ]
-with-hyper = ["hyper"]
+with-hyper = ["html5ever/hyper"]
 
 [dependencies]
 matches = "0.1.2"
-html5ever = "0.2.11"
+html5ever = "0.3"
 string_cache = "0.2"
-tendril = "0.1.1"
 selectors = "0.2.0"
 rc = "0.1.0"
-hyper = {version = "0.7", optional = true}
 
 [dev-dependencies]
 tempdir = "0.3"
-hyper = "0.7"
+html5ever = {version = ">=0", features = ["hyper"]}

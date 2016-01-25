@@ -3,8 +3,8 @@ use std::path::Path;
 
 use tempdir::TempDir;
 
-use Html;
-use iter::NodeIterator;
+use parser::parse_html;
+use traits::*;
 
 #[test]
 fn text_nodes() {
@@ -12,7 +12,7 @@ fn text_nodes() {
 <!doctype html>
 <title>Test case</title>
 <p>Content contains <b>Important</b> data</p>";
-    let document = Html::from_string(html).parse();
+    let document = parse_html().one(html);
     let paragraph = document.select("p").unwrap().collect::<Vec<_>>();
     assert_eq!(paragraph.len(), 1);
     assert_eq!(paragraph[0].text_contents(), "Content contains Important data");
@@ -35,7 +35,7 @@ fn parse_and_serialize() {
 <!doctype html>
 <title>Test case</title>
 <p>Content";
-    let document = Html::from_string(html).parse();
+    let document = parse_html().one(html);
     assert_eq!(document.as_document().unwrap().quirks_mode(), QuirksMode::NoQuirks);
     assert_eq!(document.to_string(), r"<!DOCTYPE html>
 <html><head><title>Test case</title>
@@ -57,7 +57,7 @@ fn parse_file() {
     
 
 </body></html>";
-    let document = Html::from_file(&path).unwrap().parse();
+    let document = parse_html().from_utf8().from_file(&path).unwrap();
     assert_eq!(document.to_string(), html);
 }
 
@@ -68,10 +68,10 @@ fn serialize_and_read_file() {
     path.push("temp.html");
 
     let html = r"<!DOCTYPE html><html><head><title>Title</title></head><body>Body</body></html>";
-    let document = Html::from_string(html).parse();
+    let document = parse_html().one(html);
     let _ = document.serialize_to_file(path.clone());
 
-    let document2 = Html::from_file(&path).unwrap().parse();
+    let document2 = parse_html().from_utf8().from_file(&path).unwrap();
     assert_eq!(document.to_string(), document2.to_string());
 }
 
@@ -84,7 +84,7 @@ fn select() {
 <p class=foo>Foo
 ";
 
-    let document = Html::from_string(html).parse();
+    let document = parse_html().one(html);
     let matching = document.select("p.foo").unwrap().collect::<Vec<_>>();
     assert_eq!(matching.len(), 2);
     let child = matching[0].as_node().first_child().unwrap();
@@ -105,6 +105,6 @@ fn to_string() {
     </body>
 </html>";
 
-    let document = Html::from_string(html).parse();
+    let document = parse_html().one(html);
     assert_eq!(document.inclusive_descendants().nth(11).unwrap().to_string(), "<p class=\"foo\">Foo\n    \n</p>");
 }
