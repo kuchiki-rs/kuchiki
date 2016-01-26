@@ -1,23 +1,22 @@
-extern crate hyper;
 extern crate kuchiki;
 
-use hyper::Client;
-
-use kuchiki::Html;
-
+#[cfg(not(feature = "hyper"))]
 fn main() {
-    // Create a client.
-    let client = Client::new();
+    // Intentionally trigger an unused_import warning,
+    // with a message on the same line that will be visible in compiler output:
+    use kuchiki::traits::*;  // This file requires the `hyper` feature to be enabled
+}
+
+#[cfg(feature = "hyper")]
+fn main() {
+    use kuchiki::traits::*;
+
     let url = "https://www.mozilla.org/en-US/";
     println!("{} - {} ", "Calling site ", url);
 
-    // Get response
-    let mut response = client.get(url).send().unwrap();
-
-    // Parse the html page
-    if let Ok(html) = Html::from_stream(&mut response) {
+    // Fetch and parse the html page
+    if let Ok(doc) = kuchiki::parse_html().from_http(url) {
         println!("{}", "Finding Easter egg");
-        let doc = html.parse();
 
         // Manually navigate to hidden comment
         let x = doc.children().nth(1).unwrap()
@@ -29,6 +28,6 @@ fn main() {
 
         println!("{}", *comment);
     } else {
-        println!("{}", "The page couldn't be parsed");
+        println!("{}", "The page couldn't be fetched");
     }
 }

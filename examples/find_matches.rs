@@ -1,5 +1,7 @@
 extern crate kuchiki;
 
+use kuchiki::traits::*;
+
 fn main() {
     let html = r"
         <DOCTYPE html>
@@ -14,7 +16,7 @@ fn main() {
     ";
     let css_selector = ".foo";
 
-    let document = kuchiki::Html::from_string(html).parse();
+    let document = kuchiki::parse_html().one(html);
 
     for css_match in document.select(css_selector).unwrap() {
         // css_match is a NodeDataRef, but most of the interesting methods are

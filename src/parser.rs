@@ -1,75 +1,11 @@
 use std::borrow::Cow;
-use std::fs::File;
-use std::io::{Error, ErrorKind, Read};
-use std::option;
-use std::path::Path;
 use html5ever::{self, Attribute};
+use html5ever::tendril::StrTendril;
 use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
-#[cfg(feature = "with-hyper")] use hyper::client::IntoUrl;
+#[cfg(feature = "hyper")] use hyper::client::IntoUrl;
 use string_cache::QualName;
-use tendril::{StrTendril, ReadExt, Tendril};
 
 use tree::NodeRef;
-
-/// The HTML parser.
-pub struct Html {
-    opts: ParseOpts,
-    data: option::IntoIter<StrTendril>,
-}
-
-impl Html  {
-    /// Parse from a single string in memory.
-    #[inline]
-    pub fn from_string<S: Into<StrTendril>>(string: S) -> Html {
-        Html {
-            opts: ParseOpts::default(),
-            data: Some(string.into()).into_iter(),
-        }
-    }
-
-    /// Parse from reading a file.
-    #[inline]
-    pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Html, Error> {
-        Html::from_stream(&mut try!(File::open(&path)))
-    }
-
-    /// Fetch an HTTP or HTTPS URL with Hyper and parse.
-    #[cfg(feature = "with-hyper")]
-    pub fn from_http<U: IntoUrl>(url: U) -> Result<Html, ::hyper::Error> {
-        let mut response = try!(::hyper::Client::new().get(url).send());
-        Ok(try!(Html::from_stream(&mut response)))
-    }
-
-    /// Parse from reading a stream of bytes.
-    #[inline]
-    pub fn from_stream<S: Read>(stream: &mut S) -> Result<Html, Error> {
-        let mut buf = Tendril::new();
-        try!(stream.read_to_tendril(&mut buf));
-        Ok(Html {
-            opts: ParseOpts::default(),
-            // FIXME: Make UTF-8 decoding lossy, but try to minimize copying.
-            data: Some(try!(buf.try_reinterpret().map_err(|_| {
-                Error::new(ErrorKind::Other, "Invalid UTF-8.")
-            }))).into_iter(),
-        })
-    }
-
-    /// Run the parser and return a reference to the document node, the root of the tree.
-    #[inline]
-    pub fn parse(self) -> NodeRef {
-        let parser = Parser {
-            document_node: NodeRef::new_document(),
-            on_parse_error: self.opts.on_parse_error,
-        };
-        let html5opts = html5ever::ParseOpts {
-            tokenizer: self.opts.tokenizer,
-            tree_builder: self.opts.tree_builder,
-        };
-        let parser = html5ever::parse_to(parser, self.data, html5opts);
-        parser.document_node
-    }
-
-}
 
 /// Options for the HTML parser.
 #[derive(Default)]
@@ -84,14 +20,64 @@ pub struct ParseOpts {
     pub on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
 }
 
+/// Parse an HTML document with html5ever and the default configuration.
+pub fn parse_html() -> html5ever::Parser<Sink> {
+    parse_html_with_options(ParseOpts::default())
+}
 
-struct Parser {
+/// Parse an HTML document with html5ever.
+pub fn parse_html_with_options(opts: ParseOpts) -> html5ever::Parser<Sink> {
+    let sink = Sink {
+        document_node: NodeRef::new_document(),
+        on_parse_error: opts.on_parse_error,
+    };
+    let html5opts = html5ever::ParseOpts {
+        tokenizer: opts.tokenizer,
+        tree_builder: opts.tree_builder,
+    };
+    html5ever::parse_document(sink, html5opts)
+}
+
+/// Additional methods for html5ever::Parser
+pub trait ParserExt {
+    /// Fetch an HTTP or HTTPS URL with Hyper and parse,
+    /// giving the `charset` parameter of a `Content-Type` response header, if any,
+    /// as a character encoding hint to html5ever.
+    #[cfg(feature = "hyper")]
+    fn from_http<U: IntoUrl>(self, url: U) -> Result<NodeRef, ::hyper::Error>;
+}
+
+impl ParserExt for html5ever::Parser<Sink> {
+    #[cfg(feature = "hyper")]
+    fn from_http<U: IntoUrl>(self, url: U) -> Result<NodeRef, ::hyper::Error> {
+        use html5ever::encoding::label::encoding_from_whatwg_label;
+        use html5ever::tendril::TendrilSink;
+        use hyper::Client;
+        use hyper::header::ContentType;
+        use hyper::mime::Attr::Charset;
+        use html5ever::driver::BytesOpts;
+
+        let mut response = try!(Client::new().get(url).send());
+        let opts = BytesOpts {
+            transport_layer_encoding: response.headers.get::<ContentType>()
+                .and_then(|content_type| content_type.get_param(Charset))
+                .and_then(|charset| encoding_from_whatwg_label(charset))
+        };
+        Ok(try!(self.from_bytes(opts).read_from(&mut response)))
+    }
+}
+
+
+pub struct Sink {
     document_node: NodeRef,
     on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
 }
 
+impl TreeSink for Sink {
+    type Output = NodeRef;
 
-impl TreeSink for Parser {
+    fn finish(self) -> NodeRef { self.document_node }
+
     type Handle = NodeRef;
 
     #[inline]
