@@ -1,6 +1,6 @@
 [package]
 name = "kuchiki"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Simon Sapin <simon.sapin@exyr.org>"]
 license = "MIT"
 description = "(朽木) HTML/XML tree manipulation library"
@@ -17,15 +17,14 @@ unstable = [
     "html5ever/unstable",
     "selectors/unstable",
 ]
-with-hyper = ["html5ever/hyper"]
 
 [dependencies]
 matches = "0.1.2"
-html5ever = "0.3"
+html5ever = "0.4"
+hyper = {version = "0.7", optional = true}
 string_cache = "0.2"
 selectors = "0.2.0"
 rc = "0.1.0"
 
 [dev-dependencies]
 tempdir = "0.3"
-html5ever = {version = ">=0", features = ["hyper"]}

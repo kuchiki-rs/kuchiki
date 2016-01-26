@@ -2,6 +2,7 @@ use std::borrow::Cow;
 use html5ever::{self, Attribute};
 use html5ever::tendril::StrTendril;
 use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
+#[cfg(feature = "hyper")] use hyper::client::IntoUrl;
 use string_cache::QualName;
 
 use tree::NodeRef;
@@ -36,6 +37,36 @@ pub fn parse_html_with_options(opts: ParseOpts) -> html5ever::Parser<Sink> {
     };
     html5ever::parse_document(sink, html5opts)
 }
+
+/// Additional methods for html5ever::Parser
+pub trait ParserExt {
+    /// Fetch an HTTP or HTTPS URL with Hyper and parse,
+    /// giving the `charset` parameter of a `Content-Type` response header, if any,
+    /// as a character encoding hint to html5ever.
+    #[cfg(feature = "hyper")]
+    fn from_http<U: IntoUrl>(self, url: U) -> Result<NodeRef, ::hyper::Error>;
+}
+
+impl ParserExt for html5ever::Parser<Sink> {
+    #[cfg(feature = "hyper")]
+    fn from_http<U: IntoUrl>(self, url: U) -> Result<NodeRef, ::hyper::Error> {
+        use html5ever::encoding::label::encoding_from_whatwg_label;
+        use html5ever::tendril::TendrilSink;
+        use hyper::Client;
+        use hyper::header::ContentType;
+        use hyper::mime::Attr::Charset;
+        use html5ever::driver::BytesOpts;
+
+        let mut response = try!(Client::new().get(url).send());
+        let opts = BytesOpts {
+            transport_layer_encoding: response.headers.get::<ContentType>()
+                .and_then(|content_type| content_type.get_param(Charset))
+                .and_then(|charset| encoding_from_whatwg_label(charset))
+        };
+        Ok(try!(self.from_bytes(opts).read_from(&mut response)))
+    }
+}
+
 
 pub struct Sink {
     document_node: NodeRef,
