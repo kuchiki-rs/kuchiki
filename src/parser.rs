@@ -43,6 +43,16 @@ pub trait ParserExt {
     /// Fetch an HTTP or HTTPS URL with Hyper and parse,
     /// giving the `charset` parameter of a `Content-Type` response header, if any,
     /// as a character encoding hint to html5ever.
+    ///
+    /// This feature (and the dependency on Hyper) is optional and not enabled by default.
+    /// To enable it, your `Cargo.toml` file should look like:
+    ///
+    /// ```toml
+    /// [dependencies]
+    /// kuchiki = {version = "...", features = ["hyper"]}
+    /// ```
+    ///
+    /// See [Cargo features](http://doc.crates.io/manifest.html#the-features-section).
     #[cfg(feature = "hyper")]
     fn from_http<U: IntoUrl>(self, url: U) -> Result<NodeRef, ::hyper::Error>;
 }

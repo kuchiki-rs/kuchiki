@@ -8,7 +8,7 @@ script:
   - ([ $TRAVIS_RUST_VERSION != nightly ] || cargo test --features unstable)
   - cargo test
   - cargo test --features hyper
-  - cargo doc
+  - cargo doc --features hyper
 after_success: |
   [ $TRAVIS_RUST_VERSION = nightly ] &&
   [ $TRAVIS_BRANCH = master ] &&
