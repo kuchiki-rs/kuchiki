@@ -1,13 +1,57 @@
-use selectors::{self, parser, matching};
-use selectors::parser::{AttrSelector, NamespaceConstraint, Selector};
-use string_cache::{Atom, Namespace};
-
-use tree::{NodeRef, NodeData, ElementData};
 use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
+use selectors::{self, parser, matching};
+use selectors::parser::{AttrSelector, NamespaceConstraint, Selector, SelectorImpl, ParserContext};
+use std::ascii::AsciiExt;
+use string_cache::{Atom, Namespace};
+use tree::{NodeRef, NodeData, ElementData};
 
+pub struct KuchikiSelectors;
+
+impl SelectorImpl for KuchikiSelectors {
+    type NonTSPseudoClass = PseudoClass;
+    type PseudoElement = PseudoElement;
+
+    fn parse_non_ts_pseudo_class(_context: &ParserContext, name: &str) -> Result<PseudoClass, ()> {
+        use self::PseudoClass::*;
+             if name.eq_ignore_ascii_case("any-link") { Ok(AnyLink) }
+        else if name.eq_ignore_ascii_case("link") { Ok(Link) }
+        else if name.eq_ignore_ascii_case("visited") { Ok(Visited) }
+        else if name.eq_ignore_ascii_case("active") { Ok(Active) }
+        else if name.eq_ignore_ascii_case("focus") { Ok(Focus) }
+        else if name.eq_ignore_ascii_case("hover") { Ok(Hover) }
+        else if name.eq_ignore_ascii_case("enabled") { Ok(Enabled) }
+        else if name.eq_ignore_ascii_case("disabled") { Ok(Disabled) }
+        else if name.eq_ignore_ascii_case("checked") { Ok(Checked) }
+        else if name.eq_ignore_ascii_case("indeterminate") { Ok(Indeterminate) }
+        else { Err(()) }
+    }
+
+    fn parse_pseudo_element(_context: &ParserContext, _name: &str) -> Result<PseudoElement, ()> {
+        Err(())
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub enum PseudoClass {
+    AnyLink,
+    Link,
+    Visited,
+    Active,
+    Focus,
+    Hover,
+    Enabled,
+    Disabled,
+    Checked,
+    Indeterminate,
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Hash)]
+pub enum PseudoElement {}
 
 impl selectors::Element for NodeDataRef<ElementData> {
+    type Impl = KuchikiSelectors;
+
     #[inline]
     fn parent_element(&self) -> Option<Self> {
         self.as_node().parent().and_then(NodeRef::into_element_ref)
@@ -51,17 +95,10 @@ impl selectors::Element for NodeDataRef<ElementData> {
     }
     #[inline] fn get_local_name<'a>(&'a self) -> &'a Atom { &self.name.local }
     #[inline] fn get_namespace<'a>(&'a self) -> &'a Namespace { &self.name.ns }
-    #[inline] fn get_active_state(&self) -> bool { false }
-    #[inline] fn get_hover_state(&self) -> bool { false }
-    #[inline] fn get_focus_state(&self) -> bool { false }
     #[inline]
     fn get_id(&self) -> Option<Atom> {
         self.attributes.borrow().get(atom!("id")).map(Atom::from)
     }
-    #[inline] fn get_disabled_state(&self) -> bool { false }
-    #[inline] fn get_enabled_state(&self) -> bool { false }
-    #[inline] fn get_checked_state(&self) -> bool { false }
-    #[inline] fn get_intermediate_state(&self) -> bool { false }
     #[inline]
     fn has_class(&self, name: &Atom) -> bool {
         !name.is_empty() &&
@@ -72,14 +109,6 @@ impl selectors::Element for NodeDataRef<ElementData> {
             false
         }
     }
-    #[inline]
-    fn is_link(&self) -> bool {
-        self.name.ns == ns!(html) &&
-        matches!(self.name.local, atom!("a") | atom!("area") | atom!("link")) &&
-        self.attributes.borrow().contains(atom!("href"))
-    }
-    #[inline] fn is_visited_link(&self) -> bool { false }
-    #[inline] fn is_unvisited_link(&self) -> bool { self.is_link() }
     #[inline]
     fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {
         if let Some(class_attr) = self.attributes.borrow().get(atom!("class")) {
@@ -103,11 +132,22 @@ impl selectors::Element for NodeDataRef<ElementData> {
             test(value)
         })
     }
+
+    fn match_non_ts_pseudo_class(&self, pseudo: PseudoClass) -> bool {
+        use self::PseudoClass::*;
+        match pseudo {
+            Active | Focus | Hover | Enabled | Disabled | Checked | Indeterminate | Visited => false,
+            AnyLink | Link => {
+                self.name.ns == ns!(html) &&
+                matches!(self.name.local, atom!("a") | atom!("area") | atom!("link")) &&
+                self.attributes.borrow().contains(atom!("href"))
+            }
+        }
+    }
 }
 
-
 /// A pre-compiled list of CSS Selectors.
-pub struct Selectors(Vec<Selector>);
+pub struct Selectors(Vec<Selector<KuchikiSelectors>>);
 
 impl Selectors {
     /// Compile a list of selectors. This may fail on syntax errors or unsupported selectors.
