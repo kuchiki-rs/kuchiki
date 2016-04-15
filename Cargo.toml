@@ -20,7 +20,7 @@ unstable = [
 
 [dependencies]
 matches = "0.1.2"
-html5ever = ">= 0.4, <0.6"
+html5ever = "0.5.4"
 hyper = {version = ">=0.7, <0.9", optional = true}
 string_cache = "0.2"
 selectors = "0.5"

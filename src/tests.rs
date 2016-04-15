@@ -37,8 +37,7 @@ fn parse_and_serialize() {
 <p>Content";
     let document = parse_html().one(html);
     assert_eq!(document.as_document().unwrap().quirks_mode(), QuirksMode::NoQuirks);
-    assert_eq!(document.to_string(), r"<!DOCTYPE html>
-<html><head><title>Test case</title>
+    assert_eq!(document.to_string(), r"<!DOCTYPE html><html><head><title>Test case</title>
 </head><body><p>Content</p></body></html>");
 }
 
@@ -48,8 +47,7 @@ fn parse_file() {
     path.push("test_data".to_string());
     path.push("foo.html");
 
-    let html = r"<!DOCTYPE html>
-<html><head>
+    let html = r"<!DOCTYPE html><html><head>
         <title>Test case</title>
     </head>
     <body>
