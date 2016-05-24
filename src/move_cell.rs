@@ -12,12 +12,27 @@ impl<T> MoveCell<T> {
         MoveCell(UnsafeCell::new(x))
     }
 
-    #[inline]
-    pub fn set(&self, x: T) {
-        unsafe {
-            *self.0.get() = x;
-        }
-    }
+    // Note: this is unsound:
+    //
+    //    #[inline]
+    //    pub fn set(&self, x: T) {
+    //        unsafe {
+    //            *self.0.get() = x;
+    //        }
+    //    }
+    //
+    // Example:
+    //
+    //    struct Evil(Box<u32>, Rc<MoveCell<Option<Evil>>>);
+    //    impl Drop for Evil {
+    //        fn drop(&mut self) {
+    //            mem::drop(self.1.take());  // Mess with the "other" node, which might be `self`.
+    //            self.0.clone();  // use after free!
+    //        }
+    //    }
+    //    let a = Rc::new(MoveCell::new(None));
+    //    a.replace(Some(Evil(Box::new(5), a.clone())));  // Make a reference cycle.
+    //    a.set(None);  // Trigger Evil::drop while in the cell
 
     #[inline]
     pub fn replace(&self, x: T) -> T {
@@ -88,7 +103,7 @@ impl<T> MoveCell<T> where T: WellBehavedClone {
     Incorrect example:
 
     ```rust
-    struct Evil(Box<u32>, Rc<MoveCell<Option<<Evil>>>);
+    struct Evil(Box<u32>, Rc<MoveCell<Option<Evil>>>);
     impl Clone for Evil {
         fn clone(&self) -> Self {
             mem::drop(self.1.take());  // Mess with the "other" node, which might be `self`.
