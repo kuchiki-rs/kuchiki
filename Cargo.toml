@@ -21,7 +21,7 @@ unstable = [
 [dependencies]
 matches = "0.1.2"
 html5ever = "0.5.4"
-hyper = {version = ">=0.7, <0.9", optional = true}
+hyper = {version = ">=0.7, <0.10", optional = true}
 string_cache = "0.2"
 selectors = "0.5"
 rc = "0.1.0"
