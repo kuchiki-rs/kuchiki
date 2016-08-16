@@ -15,9 +15,16 @@ static SELECTOR_WHITESPACE: &'static [char] = &[' ', '\t', '\n', '\r', '\x0C'];
 pub struct KuchikiSelectors;
 
 impl SelectorImpl for KuchikiSelectors {
-    type NonTSPseudoClass = PseudoClass;
-    type PseudoElement = PseudoElement;
+    type AttrValue = String;
+    type Identifier = String;
+    type ClassName = String;
+    type LocalName = Atom;
+    type NamespaceUrl = Namespace;
+    type NamespacePrefix = String;
+    type BorrowedNamespaceUrl = Namespace;
+    type BorrowedLocalName = Atom;
 
+    type NonTSPseudoClass = PseudoClass;
     fn parse_non_ts_pseudo_class(_context: &ParserContext<Self>, name: &str) -> Result<PseudoClass, ()> {
         use self::PseudoClass::*;
              if name.eq_ignore_ascii_case("any-link") { Ok(AnyLink) }
@@ -33,6 +40,7 @@ impl SelectorImpl for KuchikiSelectors {
         else { Err(()) }
     }
 
+    type PseudoElement = PseudoElement;
     fn parse_pseudo_element(_context: &ParserContext<Self>, _name: &str) -> Result<PseudoElement, ()> {
         Err(())
     }
