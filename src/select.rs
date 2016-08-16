@@ -1,18 +1,30 @@
 use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
-use selectors::{self, parser, matching};
+use selectors::{self, parser, matching, Element};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector, SelectorImpl, ParserContext};
 use std::ascii::AsciiExt;
 use string_cache::{Atom, Namespace};
 use tree::{NodeRef, NodeData, ElementData};
 
+/// The definition of whitespace per CSS Selectors Level 3 § 4.
+///
+/// Copied from rust-selectors.
+static SELECTOR_WHITESPACE: &'static [char] = &[' ', '\t', '\n', '\r', '\x0C'];
+
+#[derive(Debug)]
 pub struct KuchikiSelectors;
 
 impl SelectorImpl for KuchikiSelectors {
-    type NonTSPseudoClass = PseudoClass;
-    type PseudoElement = PseudoElement;
+    type AttrValue = String;
+    type Identifier = Atom;
+    type ClassName = Atom;
+    type LocalName = Atom;
+    type Namespace = Namespace;
+    type BorrowedNamespace = Namespace;
+    type BorrowedLocalName = Atom;
 
-    fn parse_non_ts_pseudo_class(_context: &ParserContext, name: &str) -> Result<PseudoClass, ()> {
+    type NonTSPseudoClass = PseudoClass;
+    fn parse_non_ts_pseudo_class(_context: &ParserContext<Self>, name: &str) -> Result<PseudoClass, ()> {
         use self::PseudoClass::*;
              if name.eq_ignore_ascii_case("any-link") { Ok(AnyLink) }
         else if name.eq_ignore_ascii_case("link") { Ok(Link) }
@@ -27,7 +39,8 @@ impl SelectorImpl for KuchikiSelectors {
         else { Err(()) }
     }
 
-    fn parse_pseudo_element(_context: &ParserContext, _name: &str) -> Result<PseudoElement, ()> {
+    type PseudoElement = PseudoElement;
+    fn parse_pseudo_element(_context: &ParserContext<Self>, _name: &str) -> Result<PseudoElement, ()> {
         Err(())
     }
 }
@@ -50,8 +63,6 @@ pub enum PseudoClass {
 pub enum PseudoElement {}
 
 impl selectors::Element for NodeDataRef<ElementData> {
-    type Impl = KuchikiSelectors;
-
     #[inline]
     fn parent_element(&self) -> Option<Self> {
         self.as_node().parent().and_then(NodeRef::into_element_ref)
@@ -103,7 +114,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     fn has_class(&self, name: &Atom) -> bool {
         !name.is_empty() &&
         if let Some(class_attr) = self.attributes.borrow().get(atom!("class")) {
-            class_attr.split(::selectors::matching::SELECTOR_WHITESPACE)
+            class_attr.split(SELECTOR_WHITESPACE)
             .any(|class| &**name == class )
         } else {
             false
@@ -112,25 +123,12 @@ impl selectors::Element for NodeDataRef<ElementData> {
     #[inline]
     fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {
         if let Some(class_attr) = self.attributes.borrow().get(atom!("class")) {
-            for class in class_attr.split(::selectors::matching::SELECTOR_WHITESPACE) {
+            for class in class_attr.split(SELECTOR_WHITESPACE) {
                 if !class.is_empty() {
                     callback(&Atom::from(class))
                 }
             }
         }
-    }
-    #[inline]
-    fn match_attr<F>(&self, attr: &AttrSelector, test: F) -> bool where F: Fn(&str) -> bool {
-        let name = if self.is_html_element_in_html_document() {
-            &attr.lower_name
-        } else {
-            &attr.name
-        };
-        self.attributes.borrow().map.iter().any(|(key, value)| {
-            !matches!(attr.namespace, NamespaceConstraint::Specific(ref ns) if *ns != key.ns) &&
-            key.local == *name &&
-            test(value)
-        })
     }
 
     fn match_non_ts_pseudo_class(&self, pseudo: PseudoClass) -> bool {
@@ -145,6 +143,25 @@ impl selectors::Element for NodeDataRef<ElementData> {
         }
     }
 }
+
+impl selectors::MatchAttrGeneric for NodeDataRef<ElementData> {
+    type Impl = KuchikiSelectors;
+
+    #[inline]
+    fn match_attr<F>(&self, attr: &AttrSelector<Self::Impl>, test: F) -> bool where F: Fn(&str) -> bool {
+        let name = if self.is_html_element_in_html_document() {
+            &attr.lower_name
+        } else {
+            &attr.name
+        };
+        self.attributes.borrow().map.iter().any(|(key, value)| {
+            !matches!(attr.namespace, NamespaceConstraint::Specific(ref ns) if *ns != key.ns) &&
+            key.local == *name &&
+            test(value)
+        })
+    }
+}
+
 
 /// A pre-compiled list of CSS Selectors.
 pub struct Selectors(Vec<Selector<KuchikiSelectors>>);
