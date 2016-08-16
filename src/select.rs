@@ -16,8 +16,8 @@ pub struct KuchikiSelectors;
 
 impl SelectorImpl for KuchikiSelectors {
     type AttrValue = String;
-    type Identifier = String;
-    type ClassName = String;
+    type Identifier = Atom;
+    type ClassName = Atom;
     type LocalName = Atom;
     type NamespaceUrl = Namespace;
     type NamespacePrefix = String;
