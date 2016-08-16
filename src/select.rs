@@ -1,6 +1,6 @@
 use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
-use selectors::{self, parser, matching};
+use selectors::{self, parser, matching, Element};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector, SelectorImpl, ParserContext};
 use std::ascii::AsciiExt;
 use string_cache::{Atom, Namespace};
@@ -19,9 +19,8 @@ impl SelectorImpl for KuchikiSelectors {
     type Identifier = Atom;
     type ClassName = Atom;
     type LocalName = Atom;
-    type NamespaceUrl = Namespace;
-    type NamespacePrefix = String;
-    type BorrowedNamespaceUrl = Namespace;
+    type Namespace = Namespace;
+    type BorrowedNamespace = Namespace;
     type BorrowedLocalName = Atom;
 
     type NonTSPseudoClass = PseudoClass;
