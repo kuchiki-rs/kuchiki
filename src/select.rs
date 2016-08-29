@@ -1,8 +1,10 @@
+use cssparser::ToCss;
 use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
 use selectors::{self, parser, matching, Element};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector, SelectorImpl, ParserContext};
 use std::ascii::AsciiExt;
+use std::fmt;
 use string_cache::{Atom, Namespace};
 use tree::{NodeRef, NodeData, ElementData};
 
@@ -19,8 +21,9 @@ impl SelectorImpl for KuchikiSelectors {
     type Identifier = Atom;
     type ClassName = Atom;
     type LocalName = Atom;
-    type Namespace = Namespace;
-    type BorrowedNamespace = Namespace;
+    type NamespacePrefix = Atom;
+    type NamespaceUrl = Namespace;
+    type BorrowedNamespaceUrl = Namespace;
     type BorrowedLocalName = Atom;
 
     type NonTSPseudoClass = PseudoClass;
@@ -45,7 +48,7 @@ impl SelectorImpl for KuchikiSelectors {
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub enum PseudoClass {
     AnyLink,
     Link,
@@ -59,8 +62,32 @@ pub enum PseudoClass {
     Indeterminate,
 }
 
+impl ToCss for PseudoClass {
+    fn to_css<W>(&self, dest: &mut W) -> fmt::Result where W: fmt::Write {
+        dest.write_str(match *self {
+            PseudoClass::AnyLink => ":any-link",
+            PseudoClass::Link => ":link",
+            PseudoClass::Visited => ":visited",
+            PseudoClass::Active => ":active",
+            PseudoClass::Focus => ":focus",
+            PseudoClass::Hover => ":hover",
+            PseudoClass::Enabled => ":enabled",
+            PseudoClass::Disabled => ":disabled",
+            PseudoClass::Checked => ":checked",
+            PseudoClass::Indeterminate => ":indeterminate",
+        })
+    }
+}
+
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub enum PseudoElement {}
+
+impl ToCss for PseudoElement {
+    fn to_css<W>(&self, _dest: &mut W) -> fmt::Result where W: fmt::Write {
+        match *self {
+        }
+    }
+}
 
 impl selectors::Element for NodeDataRef<ElementData> {
     #[inline]
@@ -155,7 +182,7 @@ impl selectors::MatchAttrGeneric for NodeDataRef<ElementData> {
             &attr.name
         };
         self.attributes.borrow().map.iter().any(|(key, value)| {
-            !matches!(attr.namespace, NamespaceConstraint::Specific(ref ns) if *ns != key.ns) &&
+            !matches!(attr.namespace, NamespaceConstraint::Specific(ref ns) if ns.url != key.ns) &&
             key.local == *name &&
             test(value)
         })
