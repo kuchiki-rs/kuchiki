@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Element` trait in crate `selectors`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Element">
+
+    <title>selectors::Element - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>selectors</a></p><script>window.sidebarCurrent = {name: 'Element', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>selectors</a>::<wbr><a class='trait' href=''>Element</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1996' class='srclink' href='../src/selectors/tree.rs.html#124-172' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait Element: <a class='trait' href='../selectors/trait.MatchAttr.html' title='selectors::MatchAttr'>MatchAttr</a> + <a class='trait' href='https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html' title='core::marker::Sized'>Sized</a> {
+    fn <a href='#tymethod.parent_element' class='fnname'>parent_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;;
+    fn <a href='#tymethod.first_child_element' class='fnname'>first_child_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;;
+    fn <a href='#tymethod.last_child_element' class='fnname'>last_child_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;;
+    fn <a href='#tymethod.prev_sibling_element' class='fnname'>prev_sibling_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;;
+    fn <a href='#tymethod.next_sibling_element' class='fnname'>next_sibling_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;;
+    fn <a href='#tymethod.is_html_element_in_html_document' class='fnname'>is_html_element_in_html_document</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.get_local_name' class='fnname'>get_local_name</a>(&amp;self) -&gt; &amp;Self::Impl::BorrowedLocalName;
+    fn <a href='#tymethod.get_namespace' class='fnname'>get_namespace</a>(&amp;self) -&gt; &amp;Self::Impl::BorrowedNamespaceUrl;
+    fn <a href='#tymethod.match_non_ts_pseudo_class' class='fnname'>match_non_ts_pseudo_class</a>(&amp;self, pc: Self::Impl::NonTSPseudoClass) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.get_id' class='fnname'>get_id</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self::Impl::Identifier&gt;;
+    fn <a href='#tymethod.has_class' class='fnname'>has_class</a>(&amp;self, name: &amp;Self::Impl::ClassName) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.is_root' class='fnname'>is_root</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.each_class' class='fnname'>each_class</a>&lt;F&gt;(&amp;self, callback: F) <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;Self::Impl::ClassName)</span>;
+
+    fn <a href='#method.insert_flags' class='fnname'>insert_flags</a>(&amp;self, _flags: <a class='struct' href='../selectors/matching/struct.ElementFlags.html' title='selectors::matching::ElementFlags'>ElementFlags</a>) { ... }
+}</pre>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.parent_element' class='method stab '><span id='parent_element.v' class='invisible'><code>fn <a href='#tymethod.parent_element' class='fnname'>parent_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></span></h3><h3 id='tymethod.first_child_element' class='method stab '><span id='first_child_element.v' class='invisible'><code>fn <a href='#tymethod.first_child_element' class='fnname'>first_child_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></span></h3><h3 id='tymethod.last_child_element' class='method stab '><span id='last_child_element.v' class='invisible'><code>fn <a href='#tymethod.last_child_element' class='fnname'>last_child_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></span></h3><h3 id='tymethod.prev_sibling_element' class='method stab '><span id='prev_sibling_element.v' class='invisible'><code>fn <a href='#tymethod.prev_sibling_element' class='fnname'>prev_sibling_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></span></h3><h3 id='tymethod.next_sibling_element' class='method stab '><span id='next_sibling_element.v' class='invisible'><code>fn <a href='#tymethod.next_sibling_element' class='fnname'>next_sibling_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self&gt;</code></span></h3><h3 id='tymethod.is_html_element_in_html_document' class='method stab '><span id='is_html_element_in_html_document.v' class='invisible'><code>fn <a href='#tymethod.is_html_element_in_html_document' class='fnname'>is_html_element_in_html_document</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.get_local_name' class='method stab '><span id='get_local_name.v' class='invisible'><code>fn <a href='#tymethod.get_local_name' class='fnname'>get_local_name</a>(&amp;self) -&gt; &amp;Self::Impl::BorrowedLocalName</code></span></h3><h3 id='tymethod.get_namespace' class='method stab '><span id='get_namespace.v' class='invisible'><code>fn <a href='#tymethod.get_namespace' class='fnname'>get_namespace</a>(&amp;self) -&gt; &amp;Self::Impl::BorrowedNamespaceUrl</code></span></h3><h3 id='tymethod.match_non_ts_pseudo_class' class='method stab '><span id='match_non_ts_pseudo_class.v' class='invisible'><code>fn <a href='#tymethod.match_non_ts_pseudo_class' class='fnname'>match_non_ts_pseudo_class</a>(&amp;self, pc: Self::Impl::NonTSPseudoClass) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.get_id' class='method stab '><span id='get_id.v' class='invisible'><code>fn <a href='#tymethod.get_id' class='fnname'>get_id</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Self::Impl::Identifier&gt;</code></span></h3><h3 id='tymethod.has_class' class='method stab '><span id='has_class.v' class='invisible'><code>fn <a href='#tymethod.has_class' class='fnname'>has_class</a>(&amp;self, name: &amp;Self::Impl::ClassName) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.is_empty' class='method stab '><span id='is_empty.v' class='invisible'><code>fn <a href='#tymethod.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><div class='docblock'><p>Returns whether this element matches <code>:empty</code>.</p>
+
+<p>That is, whether it does not contain any child element or any non-zero-length text node.
+See <a href="http://dev.w3.org/csswg/selectors-3/#empty-pseudo">http://dev.w3.org/csswg/selectors-3/#empty-pseudo</a></p>
+</div><h3 id='tymethod.is_root' class='method stab '><span id='is_root.v' class='invisible'><code>fn <a href='#tymethod.is_root' class='fnname'>is_root</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><div class='docblock'><p>Returns whether this element matches <code>:root</code>,
+i.e. whether it is the root element of a document.</p>
+
+<p>Note: this can be false even if <code>.parent_element()</code> is <code>None</code>
+if the parent node is a <code>DocumentFragment</code>.</p>
+</div><h3 id='tymethod.each_class' class='method stab '><span id='each_class.v' class='invisible'><code>fn <a href='#tymethod.each_class' class='fnname'>each_class</a>&lt;F&gt;(&amp;self, callback: F) <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;Self::Impl::ClassName)</span></code></span></h3></div>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.insert_flags' class='method stab '><span id='insert_flags.v' class='invisible'><code>fn <a href='#method.insert_flags' class='fnname'>insert_flags</a>(&amp;self, _flags: <a class='struct' href='../selectors/matching/struct.ElementFlags.html' title='selectors::matching::ElementFlags'>ElementFlags</a>)</code></span></h3><div class='docblock'><p>Add flags to the element. See the <code>ElementFlags</code> docs for details.</p>
+
+<p>This may be called while the element <em>or one of its children</em> is being matched. Therefore
+the implementation must be thread-safe if children may be matched in parallel.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    </ul><script type="text/javascript" async
+                         src="../implementors/selectors/trait.Element.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "selectors";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

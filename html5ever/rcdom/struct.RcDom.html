@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `RcDom` struct in crate `html5ever`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, RcDom">
+
+    <title>html5ever::rcdom::RcDom - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>html5ever</a>::<wbr><a href='index.html'>rcdom</a></p><script>window.sidebarCurrent = {name: 'RcDom', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>html5ever</a>::<wbr><a href='index.html'>rcdom</a>::<wbr><a class='struct' href=''>RcDom</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-4021' class='srclink' href='../../src/html5ever/rcdom.rs.html#155-164' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct RcDom {
+    pub document: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>,
+    pub errors: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;,
+    pub quirks_mode: <a class='enum' href='../../html5ever/tree_builder/interface/enum.QuirksMode.html' title='html5ever::tree_builder::interface::QuirksMode'>QuirksMode</a>,
+}</pre><div class='docblock'><p>The DOM itself; the result of parsing.</p>
+</div><h2 class='fields'>Fields</h2><span id='structfield.document' class='structfield'>
+                           <span id='document.v' class='invisible'>
+                           <code>document: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The <code>Document</code> itself.</p>
+</div><span id='structfield.errors' class='structfield'>
+                           <span id='errors.v' class='invisible'>
+                           <code>errors: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;&gt;</code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>Errors that occurred during parsing.</p>
+</div><span id='structfield.quirks_mode' class='structfield'>
+                           <span id='quirks_mode.v' class='invisible'>
+                           <code>quirks_mode: <a class='enum' href='../../html5ever/tree_builder/interface/enum.QuirksMode.html' title='html5ever::tree_builder::interface::QuirksMode'>QuirksMode</a></code>
+                           </span></span><span class='stab '></span><div class='docblock'><p>The document&#39;s quirks mode.</p>
+</div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='../../html5ever/tree_builder/interface/trait.TreeSink.html' title='html5ever::tree_builder::interface::TreeSink'>TreeSink</a> for <a class='struct' href='../../html5ever/rcdom/struct.RcDom.html' title='html5ever::rcdom::RcDom'>RcDom</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-4025' class='srclink' href='../../src/html5ever/rcdom.rs.html#166-329' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='associatedtype.Output' class='type'><span id='Output.t' class='invisible'><code>type <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#associatedtype.Output' class='type'>Output</a> = Self</code></span></h4>
+<div class='docblock'><p>The overall result of parsing. <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#associatedtype.Output">Read more</a></p>
+</div><h4 id='method.finish' class='method'><span id='finish.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.finish' class='fnname'>finish</a>(self) -&gt; Self</code></span></h4>
+<div class='docblock'><p>Consume this sink and return the overall result of parsing. <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.finish">Read more</a></p>
+</div><h4 id='associatedtype.Handle' class='type'><span id='Handle.t' class='invisible'><code>type <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#associatedtype.Handle' class='type'>Handle</a> = <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a></code></span></h4>
+<div class='docblock'><p><code>Handle</code> is a reference to a DOM node.  The tree builder requires that a <code>Handle</code> implements <code>Clone</code> to get another reference to the same node. <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#associatedtype.Handle">Read more</a></p>
+</div><h4 id='method.parse_error' class='method'><span id='parse_error.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.parse_error' class='fnname'>parse_error</a>(&amp;mut self, msg: <a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'static,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;)</code></span></h4>
+<div class='docblock'><p>Signal a parse error.</p>
+</div><h4 id='method.get_document' class='method'><span id='get_document.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.get_document' class='fnname'>get_document</a>(&amp;mut self) -&gt; <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a></code></span></h4>
+<div class='docblock'><p>Get a handle to the <code>Document</code> node.</p>
+</div><h4 id='method.get_template_contents' class='method'><span id='get_template_contents.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.get_template_contents' class='fnname'>get_template_contents</a>(&amp;self, target: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>) -&gt; <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a></code></span></h4>
+<div class='docblock'><p>Get a handle to a template&#39;s template contents. The tree builder promises this will never be called with something else than a template element. <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.get_template_contents">Read more</a></p>
+</div><h4 id='method.set_quirks_mode' class='method'><span id='set_quirks_mode.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.set_quirks_mode' class='fnname'>set_quirks_mode</a>(&amp;mut self, mode: <a class='enum' href='../../html5ever/tree_builder/interface/enum.QuirksMode.html' title='html5ever::tree_builder::interface::QuirksMode'>QuirksMode</a>)</code></span></h4>
+<div class='docblock'><p>Set the document&#39;s quirks mode.</p>
+</div><h4 id='method.same_node' class='method'><span id='same_node.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.same_node' class='fnname'>same_node</a>(&amp;self, x: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>, y: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Do two handles refer to the same node?</p>
+</div><h4 id='method.elem_name' class='method'><span id='elem_name.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.elem_name' class='fnname'>elem_name</a>(&amp;self, target: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>) -&gt; <a class='struct' href='../../string_cache/namespace/struct.QualName.html' title='string_cache::namespace::QualName'>QualName</a></code></span></h4>
+<div class='docblock'><p>What is the name of this element? <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.elem_name">Read more</a></p>
+</div><h4 id='method.create_element' class='method'><span id='create_element.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.create_element' class='fnname'>create_element</a>(&amp;mut self, name: <a class='struct' href='../../string_cache/namespace/struct.QualName.html' title='string_cache::namespace::QualName'>QualName</a>, attrs: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../html5ever/struct.Attribute.html' title='html5ever::Attribute'>Attribute</a>&gt;) -&gt; <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a></code></span></h4>
+<div class='docblock'><p>Create an element. <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.create_element">Read more</a></p>
+</div><h4 id='method.create_comment' class='method'><span id='create_comment.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.create_comment' class='fnname'>create_comment</a>(&amp;mut self, text: <a class='type' href='../../tendril/tendril/type.StrTendril.html' title='tendril::tendril::StrTendril'>StrTendril</a>) -&gt; <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a></code></span></h4>
+<div class='docblock'><p>Create a comment node.</p>
+</div><h4 id='method.append' class='method'><span id='append.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.append' class='fnname'>append</a>(&amp;mut self, parent: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>, child: <a class='enum' href='../../html5ever/tree_builder/interface/enum.NodeOrText.html' title='html5ever::tree_builder::interface::NodeOrText'>NodeOrText</a>&lt;<a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>&gt;)</code></span></h4>
+<div class='docblock'><p>Append a node as the last child of the given node.  If this would produce adjacent sibling text nodes, it should concatenate the text instead. <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.append">Read more</a></p>
+</div><h4 id='method.append_before_sibling' class='method'><span id='append_before_sibling.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.append_before_sibling' class='fnname'>append_before_sibling</a>(&amp;mut self, sibling: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>, child: <a class='enum' href='../../html5ever/tree_builder/interface/enum.NodeOrText.html' title='html5ever::tree_builder::interface::NodeOrText'>NodeOrText</a>&lt;<a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='enum' href='../../html5ever/tree_builder/interface/enum.NodeOrText.html' title='html5ever::tree_builder::interface::NodeOrText'>NodeOrText</a>&lt;<a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>Append a node as the sibling immediately before the given node.  If that node has no parent, do nothing and return Err(new_node). <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.append_before_sibling">Read more</a></p>
+</div><h4 id='method.append_doctype_to_document' class='method'><span id='append_doctype_to_document.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.append_doctype_to_document' class='fnname'>append_doctype_to_document</a>(&amp;mut self, name: <a class='type' href='../../tendril/tendril/type.StrTendril.html' title='tendril::tendril::StrTendril'>StrTendril</a>, public_id: <a class='type' href='../../tendril/tendril/type.StrTendril.html' title='tendril::tendril::StrTendril'>StrTendril</a>, system_id: <a class='type' href='../../tendril/tendril/type.StrTendril.html' title='tendril::tendril::StrTendril'>StrTendril</a>)</code></span></h4>
+<div class='docblock'><p>Append a <code>DOCTYPE</code> element to the <code>Document</code> node.</p>
+</div><h4 id='method.add_attrs_if_missing' class='method'><span id='add_attrs_if_missing.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.add_attrs_if_missing' class='fnname'>add_attrs_if_missing</a>(&amp;mut self, target: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>, attrs: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../html5ever/struct.Attribute.html' title='html5ever::Attribute'>Attribute</a>&gt;)</code></span></h4>
+<div class='docblock'><p>Add each attribute to the given element, if no attribute with that name already exists. The tree builder promises this will never be called with something else than an element. <a href="../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.add_attrs_if_missing">Read more</a></p>
+</div><h4 id='method.remove_from_parent' class='method'><span id='remove_from_parent.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.remove_from_parent' class='fnname'>remove_from_parent</a>(&amp;mut self, target: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>)</code></span></h4>
+<div class='docblock'><p>Detach the given node from its parent.</p>
+</div><h4 id='method.reparent_children' class='method'><span id='reparent_children.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.reparent_children' class='fnname'>reparent_children</a>(&amp;mut self, node: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>, new_parent: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>)</code></span></h4>
+<div class='docblock'><p>Remove all the children from node and append them to new_parent.</p>
+</div><h4 id='method.mark_script_already_started' class='method'><span id='mark_script_already_started.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#tymethod.mark_script_already_started' class='fnname'>mark_script_already_started</a>(&amp;mut self, target: <a class='struct' href='../../html5ever/rcdom/struct.Handle.html' title='html5ever::rcdom::Handle'>Handle</a>)</code></span></h4>
+<div class='docblock'><p>Mark a HTML <code>&lt;script&gt;</code> element as &quot;already started&quot;.</p>
+</div><h4 id='method.is_mathml_annotation_xml_integration_point' class='method'><span id='is_mathml_annotation_xml_integration_point.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#method.is_mathml_annotation_xml_integration_point' class='fnname'>is_mathml_annotation_xml_integration_point</a>(&amp;self, handle: Self::Handle) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<h4 id='method.complete_script' class='method'><span id='complete_script.v' class='invisible'><code>fn <a href='../../html5ever/tree_builder/interface/trait.TreeSink.html#method.complete_script' class='fnname'>complete_script</a>(&amp;mut self, _node: Self::Handle) -&gt; <a class='enum' href='../../html5ever/tree_builder/interface/enum.NextParserState.html' title='html5ever::tree_builder::interface::NextParserState'>NextParserState</a></code></span></h4>
+<div class='docblock'><p>Indicate that a <code>&lt;script&gt;</code> element is complete.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html' title='core::default::Default'>Default</a> for <a class='struct' href='../../html5ever/rcdom/struct.RcDom.html' title='html5ever::rcdom::RcDom'>RcDom</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-4126' class='srclink' href='../../src/html5ever/rcdom.rs.html#331-339' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.default' class='method'><span id='default.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/default/trait.Default.html#tymethod.default' class='fnname'>default</a>() -&gt; <a class='struct' href='../../html5ever/rcdom/struct.RcDom.html' title='html5ever::rcdom::RcDom'>RcDom</a></code></span></h4>
+<div class='docblock'><p>Returns the &quot;default value&quot; for a type. <a href="https://doc.rust-lang.org/nightly/core/default/trait.Default.html#tymethod.default">Read more</a></p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "html5ever";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

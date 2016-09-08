@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `MatchAttr` trait in crate `selectors`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, MatchAttr">
+
+    <title>selectors::MatchAttr - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>selectors</a></p><script>window.sidebarCurrent = {name: 'MatchAttr', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>selectors</a>::<wbr><a class='trait' href=''>MatchAttr</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1905' class='srclink' href='../src/selectors/tree.rs.html#17-58' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait MatchAttr {
+    type <a href='#associatedtype.Impl' class='type'>Impl</a>: <a class='trait' href='../selectors/parser/trait.SelectorImpl.html' title='selectors::parser::SelectorImpl'>SelectorImpl</a>;
+    fn <a href='#tymethod.match_attr_has' class='fnname'>match_attr_has</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.match_attr_equals' class='fnname'>match_attr_equals</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.match_attr_equals_ignore_ascii_case' class='fnname'>match_attr_equals_ignore_ascii_case</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.match_attr_includes' class='fnname'>match_attr_includes</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.match_attr_dash' class='fnname'>match_attr_dash</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.match_attr_prefix' class='fnname'>match_attr_prefix</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.match_attr_substring' class='fnname'>match_attr_substring</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+    fn <a href='#tymethod.match_attr_suffix' class='fnname'>match_attr_suffix</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>;
+}</pre>
+            <h2 id='associated-types'>Associated Types</h2>
+            <div class='methods'>
+        <h3 id='associatedtype.Impl' class='method stab '><span id='Impl.t' class='invisible'><code>type <a href='#associatedtype.Impl' class='type'>Impl</a>: <a class='trait' href='../selectors/parser/trait.SelectorImpl.html' title='selectors::parser::SelectorImpl'>SelectorImpl</a></code></span></h3></div>
+            <h2 id='required-methods'>Required Methods</h2>
+            <div class='methods'>
+        <h3 id='tymethod.match_attr_has' class='method stab '><span id='match_attr_has.v' class='invisible'><code>fn <a href='#tymethod.match_attr_has' class='fnname'>match_attr_has</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.match_attr_equals' class='method stab '><span id='match_attr_equals.v' class='invisible'><code>fn <a href='#tymethod.match_attr_equals' class='fnname'>match_attr_equals</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.match_attr_equals_ignore_ascii_case' class='method stab '><span id='match_attr_equals_ignore_ascii_case.v' class='invisible'><code>fn <a href='#tymethod.match_attr_equals_ignore_ascii_case' class='fnname'>match_attr_equals_ignore_ascii_case</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.match_attr_includes' class='method stab '><span id='match_attr_includes.v' class='invisible'><code>fn <a href='#tymethod.match_attr_includes' class='fnname'>match_attr_includes</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.match_attr_dash' class='method stab '><span id='match_attr_dash.v' class='invisible'><code>fn <a href='#tymethod.match_attr_dash' class='fnname'>match_attr_dash</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.match_attr_prefix' class='method stab '><span id='match_attr_prefix.v' class='invisible'><code>fn <a href='#tymethod.match_attr_prefix' class='fnname'>match_attr_prefix</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.match_attr_substring' class='method stab '><span id='match_attr_substring.v' class='invisible'><code>fn <a href='#tymethod.match_attr_substring' class='fnname'>match_attr_substring</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3><h3 id='tymethod.match_attr_suffix' class='method stab '><span id='match_attr_suffix.v' class='invisible'><code>fn <a href='#tymethod.match_attr_suffix' class='fnname'>match_attr_suffix</a>(&amp;self, attr: &amp;<a class='struct' href='../selectors/parser/struct.AttrSelector.html' title='selectors::parser::AttrSelector'>AttrSelector</a>&lt;Self::Impl&gt;, value: &amp;Self::Impl::AttrValue) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h3></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    <li><code>impl&lt;T&gt; MatchAttr for T <span class='where'>where T: <a class='trait' href='../selectors/trait.MatchAttrGeneric.html' title='selectors::MatchAttrGeneric'>MatchAttrGeneric</a>, T::Impl: <a class='trait' href='../selectors/parser/trait.SelectorImpl.html' title='selectors::parser::SelectorImpl'>SelectorImpl</a>&lt;AttrValue=<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</span></code></li>
+</ul><script type="text/javascript" async
+                         src="../implementors/selectors/trait.MatchAttr.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "selectors";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

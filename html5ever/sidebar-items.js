@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["driver","High-level interface to the parser."],["encoding","Re-export the rust-encoding crate."],["rcdom","A simple reference-counted DOM."],["serialize",""],["tendril","Re-export the tendril crate."],["tokenizer","The HTML5 tokenizer."],["tree_builder","The HTML5 tree builder."]],"struct":[["Attribute","A tag attribute."]]});

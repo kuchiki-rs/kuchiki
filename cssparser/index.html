@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `cssparser` crate.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, cssparser">
+
+    <title>cssparser - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'></p><script>window.sidebarCurrent = {name: 'cssparser', ty: 'mod', relpath: '../'};</script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Crate <a class='mod' href=''>cssparser</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-0' class='srclink' href='../src/cssparser/lib.rs.html#5-147' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Implementation of <a href="https://drafts.csswg.org/css-syntax/">CSS Syntax Module Level 3</a> for Rust.</p>
+
+<h1 id='input' class='section-header'><a href='#input'>Input</a></h1>
+<p>Everything is based on <code>Parser</code> objects, which borrow a <code>&amp;str</code> input.
+If you have bytes (from a file, the network, or something),
+see the <code>decode_stylesheet_bytes</code> function.</p>
+
+<h1 id='conventions-for-parsing-functions' class='section-header'><a href='#conventions-for-parsing-functions'>Conventions for parsing functions</a></h1>
+<ul>
+<li>Take (at least) a <code>input: &amp;mut cssparser::Parser</code> parameter</li>
+<li>Return <code>Result&lt;_, ()&gt;</code></li>
+<li>When returning <code>Ok(_)</code>,
+the function must have consume exactly the amount of input that represents the parsed value.</li>
+<li>When returning <code>Err(())</code>, any amount of input may have been consumed.</li>
+</ul>
+
+<p>As a consequence, when calling another parsing function, either:</p>
+
+<ul>
+<li>Any <code>Err(())</code> return value must be propagated.
+This happens by definition for tail calls,
+and can otherwise be done with the <code>try!</code> macro.</li>
+<li>Or the call must be wrapped in a <code>Parser::try</code> call.
+<code>try</code> takes a closure that takes a <code>Parser</code> and returns a <code>Result</code>,
+calls it once,
+and returns itself that same result.
+If the result is <code>Err</code>,
+it restores the position inside the input to the one saved before calling the closure.</li>
+</ul>
+
+<p>Examples:</p>
+
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// &#39;none&#39; | &lt;image&gt;</span>
+<span class='kw'>fn</span> <span class='ident'>parse_background_image</span>(<span class='ident'>context</span>: <span class='kw-2'>&amp;</span><span class='ident'>ParserContext</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Parser</span>)
+                                    <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span><span class='prelude-ty'>Option</span><span class='op'>&lt;</span><span class='ident'>Image</span><span class='op'>&gt;</span>, ()<span class='op'>&gt;</span> {
+    <span class='kw'>if</span> <span class='ident'>input</span>.<span class='ident'>try</span>(<span class='op'>|</span><span class='ident'>input</span><span class='op'>|</span> <span class='ident'>input</span>.<span class='ident'>expect_ident_matching</span>(<span class='string'>&quot;none&quot;</span>)).<span class='ident'>is_ok</span>() {
+        <span class='prelude-val'>Ok</span>(<span class='prelude-val'>None</span>)
+    } <span class='kw'>else</span> {
+        <span class='ident'>Image</span>::<span class='ident'>parse</span>(<span class='ident'>context</span>, <span class='ident'>input</span>).<span class='ident'>map</span>(<span class='prelude-val'>Some</span>)  <span class='comment'>// tail call</span>
+    }
+}</pre>
+
+<pre class='rust rust-example-rendered'>
+<span class='comment'>// [ &lt;length&gt; | &lt;percentage&gt; ] [ &lt;length&gt; | &lt;percentage&gt; ]?</span>
+<span class='kw'>fn</span> <span class='ident'>parse_border_spacing</span>(<span class='ident'>_context</span>: <span class='kw-2'>&amp;</span><span class='ident'>ParserContext</span>, <span class='ident'>input</span>: <span class='kw-2'>&amp;</span><span class='kw-2'>mut</span> <span class='ident'>Parser</span>)
+                          <span class='op'>-&gt;</span> <span class='prelude-ty'>Result</span><span class='op'>&lt;</span>(<span class='ident'>LengthOrPercentage</span>, <span class='ident'>LengthOrPercentage</span>), ()<span class='op'>&gt;</span> {
+    <span class='kw'>let</span> <span class='ident'>first</span> <span class='op'>=</span> <span class='macro'>try</span><span class='macro'>!</span>(<span class='ident'>LengthOrPercentage</span>::<span class='ident'>parse</span>);
+    <span class='kw'>let</span> <span class='ident'>second</span> <span class='op'>=</span> <span class='ident'>input</span>.<span class='ident'>try</span>(<span class='ident'>LengthOrPercentage</span>::<span class='ident'>parse</span>).<span class='ident'>unwrap_or</span>(<span class='ident'>first</span>);
+    (<span class='ident'>first</span>, <span class='ident'>second</span>)
+}</pre>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='Delimiter/index.html'
+                                  title='cssparser::Delimiter'>Delimiter</a></td>
+                           <td class='docblock short'>
+                                <p><code>Delimiters</code> constants.</p>
+                           </td>
+                       </tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='macro' href='macro.match_ignore_ascii_case.html'
+                                  title='cssparser::match_ignore_ascii_case'>match_ignore_ascii_case</a></td>
+                           <td class='docblock short'>
+                                <p>This macro is equivalent to a <code>match</code> expression on an <code>&amp;str</code> value,
+but matching is case-insensitive in the ASCII range.</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.CssStringWriter.html'
+                                  title='cssparser::CssStringWriter'>CssStringWriter</a></td>
+                           <td class='docblock short'>
+                                <p>A <code>fmt::Write</code> adapter that escapes text for writing as a double-quoted CSS string.
+Quotes are not included.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.DeclarationListParser.html'
+                                  title='cssparser::DeclarationListParser'>DeclarationListParser</a></td>
+                           <td class='docblock short'>
+                                <p>Provides an iterator for declaration list parsing.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Delimiters.html'
+                                  title='cssparser::Delimiters'>Delimiters</a></td>
+                           <td class='docblock short'>
+                                <p>A set of characters, to be used with the <code>Parser::parse_until*</code> methods.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.NumericValue.html'
+                                  title='cssparser::NumericValue'>NumericValue</a></td>
+                           <td class='docblock short'>
+                                <p>The numeric value of <code>Number</code> and <code>Dimension</code> tokens.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Parser.html'
+                                  title='cssparser::Parser'>Parser</a></td>
+                           <td class='docblock short'>
+                                <p>A CSS parser that borrows its <code>&amp;str</code> input,
+yields <code>Token</code>s,
+and keeps track of nested blocks and functions.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.PercentageValue.html'
+                                  title='cssparser::PercentageValue'>PercentageValue</a></td>
+                           <td class='docblock short'>
+                                <p>The numeric value of <code>Percentage</code> tokens.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RGBA.html'
+                                  title='cssparser::RGBA'>RGBA</a></td>
+                           <td class='docblock short'>
+                                <p>A color with red, green, blue, and alpha components.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.RuleListParser.html'
+                                  title='cssparser::RuleListParser'>RuleListParser</a></td>
+                           <td class='docblock short'>
+                                <p>Provides an iterator for rule list parsing.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.SourceLocation.html'
+                                  title='cssparser::SourceLocation'>SourceLocation</a></td>
+                           <td class='docblock short'>
+                                <p>The line and column number for a given position within the input.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.SourcePosition.html'
+                                  title='cssparser::SourcePosition'>SourcePosition</a></td>
+                           <td class='docblock short'>
+                                <p>A capture of the internal state of a <code>Parser</code> (including the position within the input),
+obtained from the <code>Parser::position</code> method.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.TokenSerializationType.html'
+                                  title='cssparser::TokenSerializationType'>TokenSerializationType</a></td>
+                           <td class='docblock short'>
+                                <p>A category of token. See the <code>needs_separator_when_before</code> method.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.AtRuleType.html'
+                                  title='cssparser::AtRuleType'>AtRuleType</a></td>
+                           <td class='docblock short'>
+                                <p>The return value for <code>AtRuleParser::parse_prelude</code>.
+Indicates whether the at-rule is expected to have a <code>{ /* ... */ }</code> block
+or end with a <code>;</code> semicolon.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.Color.html'
+                                  title='cssparser::Color'>Color</a></td>
+                           <td class='docblock short'>
+                                <p>A <color> value.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.Token.html'
+                                  title='cssparser::Token'>Token</a></td>
+                           <td class='docblock short'>
+                                <p>One of the pieces the CSS input is broken into.</p>
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.AtRuleParser.html'
+                                  title='cssparser::AtRuleParser'>AtRuleParser</a></td>
+                           <td class='docblock short'>
+                                <p>A trait to provide various parsing of at-rules.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.DeclarationParser.html'
+                                  title='cssparser::DeclarationParser'>DeclarationParser</a></td>
+                           <td class='docblock short'>
+                                <p>A trait to provide various parsing of declaration values.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.QualifiedRuleParser.html'
+                                  title='cssparser::QualifiedRuleParser'>QualifiedRuleParser</a></td>
+                           <td class='docblock short'>
+                                <p>A trait to provide various parsing of qualified rules.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.ToCss.html'
+                                  title='cssparser::ToCss'>ToCss</a></td>
+                           <td class='docblock short'>
+                                <p>Trait for things the can serialize themselves in CSS syntax.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.decode_stylesheet_bytes.html'
+                                  title='cssparser::decode_stylesheet_bytes'>decode_stylesheet_bytes</a></td>
+                           <td class='docblock short'>
+                                <p>Determine the character encoding of a CSS stylesheet and decode it.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.parse_color_keyword.html'
+                                  title='cssparser::parse_color_keyword'>parse_color_keyword</a></td>
+                           <td class='docblock short'>
+                                <p>Return the named color with the given name.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.parse_important.html'
+                                  title='cssparser::parse_important'>parse_important</a></td>
+                           <td class='docblock short'>
+                                <p>Parse <code>!important</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.parse_nth.html'
+                                  title='cssparser::parse_nth'>parse_nth</a></td>
+                           <td class='docblock short'>
+                                <p>Parse the <em>An+B</em> notation, as found in the <code>:nth-child()</code> selector.
+The input is typically the arguments of a function,
+in which case the caller needs to check if the arguments’ parser is exhausted.
+Return <code>Ok((A, B))</code>, or <code>Err(())</code> for a syntax error.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.parse_one_declaration.html'
+                                  title='cssparser::parse_one_declaration'>parse_one_declaration</a></td>
+                           <td class='docblock short'>
+                                <p>Parse a single declaration, such as an <code>( /* ... */ )</code> parenthesis in an <code>@supports</code> prelude.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.parse_one_rule.html'
+                                  title='cssparser::parse_one_rule'>parse_one_rule</a></td>
+                           <td class='docblock short'>
+                                <p>Parse a single rule, such as for CSSOM’s <code>CSSStyleSheet.insertRule</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.serialize_identifier.html'
+                                  title='cssparser::serialize_identifier'>serialize_identifier</a></td>
+                           <td class='docblock short'>
+                                <p>Write a CSS identifier, escaping characters as necessary.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.serialize_string.html'
+                                  title='cssparser::serialize_string'>serialize_string</a></td>
+                           <td class='docblock short'>
+                                <p>Write a double-quoted CSS string token, escaping content as necessary.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "cssparser";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

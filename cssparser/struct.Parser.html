@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Parser` struct in crate `cssparser`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Parser">
+
+    <title>cssparser::Parser - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>cssparser</a></p><script>window.sidebarCurrent = {name: 'Parser', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>cssparser</a>::<wbr><a class='struct' href=''>Parser</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-872' class='srclink' href='../src/cssparser/parser.rs.html#65-71' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Parser&lt;'i: 't,&nbsp;'t&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>A CSS parser that borrows its <code>&amp;str</code> input,
+yields <code>Token</code>s,
+and keeps track of nested blocks and functions.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;'i,&nbsp;'t&gt; <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'t&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a id='src-966' class='srclink' href='../src/cssparser/parser.rs.html#169-691' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class='method'><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>(input: &amp;'i <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'i&gt;</code></span></h4>
+<div class='docblock'><p>Create a new parser</p>
+</div><h4 id='method.is_exhausted' class='method'><span id='is_exhausted.v' class='invisible'><code>fn <a href='#method.is_exhausted' class='fnname'>is_exhausted</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Check whether the input is exhausted. That is, if <code>.next()</code> would return a token.</p>
+
+<p>This ignores whitespace and comments.</p>
+</div><h4 id='method.expect_exhausted' class='method'><span id='expect_exhausted.v' class='invisible'><code>fn <a href='#method.expect_exhausted' class='fnname'>expect_exhausted</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Check whether the input is exhausted. That is, if <code>.next()</code> would return a token.
+Return a <code>Result</code> so that the <code>try!</code> macro can be used: <code>try!(input.expect_exhausted())</code></p>
+
+<p>This ignores whitespace and comments.</p>
+</div><h4 id='method.position' class='method'><span id='position.v' class='invisible'><code>fn <a href='#method.position' class='fnname'>position</a>(&amp;self) -&gt; <a class='struct' href='../cssparser/struct.SourcePosition.html' title='cssparser::SourcePosition'>SourcePosition</a></code></span></h4>
+<div class='docblock'><p>Return the current internal state of the parser (including position within the input).</p>
+
+<p>This state can later be restored with the <code>Parser::reset</code> method.</p>
+</div><h4 id='method.reset' class='method'><span id='reset.v' class='invisible'><code>fn <a href='#method.reset' class='fnname'>reset</a>(&amp;mut self, new_position: <a class='struct' href='../cssparser/struct.SourcePosition.html' title='cssparser::SourcePosition'>SourcePosition</a>)</code></span></h4>
+<div class='docblock'><p>Restore the internal state of the parser (including position within the input)
+to what was previously saved by the <code>Parser::position</code> method.</p>
+
+<p>Should only be used with <code>SourcePosition</code> values from the same <code>Parser</code> instance.</p>
+</div><h4 id='method.look_for_var_functions' class='method'><span id='look_for_var_functions.v' class='invisible'><code>fn <a href='#method.look_for_var_functions' class='fnname'>look_for_var_functions</a>(&amp;mut self)</code></span></h4>
+<div class='docblock'><p>Start looking for <code>var()</code> functions. (See the <code>.seen_var_functions()</code> method.)</p>
+</div><h4 id='method.seen_var_functions' class='method'><span id='seen_var_functions.v' class='invisible'><code>fn <a href='#method.seen_var_functions' class='fnname'>seen_var_functions</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Return whether a <code>var()</code> function has been seen by the tokenizer since
+either <code>look_for_var_functions</code> was called, and stop looking.</p>
+</div><h4 id='method.look_for_viewport_percentages' class='method'><span id='look_for_viewport_percentages.v' class='invisible'><code>fn <a href='#method.look_for_viewport_percentages' class='fnname'>look_for_viewport_percentages</a>(&amp;mut self)</code></span></h4>
+<div class='docblock'><p>Start looking for viewport percentage lengths. (See the <code>seen_viewport_percentages</code>
+method.)</p>
+</div><h4 id='method.seen_viewport_percentages' class='method'><span id='seen_viewport_percentages.v' class='invisible'><code>fn <a href='#method.seen_viewport_percentages' class='fnname'>seen_viewport_percentages</a>(&amp;mut self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Return whether a <code>vh</code>, <code>vw</code>, <code>vmin</code>, or <code>vmax</code> dimension has been seen by the tokenizer
+since <code>look_for_viewport_percentages</code> was called, and stop looking.</p>
+</div><h4 id='method.try' class='method'><span id='try.v' class='invisible'><code>fn <a href='#method.try' class='fnname'>try</a>&lt;F,&nbsp;T,&nbsp;E&gt;(&amp;mut self, thing: F) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;E&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html' title='core::ops::FnOnce'>FnOnce</a>(&amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'t&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;E&gt;</span></code></span></h4>
+<div class='docblock'><p>Execute the given closure, passing it the parser.
+If the result (returned unchanged) is <code>Err</code>,
+the internal state of the parser  (including position within the input)
+is restored to what it was before the call.</p>
+</div><h4 id='method.slice' class='method'><span id='slice.v' class='invisible'><code>fn <a href='#method.slice' class='fnname'>slice</a>(&amp;self, range: <a class='struct' href='https://doc.rust-lang.org/nightly/core/ops/struct.Range.html' title='core::ops::Range'>Range</a>&lt;<a class='struct' href='../cssparser/struct.SourcePosition.html' title='cssparser::SourcePosition'>SourcePosition</a>&gt;) -&gt; &amp;'i <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></span></h4>
+<div class='docblock'><p>Return a slice of the CSS input</p>
+</div><h4 id='method.slice_from' class='method'><span id='slice_from.v' class='invisible'><code>fn <a href='#method.slice_from' class='fnname'>slice_from</a>(&amp;self, start_position: <a class='struct' href='../cssparser/struct.SourcePosition.html' title='cssparser::SourcePosition'>SourcePosition</a>) -&gt; &amp;'i <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a></code></span></h4>
+<div class='docblock'><p>Return a slice of the CSS input, from the given position to the current one.</p>
+</div><h4 id='method.current_source_location' class='method'><span id='current_source_location.v' class='invisible'><code>fn <a href='#method.current_source_location' class='fnname'>current_source_location</a>(&amp;self) -&gt; <a class='struct' href='../cssparser/struct.SourceLocation.html' title='cssparser::SourceLocation'>SourceLocation</a></code></span></h4>
+<div class='docblock'><p>Return the line and column number within the input for the current position.</p>
+</div><h4 id='method.source_location' class='method'><span id='source_location.v' class='invisible'><code>fn <a href='#method.source_location' class='fnname'>source_location</a>(&amp;self, target: <a class='struct' href='../cssparser/struct.SourcePosition.html' title='cssparser::SourcePosition'>SourcePosition</a>) -&gt; <a class='struct' href='../cssparser/struct.SourceLocation.html' title='cssparser::SourceLocation'>SourceLocation</a></code></span></h4>
+<div class='docblock'><p>Return the line and column number within the input for the given position.</p>
+</div><h4 id='method.next' class='method'><span id='next.v' class='invisible'><code>fn <a href='#method.next' class='fnname'>next</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../cssparser/enum.Token.html' title='cssparser::Token'>Token</a>&lt;'i&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return the next token in the input that is neither whitespace or a comment,
+and advance the position accordingly.</p>
+
+<p>After returning a <code>Function</code>, <code>ParenthesisBlock</code>,
+<code>CurlyBracketBlock</code>, or <code>SquareBracketBlock</code> token,
+the next call will skip until after the matching <code>CloseParenthesis</code>,
+<code>CloseCurlyBracket</code>, or <code>CloseSquareBracket</code> token.</p>
+
+<p>See the <code>Parser::parse_nested_block</code> method to parse the content of functions or blocks.</p>
+
+<p>This only returns a closing token when it is unmatched (and therefore an error).</p>
+</div><h4 id='method.next_including_whitespace' class='method'><span id='next_including_whitespace.v' class='invisible'><code>fn <a href='#method.next_including_whitespace' class='fnname'>next_including_whitespace</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../cssparser/enum.Token.html' title='cssparser::Token'>Token</a>&lt;'i&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Same as <code>Parser::next</code>, but does not skip whitespace tokens.</p>
+</div><h4 id='method.next_including_whitespace_and_comments' class='method'><span id='next_including_whitespace_and_comments.v' class='invisible'><code>fn <a href='#method.next_including_whitespace_and_comments' class='fnname'>next_including_whitespace_and_comments</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../cssparser/enum.Token.html' title='cssparser::Token'>Token</a>&lt;'i&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Same as <code>Parser::next</code>, but does not skip whitespace or comment tokens.</p>
+
+<p><strong>Note</strong>: This should only be used in contexts like a CSS pre-processor
+where comments are preserved.
+When parsing higher-level values, per the CSS Syntax specification,
+comments should always be ignored between tokens.</p>
+</div><h4 id='method.parse_entirely' class='method'><span id='parse_entirely.v' class='invisible'><code>fn <a href='#method.parse_entirely' class='fnname'>parse_entirely</a>&lt;F,&nbsp;T&gt;(&amp;mut self, parse: F) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html' title='core::ops::FnOnce'>FnOnce</a>(&amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'t&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</span></code></span></h4>
+<div class='docblock'><p>Have the given closure parse something, then check the the input is exhausted.
+The result is overridden to <code>Err(())</code> if some input remains.</p>
+
+<p>This can help tell e.g. <code>color: green;</code> from <code>color: green 4px;</code></p>
+</div><h4 id='method.parse_comma_separated' class='method'><span id='parse_comma_separated.v' class='invisible'><code>fn <a href='#method.parse_comma_separated' class='fnname'>parse_comma_separated</a>&lt;F,&nbsp;T&gt;(&amp;mut self, parse_one: F) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;T&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where F: <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnMut.html' title='core::ops::FnMut'>FnMut</a>(&amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</span></code></span></h4>
+<div class='docblock'><p>Parse a list of comma-separated values, all with the same syntax.</p>
+
+<p>The given closure is called repeatedly with a &quot;delimited&quot; parser
+(see the <code>Parser::parse_until_before</code> method)
+so that it can over consume the input past a comma at this block/function nesting level.</p>
+
+<p>Successful results are accumulated in a vector.</p>
+
+<p>This method retuns <code>Err(())</code> the first time that a closure call does,
+or if a closure call leaves some input before the next comma or the end of the input.</p>
+</div><h4 id='method.parse_nested_block' class='method'><span id='parse_nested_block.v' class='invisible'><code>fn <a href='#method.parse_nested_block' class='fnname'>parse_nested_block</a>&lt;F,&nbsp;T&gt;(&amp;mut self, parse: F) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where F: for&lt;'tt&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html' title='core::ops::FnOnce'>FnOnce</a>(&amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'tt&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</span></code></span></h4>
+<div class='docblock'><p>Parse the content of a block or function.</p>
+
+<p>This method panics if the last token yielded by this parser
+(from one of the <code>next*</code> methods)
+is not a on that marks the start of a block or function:
+a <code>Function</code>, <code>ParenthesisBlock</code>, <code>CurlyBracketBlock</code>, or <code>SquareBracketBlock</code>.</p>
+
+<p>The given closure is called with a &quot;delimited&quot; parser
+that stops at the end of the block or function (at the matching closing token).</p>
+
+<p>The result is overridden to <code>Err(())</code> if the closure leaves some input before that point.</p>
+</div><h4 id='method.parse_until_before' class='method'><span id='parse_until_before.v' class='invisible'><code>fn <a href='#method.parse_until_before' class='fnname'>parse_until_before</a>&lt;F,&nbsp;T&gt;(&amp;mut self, delimiters: <a class='struct' href='../cssparser/struct.Delimiters.html' title='cssparser::Delimiters'>Delimiters</a>, parse: F) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where F: for&lt;'tt&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html' title='core::ops::FnOnce'>FnOnce</a>(&amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'tt&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</span></code></span></h4>
+<div class='docblock'><p>Limit parsing to until a given delimiter. (E.g. a semicolon for a property value.)</p>
+
+<p>The given closure is called with a &quot;delimited&quot; parser
+that stops before the first character at this block/function nesting level
+that matches the given set of delimiters.</p>
+
+<p>The result is overridden to <code>Err(())</code> if the closure leaves some input before that point.</p>
+</div><h4 id='method.parse_until_after' class='method'><span id='parse_until_after.v' class='invisible'><code>fn <a href='#method.parse_until_after' class='fnname'>parse_until_after</a>&lt;F,&nbsp;T&gt;(&amp;mut self, delimiters: <a class='struct' href='../cssparser/struct.Delimiters.html' title='cssparser::Delimiters'>Delimiters</a>, parse: F) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; <span class='where'>where F: for&lt;'tt&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.FnOnce.html' title='core::ops::FnOnce'>FnOnce</a>(&amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'tt&gt;) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;T,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</span></code></span></h4>
+<div class='docblock'><p>Like <code>parse_until_before</code>, but also consume the delimiter token.</p>
+
+<p>This can be useful when you don’t need to know which delimiter it was
+(e.g. if these is only one in the given set)
+or if it was there at all (as opposed to reaching the end of the input).</p>
+</div><h4 id='method.expect_whitespace' class='method'><span id='expect_whitespace.v' class='invisible'><code>fn <a href='#method.expect_whitespace' class='fnname'>expect_whitespace</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;&amp;'i <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <whitespace-token> and return its value.</p>
+</div><h4 id='method.expect_ident' class='method'><span id='expect_ident.v' class='invisible'><code>fn <a href='#method.expect_ident' class='fnname'>expect_ident</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'i,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <ident-token> and return the unescaped value.</p>
+</div><h4 id='method.expect_ident_matching' class='method'><span id='expect_ident_matching.v' class='invisible'><code>fn <a href='#method.expect_ident_matching' class='fnname'>expect_ident_matching</a>(&amp;mut self, expected_value: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <ident-token> whose unescaped value is an ASCII-insensitive match for the given value.</p>
+</div><h4 id='method.expect_string' class='method'><span id='expect_string.v' class='invisible'><code>fn <a href='#method.expect_string' class='fnname'>expect_string</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'i,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <string-token> and return the unescaped value.</p>
+</div><h4 id='method.expect_ident_or_string' class='method'><span id='expect_ident_or_string.v' class='invisible'><code>fn <a href='#method.expect_ident_or_string' class='fnname'>expect_ident_or_string</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'i,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse either a <ident-token> or a <string-token>, and return the unescaped value.</p>
+</div><h4 id='method.expect_url' class='method'><span id='expect_url.v' class='invisible'><code>fn <a href='#method.expect_url' class='fnname'>expect_url</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'i,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <url-token> and return the unescaped value.</p>
+</div><h4 id='method.expect_url_or_string' class='method'><span id='expect_url_or_string.v' class='invisible'><code>fn <a href='#method.expect_url_or_string' class='fnname'>expect_url_or_string</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'i,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse either a <url-token> or a <string-token>, and return the unescaped value.</p>
+</div><h4 id='method.expect_number' class='method'><span id='expect_number.v' class='invisible'><code>fn <a href='#method.expect_number' class='fnname'>expect_number</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <number-token> and return the integer value.</p>
+</div><h4 id='method.expect_integer' class='method'><span id='expect_integer.v' class='invisible'><code>fn <a href='#method.expect_integer' class='fnname'>expect_integer</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <number-token> that does not have a fractional part, and return the integer value.</p>
+</div><h4 id='method.expect_percentage' class='method'><span id='expect_percentage.v' class='invisible'><code>fn <a href='#method.expect_percentage' class='fnname'>expect_percentage</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <percentage-token> and return the value.
+<code>0%</code> and <code>100%</code> map to <code>0.0</code> and <code>1.0</code> (not <code>100.0</code>), respectively.</p>
+</div><h4 id='method.expect_colon' class='method'><span id='expect_colon.v' class='invisible'><code>fn <a href='#method.expect_colon' class='fnname'>expect_colon</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <code>:</code> <colon-token>.</p>
+</div><h4 id='method.expect_semicolon' class='method'><span id='expect_semicolon.v' class='invisible'><code>fn <a href='#method.expect_semicolon' class='fnname'>expect_semicolon</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <code>;</code> <semicolon-token>.</p>
+</div><h4 id='method.expect_comma' class='method'><span id='expect_comma.v' class='invisible'><code>fn <a href='#method.expect_comma' class='fnname'>expect_comma</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <code>,</code> <comma-token>.</p>
+</div><h4 id='method.expect_delim' class='method'><span id='expect_delim.v' class='invisible'><code>fn <a href='#method.expect_delim' class='fnname'>expect_delim</a>(&amp;mut self, expected_value: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.char.html'>char</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <delim-token> with the given value.</p>
+</div><h4 id='method.expect_curly_bracket_block' class='method'><span id='expect_curly_bracket_block.v' class='invisible'><code>fn <a href='#method.expect_curly_bracket_block' class='fnname'>expect_curly_bracket_block</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <code>{ /* ... */ }</code> curly brackets block.</p>
+
+<p>If the result is <code>Ok</code>, you can then call the <code>Parser::parse_nested_block</code> method.</p>
+</div><h4 id='method.expect_square_bracket_block' class='method'><span id='expect_square_bracket_block.v' class='invisible'><code>fn <a href='#method.expect_square_bracket_block' class='fnname'>expect_square_bracket_block</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <code>[ /* ... */ ]</code> square brackets block.</p>
+
+<p>If the result is <code>Ok</code>, you can then call the <code>Parser::parse_nested_block</code> method.</p>
+</div><h4 id='method.expect_parenthesis_block' class='method'><span id='expect_parenthesis_block.v' class='invisible'><code>fn <a href='#method.expect_parenthesis_block' class='fnname'>expect_parenthesis_block</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <code>( /* ... */ )</code> parenthesis block.</p>
+
+<p>If the result is <code>Ok</code>, you can then call the <code>Parser::parse_nested_block</code> method.</p>
+</div><h4 id='method.expect_function' class='method'><span id='expect_function.v' class='invisible'><code>fn <a href='#method.expect_function' class='fnname'>expect_function</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='https://doc.rust-lang.org/nightly/collections/borrow/enum.Cow.html' title='collections::borrow::Cow'>Cow</a>&lt;'i,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <function> token and return its name.</p>
+
+<p>If the result is <code>Ok</code>, you can then call the <code>Parser::parse_nested_block</code> method.</p>
+</div><h4 id='method.expect_function_matching' class='method'><span id='expect_function_matching.v' class='invisible'><code>fn <a href='#method.expect_function_matching' class='fnname'>expect_function_matching</a>(&amp;mut self, expected_name: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse a <function> token whose name is an ASCII-insensitive match for the given value.</p>
+
+<p>If the result is <code>Ok</code>, you can then call the <code>Parser::parse_nested_block</code> method.</p>
+</div><h4 id='method.expect_no_error_token' class='method'><span id='expect_no_error_token.v' class='invisible'><code>fn <a href='#method.expect_no_error_token' class='fnname'>expect_no_error_token</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Parse the input until exhaustion and check that it contains no “error” token.</p>
+
+<p>See <code>Token::is_parse_error</code>. This also checks nested blocks and functions recursively.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;'i: 't,&nbsp;'t&gt; <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'t&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a id='src-878' class='srclink' href='../src/cssparser/parser.rs.html#64' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class='method'><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>&lt;'i,&nbsp;'t&gt;</code></span></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class='method'><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "cssparser";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

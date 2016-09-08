@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `AtRuleParser` trait in crate `cssparser`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, AtRuleParser">
+
+    <title>cssparser::AtRuleParser - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>cssparser</a></p><script>window.sidebarCurrent = {name: 'AtRuleParser', ty: 'trait', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content trait">
+<h1 class='fqn'><span class='in-band'>Trait <a href='index.html'>cssparser</a>::<wbr><a class='trait' href=''>AtRuleParser</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-40' class='srclink' href='../src/cssparser/rules_and_declarations.rs.html#85-140' title='goto source code'>[src]</a></span></h1>
+<pre class='rust trait'>pub trait AtRuleParser {
+    type <a href='#associatedtype.Prelude' class='type'>Prelude</a>;
+    type <a href='#associatedtype.AtRule' class='type'>AtRule</a>;
+    fn <a href='#method.parse_prelude' class='fnname'>parse_prelude</a>(&amp;self, name: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, input: &amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../cssparser/enum.AtRuleType.html' title='cssparser::AtRuleType'>AtRuleType</a>&lt;Self::Prelude,&nbsp;Self::AtRule&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; { ... }
+    fn <a href='#method.parse_block' class='fnname'>parse_block</a>(&amp;self, prelude: Self::Prelude, input: &amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self::AtRule,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt; { ... }
+    fn <a href='#method.rule_without_block' class='fnname'>rule_without_block</a>(&amp;self, prelude: Self::Prelude) -&gt; Self::AtRule { ... }
+}</pre><div class='docblock'><p>A trait to provide various parsing of at-rules.</p>
+
+<p>For example, there could be different implementations for top-level at-rules
+(<code>@media</code>, <code>@font-face</code>, …)
+and for page-margin rules inside <code>@page</code>.</p>
+
+<p>Default implementations that reject all at-rules are provided,
+so that <code>impl AtRuleParser&lt;(), ()&gt; for ... {}</code> can be used
+for using <code>DeclarationListParser</code> to parse a declartions list with only qualified rules.</p>
+</div>
+            <h2 id='associated-types'>Associated Types</h2>
+            <div class='methods'>
+        <h3 id='associatedtype.Prelude' class='method stab '><span id='Prelude.t' class='invisible'><code>type <a href='#associatedtype.Prelude' class='type'>Prelude</a></code></span></h3><div class='docblock'><p>The intermediate representation of an at-rule prelude.</p>
+</div><h3 id='associatedtype.AtRule' class='method stab '><span id='AtRule.t' class='invisible'><code>type <a href='#associatedtype.AtRule' class='type'>AtRule</a></code></span></h3><div class='docblock'><p>The finished representation of an at-rule.</p>
+</div></div>
+            <h2 id='provided-methods'>Provided Methods</h2>
+            <div class='methods'>
+        <h3 id='method.parse_prelude' class='method stab '><span id='parse_prelude.v' class='invisible'><code>fn <a href='#method.parse_prelude' class='fnname'>parse_prelude</a>(&amp;self, name: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, input: &amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='enum' href='../cssparser/enum.AtRuleType.html' title='cssparser::AtRuleType'>AtRuleType</a>&lt;Self::Prelude,&nbsp;Self::AtRule&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h3><div class='docblock'><p>Parse the prelude of an at-rule with the given <code>name</code>.</p>
+
+<p>Return the representation of the prelude and the type of at-rule,
+or <code>Err(())</code> to ignore the entire at-rule as invalid.</p>
+
+<p>See <code>AtRuleType</code>’s documentation for the return value.</p>
+
+<p>The prelude is the part after the at-keyword
+and before the <code>;</code> semicolon or <code>{ /* ... */ }</code> block.</p>
+
+<p>At-rule name matching should be case-insensitive in the ASCII range.
+This can be done with <code>std::ascii::Ascii::eq_ignore_ascii_case</code>,
+or with the <code>match_ignore_ascii_case!</code> macro.</p>
+
+<p>The given <code>input</code> is a &quot;delimited&quot; parser
+that ends wherever the prelude should end.
+(Before the next semicolon, the next <code>{</code>, or the end of the current block.)</p>
+</div><h3 id='method.parse_block' class='method stab '><span id='parse_block.v' class='invisible'><code>fn <a href='#method.parse_block' class='fnname'>parse_block</a>(&amp;self, prelude: Self::Prelude, input: &amp;mut <a class='struct' href='../cssparser/struct.Parser.html' title='cssparser::Parser'>Parser</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self::AtRule,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h3><div class='docblock'><p>Parse the content of a <code>{ /* ... */ }</code> block for the body of the at-rule.</p>
+
+<p>Return the finished representation of the at-rule
+as returned by <code>RuleListParser::next</code> or <code>DeclarationListParser::next</code>,
+or <code>Err(())</code> to ignore the entire at-rule as invalid.</p>
+
+<p>This is only called when <code>parse_prelude</code> returned <code>WithBlock</code> or <code>OptionalBlock</code>,
+and a block was indeed found following the prelude.</p>
+</div><h3 id='method.rule_without_block' class='method stab '><span id='rule_without_block.v' class='invisible'><code>fn <a href='#method.rule_without_block' class='fnname'>rule_without_block</a>(&amp;self, prelude: Self::Prelude) -&gt; Self::AtRule</code></span></h3><div class='docblock'><p>An <code>OptionalBlock</code> prelude was followed by <code>;</code>.</p>
+
+<p>Convert the prelude into the finished representation of the at-rule
+as returned by <code>RuleListParser::next</code> or <code>DeclarationListParser::next</code>.</p>
+</div></div>
+        <h2 id='implementors'>Implementors</h2>
+        <ul class='item-list' id='implementors-list'>
+    </ul><script type="text/javascript" async
+                         src="../implementors/cssparser/trait.AtRuleParser.js">
+                 </script></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "cssparser";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

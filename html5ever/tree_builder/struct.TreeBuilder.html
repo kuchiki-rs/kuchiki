@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `TreeBuilder` struct in crate `html5ever`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, TreeBuilder">
+
+    <title>html5ever::tree_builder::TreeBuilder - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>html5ever</a>::<wbr><a href='index.html'>tree_builder</a></p><script>window.sidebarCurrent = {name: 'TreeBuilder', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>html5ever</a>::<wbr><a href='index.html'>tree_builder</a>::<wbr><a class='struct' href=''>TreeBuilder</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-3428' class='srclink' href='../../src/html5ever/tree_builder/mod.rs.html#81-141' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct TreeBuilder&lt;Handle,&nbsp;Sink&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>The HTML tree builder.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;Handle,&nbsp;Sink&gt; <a class='struct' href='../../html5ever/tree_builder/struct.TreeBuilder.html' title='html5ever::tree_builder::TreeBuilder'>TreeBuilder</a>&lt;Handle,&nbsp;Sink&gt; <span class='where'>where Handle: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>, Sink: <a class='trait' href='../../html5ever/tree_builder/interface/trait.TreeSink.html' title='html5ever::tree_builder::interface::TreeSink'>TreeSink</a>&lt;Handle=Handle&gt;</span></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-3448' class='srclink' href='../../src/html5ever/tree_builder/mod.rs.html#143-357' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class='method'><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>(sink: Sink, opts: <a class='struct' href='../../html5ever/tree_builder/struct.TreeBuilderOpts.html' title='html5ever::tree_builder::TreeBuilderOpts'>TreeBuilderOpts</a>) -&gt; <a class='struct' href='../../html5ever/tree_builder/struct.TreeBuilder.html' title='html5ever::tree_builder::TreeBuilder'>TreeBuilder</a>&lt;Handle,&nbsp;Sink&gt;</code></span></h4>
+<div class='docblock'><p>Create a new tree builder which sends tree modifications to a particular <code>TreeSink</code>.</p>
+
+<p>The tree builder is also a <code>TokenSink</code>.</p>
+</div><h4 id='method.new_for_fragment' class='method'><span id='new_for_fragment.v' class='invisible'><code>fn <a href='#method.new_for_fragment' class='fnname'>new_for_fragment</a>(sink: Sink, context_elem: Handle, form_elem: <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;Handle&gt;, opts: <a class='struct' href='../../html5ever/tree_builder/struct.TreeBuilderOpts.html' title='html5ever::tree_builder::TreeBuilderOpts'>TreeBuilderOpts</a>) -&gt; <a class='struct' href='../../html5ever/tree_builder/struct.TreeBuilder.html' title='html5ever::tree_builder::TreeBuilder'>TreeBuilder</a>&lt;Handle,&nbsp;Sink&gt;</code></span></h4>
+<div class='docblock'><p>Create a new tree builder which sends tree modifications to a particular <code>TreeSink</code>.
+This is for parsing fragments.</p>
+
+<p>The tree builder is also a <code>TokenSink</code>.</p>
+</div><h4 id='method.tokenizer_state_for_context_elem' class='method'><span id='tokenizer_state_for_context_elem.v' class='invisible'><code>fn <a href='#method.tokenizer_state_for_context_elem' class='fnname'>tokenizer_state_for_context_elem</a>(&amp;self) -&gt; <a class='enum' href='../../html5ever/tokenizer/states/enum.State.html' title='html5ever::tokenizer::states::State'>State</a></code></span></h4>
+<h4 id='method.unwrap' class='method'><span id='unwrap.v' class='invisible'><code>fn <a href='#method.unwrap' class='fnname'>unwrap</a>(self) -&gt; Sink</code></span></h4>
+<h4 id='method.sink' class='method'><span id='sink.v' class='invisible'><code>fn <a href='#method.sink' class='fnname'>sink</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a Sink</code></span></h4>
+<h4 id='method.sink_mut' class='method'><span id='sink_mut.v' class='invisible'><code>fn <a href='#method.sink_mut' class='fnname'>sink_mut</a>&lt;'a&gt;(&amp;'a mut self) -&gt; &amp;'a mut Sink</code></span></h4>
+<h4 id='method.trace_handles' class='method'><span id='trace_handles.v' class='invisible'><code>fn <a href='#method.trace_handles' class='fnname'>trace_handles</a>(&amp;self, tracer: &amp;<a class='trait' href='../../html5ever/tree_builder/interface/trait.Tracer.html' title='html5ever::tree_builder::interface::Tracer'>Tracer</a>&lt;Handle=Handle&gt;)</code></span></h4>
+<div class='docblock'><p>Call the <code>Tracer</code>&#39;s <code>trace_handle</code> method on every <code>Handle</code> in the tree builder&#39;s
+internal state.  This is intended to support garbage-collected DOMs.</p>
+</div><h4 id='method.is_fragment' class='method'><span id='is_fragment.v' class='invisible'><code>fn <a href='#method.is_fragment' class='fnname'>is_fragment</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Are we parsing a HTML fragment?</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl&lt;Handle,&nbsp;Sink&gt; <a class='trait' href='../../html5ever/tokenizer/trait.TokenSink.html' title='html5ever::tokenizer::TokenSink'>TokenSink</a> for <a class='struct' href='../../html5ever/tree_builder/struct.TreeBuilder.html' title='html5ever::tree_builder::TreeBuilder'>TreeBuilder</a>&lt;Handle,&nbsp;Sink&gt; <span class='where'>where Handle: <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a>, Sink: <a class='trait' href='../../html5ever/tree_builder/interface/trait.TreeSink.html' title='html5ever::tree_builder::interface::TreeSink'>TreeSink</a>&lt;Handle=Handle&gt;</span></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-3549' class='srclink' href='../../src/html5ever/tree_builder/mod.rs.html#359-429' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.process_token' class='method'><span id='process_token.v' class='invisible'><code>fn <a href='../../html5ever/tokenizer/trait.TokenSink.html#tymethod.process_token' class='fnname'>process_token</a>(&amp;mut self, token: <a class='enum' href='../../html5ever/tokenizer/enum.Token.html' title='html5ever::tokenizer::Token'>Token</a>)</code></span></h4>
+<div class='docblock'><p>Process a token.</p>
+</div><h4 id='method.adjusted_current_node_present_but_not_in_html_namespace' class='method'><span id='adjusted_current_node_present_but_not_in_html_namespace.v' class='invisible'><code>fn <a href='../../html5ever/tokenizer/trait.TokenSink.html#method.adjusted_current_node_present_but_not_in_html_namespace' class='fnname'>adjusted_current_node_present_but_not_in_html_namespace</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>Used in the markup declaration open state. By default, this always returns false and thus all CDATA sections are tokenized as bogus comments. <a href="https://html.spec.whatwg.org/multipage/#markup-declaration-open-state">https://html.spec.whatwg.org/multipage/#markup-declaration-open-state</a> <a href="../../html5ever/tokenizer/trait.TokenSink.html#method.adjusted_current_node_present_but_not_in_html_namespace">Read more</a></p>
+</div><h4 id='method.query_state_change' class='method'><span id='query_state_change.v' class='invisible'><code>fn <a href='../../html5ever/tokenizer/trait.TokenSink.html#method.query_state_change' class='fnname'>query_state_change</a>(&amp;mut self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='enum' href='../../html5ever/tokenizer/states/enum.State.html' title='html5ever::tokenizer::states::State'>State</a>&gt;</code></span></h4>
+<div class='docblock'><p>The tokenizer will call this after emitting any tag. This allows the tree builder to change the tokenizer&#39;s state. By default no state changes occur. <a href="../../html5ever/tokenizer/trait.TokenSink.html#method.query_state_change">Read more</a></p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "html5ever";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

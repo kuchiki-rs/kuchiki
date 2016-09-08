@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `NodeRef` struct in crate `kuchiki`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, NodeRef">
+
+    <title>kuchiki::NodeRef - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>kuchiki</a></p><script>window.sidebarCurrent = {name: 'NodeRef', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>kuchiki</a>::<wbr><a class='struct' href=''>NodeRef</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1086' class='srclink' href='../src/kuchiki/src/tree.rs.html#94' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct NodeRef(pub <a class='struct' href='../rc/stable_rc/struct.Rc.html' title='rc::stable_rc::Rc'>Rc</a>&lt;<a class='struct' href='../kuchiki/struct.Node.html' title='kuchiki::Node'>Node</a>&gt;);</pre><div class='docblock'><p>A strong reference to a node.</p>
+
+<p>A node is destroyed when the last strong reference to it dropped.</p>
+
+<p>Each node holds a strong reference to its first child and next sibling (if any),
+but only a weak reference to its last child, previous sibling, and parent.
+This is to avoid strong reference cycles, which would cause memory leaks.</p>
+
+<p>As a result, a single <code>NodeRef</code> is sufficient to keep alive a node
+and nodes that are after it in tree order
+(its descendants, its following siblings, and their descendants)
+but not other nodes in a tree.</p>
+
+<p>To avoid detroying nodes prematurely,
+programs typically hold a strong reference to the root of a document
+until they’re done with that document.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-118' class='srclink' href='../src/kuchiki/src/iter.rs.html#11-143' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.inclusive_ancestors' class='method'><span id='inclusive_ancestors.v' class='invisible'><code>fn <a href='#method.inclusive_ancestors' class='fnname'>inclusive_ancestors</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Ancestors.html' title='kuchiki::iter::Ancestors'>Ancestors</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node and its ancestors.</p>
+</div><h4 id='method.ancestors' class='method'><span id='ancestors.v' class='invisible'><code>fn <a href='#method.ancestors' class='fnname'>ancestors</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Ancestors.html' title='kuchiki::iter::Ancestors'>Ancestors</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node’s ancestors.</p>
+</div><h4 id='method.inclusive_preceding_siblings' class='method'><span id='inclusive_preceding_siblings.v' class='invisible'><code>fn <a href='#method.inclusive_preceding_siblings' class='fnname'>inclusive_preceding_siblings</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/core/iter/struct.Rev.html' title='core::iter::Rev'>Rev</a>&lt;<a class='struct' href='../kuchiki/iter/struct.Siblings.html' title='kuchiki::iter::Siblings'>Siblings</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node and the siblings before it.</p>
+</div><h4 id='method.preceding_siblings' class='method'><span id='preceding_siblings.v' class='invisible'><code>fn <a href='#method.preceding_siblings' class='fnname'>preceding_siblings</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/core/iter/struct.Rev.html' title='core::iter::Rev'>Rev</a>&lt;<a class='struct' href='../kuchiki/iter/struct.Siblings.html' title='kuchiki::iter::Siblings'>Siblings</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node’s siblings before it.</p>
+</div><h4 id='method.inclusive_following_siblings' class='method'><span id='inclusive_following_siblings.v' class='invisible'><code>fn <a href='#method.inclusive_following_siblings' class='fnname'>inclusive_following_siblings</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Siblings.html' title='kuchiki::iter::Siblings'>Siblings</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node and the siblings after it.</p>
+</div><h4 id='method.following_siblings' class='method'><span id='following_siblings.v' class='invisible'><code>fn <a href='#method.following_siblings' class='fnname'>following_siblings</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Siblings.html' title='kuchiki::iter::Siblings'>Siblings</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node’s siblings after it.</p>
+</div><h4 id='method.children' class='method'><span id='children.v' class='invisible'><code>fn <a href='#method.children' class='fnname'>children</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Siblings.html' title='kuchiki::iter::Siblings'>Siblings</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node’s children.</p>
+</div><h4 id='method.inclusive_descendants' class='method'><span id='inclusive_descendants.v' class='invisible'><code>fn <a href='#method.inclusive_descendants' class='fnname'>inclusive_descendants</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Descendants.html' title='kuchiki::iter::Descendants'>Descendants</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node and its descendants, in tree order.</p>
+
+<p>Parent nodes appear before the descendants.</p>
+
+<p>Note: this is the <code>NodeEdge::Start</code> items from <code>traverse()</code>.</p>
+</div><h4 id='method.descendants' class='method'><span id='descendants.v' class='invisible'><code>fn <a href='#method.descendants' class='fnname'>descendants</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Descendants.html' title='kuchiki::iter::Descendants'>Descendants</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of references to this node’s descendants, in tree order.</p>
+
+<p>Parent nodes appear before the descendants.</p>
+
+<p>Note: this is the <code>NodeEdge::Start</code> items from <code>traverse()</code>.</p>
+</div><h4 id='method.traverse_inclusive' class='method'><span id='traverse_inclusive.v' class='invisible'><code>fn <a href='#method.traverse_inclusive' class='fnname'>traverse_inclusive</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Traverse.html' title='kuchiki::iter::Traverse'>Traverse</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of the start and end edges of this node and its descendants,
+in tree order.</p>
+</div><h4 id='method.traverse' class='method'><span id='traverse.v' class='invisible'><code>fn <a href='#method.traverse' class='fnname'>traverse</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/iter/struct.Traverse.html' title='kuchiki::iter::Traverse'>Traverse</a></code></span></h4>
+<div class='docblock'><p>Return an iterator of the start and end edges of this node’s descendants,
+in tree order.</p>
+</div><h4 id='method.select' class='method'><span id='select.v' class='invisible'><code>fn <a href='#method.select' class='fnname'>select</a>(&amp;self, selectors: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../kuchiki/iter/struct.Select.html' title='kuchiki::iter::Select'>Select</a>&lt;<a class='struct' href='../kuchiki/iter/struct.Elements.html' title='kuchiki::iter::Elements'>Elements</a>&lt;<a class='struct' href='../kuchiki/iter/struct.Descendants.html' title='kuchiki::iter::Descendants'>Descendants</a>&gt;&gt;,&nbsp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return an iterator of the inclusive descendants element that match the given selector list.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-524' class='srclink' href='../src/kuchiki/src/node_data_ref.rs.html#6-36' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.into_element_ref' class='method'><span id='into_element_ref.v' class='invisible'><code>fn <a href='#method.into_element_ref' class='fnname'>into_element_ref</a>(self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeDataRef.html' title='kuchiki::NodeDataRef'>NodeDataRef</a>&lt;<a class='struct' href='../kuchiki/struct.ElementData.html' title='kuchiki::ElementData'>ElementData</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>If this node is an element, return a strong reference to element-specific data.</p>
+</div><h4 id='method.into_text_ref' class='method'><span id='into_text_ref.v' class='invisible'><code>fn <a href='#method.into_text_ref' class='fnname'>into_text_ref</a>(self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeDataRef.html' title='kuchiki::NodeDataRef'>NodeDataRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/core/cell/struct.RefCell.html' title='core::cell::RefCell'>RefCell</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;&gt;</code></span></h4>
+<div class='docblock'><p>If this node is a text node, return a strong reference to its contents.</p>
+</div><h4 id='method.into_comment_ref' class='method'><span id='into_comment_ref.v' class='invisible'><code>fn <a href='#method.into_comment_ref' class='fnname'>into_comment_ref</a>(self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeDataRef.html' title='kuchiki::NodeDataRef'>NodeDataRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/core/cell/struct.RefCell.html' title='core::cell::RefCell'>RefCell</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;&gt;</code></span></h4>
+<div class='docblock'><p>If this node is a comment, return a strong reference to its contents.</p>
+</div><h4 id='method.into_doctype_ref' class='method'><span id='into_doctype_ref.v' class='invisible'><code>fn <a href='#method.into_doctype_ref' class='fnname'>into_doctype_ref</a>(self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeDataRef.html' title='kuchiki::NodeDataRef'>NodeDataRef</a>&lt;<a class='struct' href='../kuchiki/struct.Doctype.html' title='kuchiki::Doctype'>Doctype</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>If this node is a doctype, return a strong reference to doctype-specific data.</p>
+</div><h4 id='method.into_document_ref' class='method'><span id='into_document_ref.v' class='invisible'><code>fn <a href='#method.into_document_ref' class='fnname'>into_document_ref</a>(self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeDataRef.html' title='kuchiki::NodeDataRef'>NodeDataRef</a>&lt;<a class='struct' href='../kuchiki/struct.DocumentData.html' title='kuchiki::DocumentData'>DocumentData</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>If this node is a document, return a strong reference to document-specific data.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-898' class='srclink' href='../src/kuchiki/src/serializer.rs.html#59-75' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.serialize' class='method'><span id='serialize.v' class='invisible'><code>fn <a href='#method.serialize' class='fnname'>serialize</a>&lt;W:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>&gt;(&amp;self, writer: &amp;mut W) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Serialize this node and its descendants in HTML syntax to the given stream.</p>
+</div><h4 id='method.serialize_to_file' class='method'><span id='serialize_to_file.v' class='invisible'><code>fn <a href='#method.serialize_to_file' class='fnname'>serialize_to_file</a>&lt;P:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.AsRef.html' title='core::convert::AsRef'>AsRef</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/std/path/struct.Path.html' title='std::path::Path'>Path</a>&gt;&gt;(&amp;self, path: P) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+<div class='docblock'><p>Serialize this node and its descendants in HTML syntax to a new file at the given path.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1136' class='srclink' href='../src/kuchiki/src/tree.rs.html#193-263' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class='method'><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>(data: <a class='enum' href='../kuchiki/enum.NodeData.html' title='kuchiki::NodeData'>NodeData</a>) -&gt; <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span></h4>
+<div class='docblock'><p>Create a new node.</p>
+</div><h4 id='method.new_element' class='method'><span id='new_element.v' class='invisible'><code>fn <a href='#method.new_element' class='fnname'>new_element</a>&lt;I&gt;(name: <a class='struct' href='../string_cache/namespace/struct.QualName.html' title='string_cache::namespace::QualName'>QualName</a>, attributes: I) -&gt; <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a> <span class='where'>where I: <a class='trait' href='https://doc.rust-lang.org/nightly/core/iter/traits/trait.IntoIterator.html' title='core::iter::traits::IntoIterator'>IntoIterator</a>&lt;Item=<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(</a><a class='struct' href='../string_cache/namespace/struct.QualName.html' title='string_cache::namespace::QualName'>QualName</a>, <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>)</a>&gt;</span></code></span></h4>
+<div class='docblock'><p>Create a new element node.</p>
+</div><h4 id='method.new_text' class='method'><span id='new_text.v' class='invisible'><code>fn <a href='#method.new_text' class='fnname'>new_text</a>&lt;T:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;(value: T) -&gt; <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span></h4>
+<div class='docblock'><p>Create a new text node.</p>
+</div><h4 id='method.new_comment' class='method'><span id='new_comment.v' class='invisible'><code>fn <a href='#method.new_comment' class='fnname'>new_comment</a>&lt;T:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;(value: T) -&gt; <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span></h4>
+<div class='docblock'><p>Create a new comment node.</p>
+</div><h4 id='method.new_doctype' class='method'><span id='new_doctype.v' class='invisible'><code>fn <a href='#method.new_doctype' class='fnname'>new_doctype</a>&lt;T1,&nbsp;T2,&nbsp;T3&gt;(name: T1, public_id: T2, system_id: T3) -&gt; <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a> <span class='where'>where T1: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;, T2: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;, T3: <a class='trait' href='https://doc.rust-lang.org/nightly/core/convert/trait.Into.html' title='core::convert::Into'>Into</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;</span></code></span></h4>
+<div class='docblock'><p>Create a new doctype node.</p>
+</div><h4 id='method.new_document' class='method'><span id='new_document.v' class='invisible'><code>fn <a href='#method.new_document' class='fnname'>new_document</a>() -&gt; <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span></h4>
+<div class='docblock'><p>Create a new document node.</p>
+</div><h4 id='method.text_contents' class='method'><span id='text_contents.v' class='invisible'><code>fn <a href='#method.text_contents' class='fnname'>text_contents</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></span></h4>
+<div class='docblock'><p>Return the concatenation of all text nodes in this subtree.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1203' class='srclink' href='../src/kuchiki/src/tree.rs.html#375-450' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.append' class='method'><span id='append.v' class='invisible'><code>fn <a href='#method.append' class='fnname'>append</a>(&amp;self, new_child: <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>)</code></span></h4>
+<div class='docblock'><p>Append a new child to this node, after existing children.</p>
+
+<p>The new child is detached from its previous position.</p>
+</div><h4 id='method.prepend' class='method'><span id='prepend.v' class='invisible'><code>fn <a href='#method.prepend' class='fnname'>prepend</a>(&amp;self, new_child: <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>)</code></span></h4>
+<div class='docblock'><p>Prepend a new child to this node, before existing children.</p>
+
+<p>The new child is detached from its previous position.</p>
+</div><h4 id='method.insert_after' class='method'><span id='insert_after.v' class='invisible'><code>fn <a href='#method.insert_after' class='fnname'>insert_after</a>(&amp;self, new_sibling: <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>)</code></span></h4>
+<div class='docblock'><p>Insert a new sibling after this node.</p>
+
+<p>The new sibling is detached from its previous position.</p>
+</div><h4 id='method.insert_before' class='method'><span id='insert_before.v' class='invisible'><code>fn <a href='#method.insert_before' class='fnname'>insert_before</a>(&amp;self, new_sibling: <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>)</code></span></h4>
+<div class='docblock'><p>Insert a new sibling before this node.</p>
+
+<p>The new sibling is detached from its previous position.</p>
+</div></div><h2 id='deref-methods'>Methods from <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html' title='core::ops::Deref'>Deref</a>&lt;Target=<a class='struct' href='../kuchiki/struct.Node.html' title='kuchiki::Node'>Node</a>&gt;</h2><div class='impl-items'><h4 id='method.data' class='method'><span id='data.v' class='invisible'><code>fn <a href='#method.data' class='fnname'>data</a>(&amp;self) -&gt; &amp;<a class='enum' href='../kuchiki/enum.NodeData.html' title='kuchiki::NodeData'>NodeData</a></code></span></h4>
+<div class='docblock'><p>Return a reference to this node’s node-type-specific data.</p>
+</div><h4 id='method.as_element' class='method'><span id='as_element.v' class='invisible'><code>fn <a href='#method.as_element' class='fnname'>as_element</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='../kuchiki/struct.ElementData.html' title='kuchiki::ElementData'>ElementData</a>&gt;</code></span></h4>
+<div class='docblock'><p>If this node is an element, return a reference to element-specific data.</p>
+</div><h4 id='method.as_text' class='method'><span id='as_text.v' class='invisible'><code>fn <a href='#method.as_text' class='fnname'>as_text</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='https://doc.rust-lang.org/nightly/core/cell/struct.RefCell.html' title='core::cell::RefCell'>RefCell</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>If this node is a text node, return a reference to its contents.</p>
+</div><h4 id='method.as_comment' class='method'><span id='as_comment.v' class='invisible'><code>fn <a href='#method.as_comment' class='fnname'>as_comment</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='https://doc.rust-lang.org/nightly/core/cell/struct.RefCell.html' title='core::cell::RefCell'>RefCell</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>&gt;&gt;</code></span></h4>
+<div class='docblock'><p>If this node is a comment, return a reference to its contents.</p>
+</div><h4 id='method.as_doctype' class='method'><span id='as_doctype.v' class='invisible'><code>fn <a href='#method.as_doctype' class='fnname'>as_doctype</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='../kuchiki/struct.Doctype.html' title='kuchiki::Doctype'>Doctype</a>&gt;</code></span></h4>
+<div class='docblock'><p>If this node is a document, return a reference to doctype-specific data.</p>
+</div><h4 id='method.as_document' class='method'><span id='as_document.v' class='invisible'><code>fn <a href='#method.as_document' class='fnname'>as_document</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;&amp;<a class='struct' href='../kuchiki/struct.DocumentData.html' title='kuchiki::DocumentData'>DocumentData</a>&gt;</code></span></h4>
+<div class='docblock'><p>If this node is a document, return a reference to document-specific data.</p>
+</div><h4 id='method.parent' class='method'><span id='parent.v' class='invisible'><code>fn <a href='#method.parent' class='fnname'>parent</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return a reference to the parent node, unless this node is the root of the tree.</p>
+</div><h4 id='method.first_child' class='method'><span id='first_child.v' class='invisible'><code>fn <a href='#method.first_child' class='fnname'>first_child</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return a reference to the first child of this node, unless it has no child.</p>
+</div><h4 id='method.last_child' class='method'><span id='last_child.v' class='invisible'><code>fn <a href='#method.last_child' class='fnname'>last_child</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return a reference to the last child of this node, unless it has no child.</p>
+</div><h4 id='method.previous_sibling' class='method'><span id='previous_sibling.v' class='invisible'><code>fn <a href='#method.previous_sibling' class='fnname'>previous_sibling</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return a reference to the previous sibling of this node, unless it is a first child.</p>
+</div><h4 id='method.next_sibling' class='method'><span id='next_sibling.v' class='invisible'><code>fn <a href='#method.next_sibling' class='fnname'>next_sibling</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/option/enum.Option.html' title='core::option::Option'>Option</a>&lt;<a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>&gt;</code></span></h4>
+<div class='docblock'><p>Return a reference to the previous sibling of this node, unless it is a last child.</p>
+</div><h4 id='method.detach' class='method'><span id='detach.v' class='invisible'><code>fn <a href='#method.detach' class='fnname'>detach</a>(&amp;self)</code></span></h4>
+<div class='docblock'><p>Detach a node from its parent and siblings. Children are not affected.</p>
+
+<p>To remove a node and its descendants, detach it and drop any strong reference to it.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='../html5ever/serialize/trait.Serializable.html' title='html5ever::serialize::Serializable'>Serializable</a> for <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-866' class='srclink' href='../src/kuchiki/src/serializer.rs.html#11-47' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.serialize-1' class='method'><span id='serialize.v-1' class='invisible'><code>fn <a href='../html5ever/serialize/trait.Serializable.html#tymethod.serialize' class='fnname'>serialize</a>&lt;'wr,&nbsp;Wr:&nbsp;<a class='trait' href='https://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>&gt;(&amp;self, serializer: &amp;mut <a class='struct' href='../html5ever/serialize/struct.Serializer.html' title='html5ever::serialize::Serializer'>Serializer</a>&lt;'wr,&nbsp;Wr&gt;, traversal_scope: <a class='enum' href='../html5ever/serialize/enum.TraversalScope.html' title='html5ever::serialize::TraversalScope'>TraversalScope</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/std/io/error/type.Result.html' title='std::io::error::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>&gt;</code></span></h4>
+</div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/collections/string/trait.ToString.html' title='collections::string::ToString'>ToString</a> for <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-894' class='srclink' href='../src/kuchiki/src/serializer.rs.html#50-57' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.to_string' class='method'><span id='to_string.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/collections/string/trait.ToString.html#tymethod.to_string' class='fnname'>to_string</a>(&amp;self) -&gt; <a class='struct' href='https://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a></code></span></h4>
+<div class='docblock'><p>Converts the given value to a <code>String</code>. <a href="https://doc.rust-lang.org/nightly/collections/string/trait.ToString.html#tymethod.to_string">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1089' class='srclink' href='../src/kuchiki/src/tree.rs.html#93' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.clone' class='method'><span id='clone.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span></h4>
+<div class='docblock'><p>Returns a copy of the value. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#tymethod.clone">Read more</a></p>
+</div><h4 id='method.clone_from' class='method'><span id='clone_from.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from">Read more</a></p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1093' class='srclink' href='../src/kuchiki/src/tree.rs.html#93' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.fmt' class='method'><span id='fmt.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#tymethod.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></span></h4>
+<div class='docblock'><p>Formats the value using the given formatter.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html' title='core::ops::Deref'>Deref</a> for <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1099' class='srclink' href='../src/kuchiki/src/tree.rs.html#96-102' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='associatedtype.Target' class='type'><span id='Target.t' class='invisible'><code>type <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html#associatedtype.Target' class='type'>Target</a> = <a class='struct' href='../kuchiki/struct.Node.html' title='kuchiki::Node'>Node</a></code></span></h4>
+<div class='docblock'><p>The resulting type after dereferencing</p>
+</div><h4 id='method.deref' class='method'><span id='deref.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/ops/trait.Deref.html#tymethod.deref' class='fnname'>deref</a>(&amp;self) -&gt; &amp;<a class='struct' href='../kuchiki/struct.Node.html' title='kuchiki::Node'>Node</a></code></span></h4>
+<div class='docblock'><p>The method called to dereference a value</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1103' class='srclink' href='../src/kuchiki/src/tree.rs.html#104' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'></div><h3 class='impl'><span class='in-band'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a></code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1104' class='srclink' href='../src/kuchiki/src/tree.rs.html#105-112' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.eq' class='method'><span id='eq.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq' class='fnname'>eq</a>(&amp;self, other: &amp;<a class='struct' href='../kuchiki/struct.NodeRef.html' title='kuchiki::NodeRef'>NodeRef</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></span></h4>
+<div class='docblock'><p>This method tests for <code>self</code> and <code>other</code> values to be equal, and is used by <code>==</code>. <a href="https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#tymethod.eq">Read more</a></p>
+</div><h4 id='method.ne' class='method'><span id='ne.v' class='invisible'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, other: &amp;Rhs) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code><div class='since' title='Stable since Rust version 1.0.0'>1.0.0</div></span></h4>
+<div class='docblock'><p>This method tests for <code>!=</code>.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "kuchiki";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

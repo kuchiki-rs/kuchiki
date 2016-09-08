@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Tokenizer` struct in crate `html5ever`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Tokenizer">
+
+    <title>html5ever::tokenizer::Tokenizer - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>html5ever</a>::<wbr><a href='index.html'>tokenizer</a></p><script>window.sidebarCurrent = {name: 'Tokenizer', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>html5ever</a>::<wbr><a href='index.html'>tokenizer</a>::<wbr><a class='struct' href=''>Tokenizer</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-1328' class='srclink' href='../../src/html5ever/tokenizer/mod.rs.html#93-163' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Tokenizer&lt;Sink&gt; {
+    // some fields omitted
+}</pre><div class='docblock'><p>The HTML tokenizer.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><span class='in-band'><code>impl&lt;Sink:&nbsp;<a class='trait' href='../../html5ever/tokenizer/trait.TokenSink.html' title='html5ever::tokenizer::TokenSink'>TokenSink</a>&gt; <a class='struct' href='../../html5ever/tokenizer/struct.Tokenizer.html' title='html5ever::tokenizer::Tokenizer'>Tokenizer</a>&lt;Sink&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1352' class='srclink' href='../../src/html5ever/tokenizer/mod.rs.html#165-522' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class='method'><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>(sink: Sink, opts: <a class='struct' href='../../html5ever/tokenizer/struct.TokenizerOpts.html' title='html5ever::tokenizer::TokenizerOpts'>TokenizerOpts</a>) -&gt; <a class='struct' href='../../html5ever/tokenizer/struct.Tokenizer.html' title='html5ever::tokenizer::Tokenizer'>Tokenizer</a>&lt;Sink&gt;</code></span></h4>
+<div class='docblock'><p>Create a new tokenizer which feeds tokens to a particular <code>TokenSink</code>.</p>
+</div><h4 id='method.unwrap' class='method'><span id='unwrap.v' class='invisible'><code>fn <a href='#method.unwrap' class='fnname'>unwrap</a>(self) -&gt; Sink</code></span></h4>
+<h4 id='method.sink' class='method'><span id='sink.v' class='invisible'><code>fn <a href='#method.sink' class='fnname'>sink</a>&lt;'a&gt;(&amp;'a self) -&gt; &amp;'a Sink</code></span></h4>
+<h4 id='method.sink_mut' class='method'><span id='sink_mut.v' class='invisible'><code>fn <a href='#method.sink_mut' class='fnname'>sink_mut</a>&lt;'a&gt;(&amp;'a mut self) -&gt; &amp;'a mut Sink</code></span></h4>
+<h4 id='method.feed' class='method'><span id='feed.v' class='invisible'><code>fn <a href='#method.feed' class='fnname'>feed</a>(&amp;mut self, input: <a class='type' href='../../tendril/tendril/type.StrTendril.html' title='tendril::tendril::StrTendril'>StrTendril</a>)</code></span></h4>
+<div class='docblock'><p>Feed an input string into the tokenizer.</p>
+</div><h4 id='method.set_plaintext_state' class='method'><span id='set_plaintext_state.v' class='invisible'><code>fn <a href='#method.set_plaintext_state' class='fnname'>set_plaintext_state</a>(&amp;mut self)</code></span></h4>
+<h4 id='method.run' class='method'><span id='run.v' class='invisible'><code>fn <a href='#method.run' class='fnname'>run</a>(&amp;mut self)</code></span></h4>
+<div class='docblock'><p>Run the state machine for as long as we can.</p>
+</div></div><h3 class='impl'><span class='in-band'><code>impl&lt;Sink:&nbsp;<a class='trait' href='../../html5ever/tokenizer/trait.TokenSink.html' title='html5ever::tokenizer::TokenSink'>TokenSink</a>&gt; <a class='struct' href='../../html5ever/tokenizer/struct.Tokenizer.html' title='html5ever::tokenizer::Tokenizer'>Tokenizer</a>&lt;Sink&gt;</code></span><span class='out-of-band'><div class='ghost'></div><a id='src-1517' class='srclink' href='../../src/html5ever/tokenizer/mod.rs.html#632-1337' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.end' class='method'><span id='end.v' class='invisible'><code>fn <a href='#method.end' class='fnname'>end</a>(&amp;mut self)</code></span></h4>
+<div class='docblock'><p>Indicate that we have reached the end of the input.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "html5ever";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `fmt` mod in crate `tendril`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, fmt">
+
+    <title>tendril::fmt - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>tendril</a></p><script>window.sidebarCurrent = {name: 'fmt', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>tendril</a>::<wbr><a class='mod' href=''>fmt</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-11' class='srclink' href='../../src/tendril/fmt.rs.html#7-516' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Marker types for formats.</p>
+
+<p>This module defines the types and traits used to mark a <code>Tendril</code>
+with the format of data it contains. It includes those formats
+for which <code>Tendril</code> supports at least some operations without
+conversion.</p>
+
+<p>To convert a string tendril to/from a byte tendril in an arbitrary
+character encoding, see the <code>encode</code> and <code>decode</code> methods on
+<code>Tendril</code>.</p>
+
+<p><code>Tendril</code> operations may become memory-unsafe if data invalid for
+the format sneaks in. For that reason, these traits require
+<code>unsafe impl</code>.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='imp/index.html'
+                                  title='tendril::fmt::imp'>imp</a></td>
+                           <td class='docblock short'>
+                                <p>Implementation details.</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.ASCII.html'
+                                  title='tendril::fmt::ASCII'>ASCII</a></td>
+                           <td class='docblock short'>
+                                <p>Marker type for ASCII text.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Bytes.html'
+                                  title='tendril::fmt::Bytes'>Bytes</a></td>
+                           <td class='docblock short'>
+                                <p>Marker type for uninterpreted bytes.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.Latin1.html'
+                                  title='tendril::fmt::Latin1'>Latin1</a></td>
+                           <td class='docblock short'>
+                                <p>Marker type for the single-byte encoding of the first 256 Unicode codepoints.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.UTF8.html'
+                                  title='tendril::fmt::UTF8'>UTF8</a></td>
+                           <td class='docblock short'>
+                                <p>Marker type for UTF-8 text.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.WTF8.html'
+                                  title='tendril::fmt::WTF8'>WTF8</a></td>
+                           <td class='docblock short'>
+                                <p>Marker type for WTF-8 text.</p>
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.CharFormat.html'
+                                  title='tendril::fmt::CharFormat'>CharFormat</a></td>
+                           <td class='docblock short'>
+                                <p>Indicates a format which contains characters from Unicode
+(all of it, or some proper subset).</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Format.html'
+                                  title='tendril::fmt::Format'>Format</a></td>
+                           <td class='docblock short'>
+                                <p>Trait for format marker types.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Slice.html'
+                                  title='tendril::fmt::Slice'>Slice</a></td>
+                           <td class='docblock short'>
+                                <p>Indicates a Rust slice type that is represented in memory as bytes.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.SliceFormat.html'
+                                  title='tendril::fmt::SliceFormat'>SliceFormat</a></td>
+                           <td class='docblock short'>
+                                <p>Indicates a format which corresponds to a Rust slice type,
+representing exactly the same invariants.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.SubsetOf.html'
+                                  title='tendril::fmt::SubsetOf'>SubsetOf</a></td>
+                           <td class='docblock short'>
+                                <p>Indicates that one format is a subset of another.</p>
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "tendril";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>

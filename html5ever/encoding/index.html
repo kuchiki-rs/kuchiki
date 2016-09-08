@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `encoding` mod in crate `html5ever`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, encoding">
+
+    <title>html5ever::encoding - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='../index.html'>html5ever</a></p><script>window.sidebarCurrent = {name: 'encoding', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../index.html'>html5ever</a>::<wbr><a class='mod' href=''>encoding</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a id='src-390' class='srclink' href='../../tendril/encoding/index.html?gotosrc=390' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Re-export the rust-encoding crate.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='all/index.html'
+                                  title='html5ever::encoding::all'>all</a></td>
+                           <td class='docblock short'>
+                                <p>A list of all supported encodings. Useful for encodings fixed in the compile time.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='codec/index.html'
+                                  title='html5ever::encoding::codec'>codec</a></td>
+                           <td class='docblock short'>
+                                <p>Codec implementations.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='label/index.html'
+                                  title='html5ever::encoding::label'>label</a></td>
+                           <td class='docblock short'>
+                                <p>An interface for retrieving an encoding (or a set of encodings) from a string/numeric label.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='mod' href='types/index.html'
+                                  title='html5ever::encoding::types'>types</a></td>
+                           <td class='docblock short'>
+                                <p>Interface to the character encoding.</p>
+                           </td>
+                       </tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='struct' href='struct.CodecError.html'
+                                  title='html5ever::encoding::CodecError'>CodecError</a></td>
+                           <td class='docblock short'>
+                                <p>Error information from either encoder or decoder.</p>
+                           </td>
+                       </tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.DecoderTrap.html'
+                                  title='html5ever::encoding::DecoderTrap'>DecoderTrap</a></td>
+                           <td class='docblock short'>
+                                <p>Trap, which handles decoder errors.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='enum' href='enum.EncoderTrap.html'
+                                  title='html5ever::encoding::EncoderTrap'>EncoderTrap</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.ByteWriter.html'
+                                  title='html5ever::encoding::ByteWriter'>ByteWriter</a></td>
+                           <td class='docblock short'>
+                                <p>Byte writer used by encoders. In most cases this will be an owned vector of <code>u8</code>.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.Encoding.html'
+                                  title='html5ever::encoding::Encoding'>Encoding</a></td>
+                           <td class='docblock short'>
+                                <p>Character encoding.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.RawDecoder.html'
+                                  title='html5ever::encoding::RawDecoder'>RawDecoder</a></td>
+                           <td class='docblock short'>
+                                <p>Decoder converting a byte sequence into a Unicode string.
+This is a lower level interface, and normally <code>Encoding::decode</code> should be used instead.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.RawEncoder.html'
+                                  title='html5ever::encoding::RawEncoder'>RawEncoder</a></td>
+                           <td class='docblock short'>
+                                <p>Encoder converting a Unicode string into a byte sequence.
+This is a lower level interface, and normally <code>Encoding::encode</code> should be used instead.</p>
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='trait' href='trait.StringWriter.html'
+                                  title='html5ever::encoding::StringWriter'>StringWriter</a></td>
+                           <td class='docblock short'>
+                                <p>String writer used by decoders. In most cases this will be an owned string.</p>
+                           </td>
+                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='fn' href='fn.decode.html'
+                                  title='html5ever::encoding::decode'>decode</a></td>
+                           <td class='docblock short'>
+                                <p>Determine the encoding by looking for a Byte Order Mark (BOM)
+and decoded a single string in memory.
+Return the result and the used encoding.</p>
+                           </td>
+                       </tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.DecoderTrapFunc.html'
+                                  title='html5ever::encoding::DecoderTrapFunc'>DecoderTrapFunc</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.EncoderTrapFunc.html'
+                                  title='html5ever::encoding::EncoderTrapFunc'>EncoderTrapFunc</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class='type' href='type.EncodingRef.html'
+                                  title='html5ever::encoding::EncodingRef'>EncodingRef</a></td>
+                           <td class='docblock short'>
+                                
+                           </td>
+                       </tr></table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "html5ever";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
