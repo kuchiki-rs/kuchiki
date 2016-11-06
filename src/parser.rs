@@ -1,8 +1,7 @@
 use std::borrow::Cow;
-use html5ever::{self, Attribute};
+use html5ever::{self, Attribute, QualName};
 use html5ever::tendril::StrTendril;
 use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
-use string_cache::QualName;
 
 use tree::NodeRef;
 
@@ -159,7 +158,7 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn get_template_contents(&self, target: NodeRef) -> NodeRef {
+    fn get_template_contents(&mut self, target: NodeRef) -> NodeRef {
         target.as_element().unwrap().template_contents.clone().unwrap()
     }
 }

@@ -5,7 +5,7 @@ use selectors::{self, parser, matching, Element};
 use selectors::parser::{AttrSelector, NamespaceConstraint, Selector, SelectorImpl, ParserContext};
 use std::ascii::AsciiExt;
 use std::fmt;
-use string_cache::{Atom, Namespace};
+use html5ever::{LocalName, Namespace};
 use tree::{NodeRef, NodeData, ElementData};
 
 /// The definition of whitespace per CSS Selectors Level 3 § 4.
@@ -18,13 +18,13 @@ pub struct KuchikiSelectors;
 
 impl SelectorImpl for KuchikiSelectors {
     type AttrValue = String;
-    type Identifier = Atom;
-    type ClassName = Atom;
-    type LocalName = Atom;
-    type NamespacePrefix = Atom;
+    type Identifier = LocalName;
+    type ClassName = LocalName;
+    type LocalName = LocalName;
+    type NamespacePrefix = LocalName;
     type NamespaceUrl = Namespace;
     type BorrowedNamespaceUrl = Namespace;
-    type BorrowedLocalName = Atom;
+    type BorrowedLocalName = LocalName;
 
     type NonTSPseudoClass = PseudoClass;
     fn parse_non_ts_pseudo_class(_context: &ParserContext<Self>, name: &str) -> Result<PseudoClass, ()> {
@@ -131,16 +131,16 @@ impl selectors::Element for NodeDataRef<ElementData> {
         // FIXME: Have a notion of HTML document v.s. XML document?
         self.name.ns == ns!(html)
     }
-    #[inline] fn get_local_name<'a>(&'a self) -> &'a Atom { &self.name.local }
+    #[inline] fn get_local_name<'a>(&'a self) -> &'a LocalName { &self.name.local }
     #[inline] fn get_namespace<'a>(&'a self) -> &'a Namespace { &self.name.ns }
     #[inline]
-    fn get_id(&self) -> Option<Atom> {
-        self.attributes.borrow().get(atom!("id")).map(Atom::from)
+    fn get_id(&self) -> Option<LocalName> {
+        self.attributes.borrow().get(local_name!("id")).map(LocalName::from)
     }
     #[inline]
-    fn has_class(&self, name: &Atom) -> bool {
+    fn has_class(&self, name: &LocalName) -> bool {
         !name.is_empty() &&
-        if let Some(class_attr) = self.attributes.borrow().get(atom!("class")) {
+        if let Some(class_attr) = self.attributes.borrow().get(local_name!("class")) {
             class_attr.split(SELECTOR_WHITESPACE)
             .any(|class| &**name == class )
         } else {
@@ -148,11 +148,11 @@ impl selectors::Element for NodeDataRef<ElementData> {
         }
     }
     #[inline]
-    fn each_class<F>(&self, mut callback: F) where F: FnMut(&Atom) {
-        if let Some(class_attr) = self.attributes.borrow().get(atom!("class")) {
+    fn each_class<F>(&self, mut callback: F) where F: FnMut(&LocalName) {
+        if let Some(class_attr) = self.attributes.borrow().get(local_name!("class")) {
             for class in class_attr.split(SELECTOR_WHITESPACE) {
                 if !class.is_empty() {
-                    callback(&Atom::from(class))
+                    callback(&LocalName::from(class))
                 }
             }
         }
@@ -164,8 +164,8 @@ impl selectors::Element for NodeDataRef<ElementData> {
             Active | Focus | Hover | Enabled | Disabled | Checked | Indeterminate | Visited => false,
             AnyLink | Link => {
                 self.name.ns == ns!(html) &&
-                matches!(self.name.local, atom!("a") | atom!("area") | atom!("link")) &&
-                self.attributes.borrow().contains(atom!("href"))
+                matches!(self.name.local, local_name!("a") | local_name!("area") | local_name!("link")) &&
+                self.attributes.borrow().contains(local_name!("href"))
             }
         }
     }
