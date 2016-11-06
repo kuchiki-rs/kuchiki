@@ -3,8 +3,8 @@ use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::ops::Deref;
 use html5ever::tree_builder::QuirksMode;
+use html5ever::QualName;
 use rc::{Rc, Weak};
-use string_cache::QualName;
 
 use attributes::Attributes;
 use iter::NodeIterator;
