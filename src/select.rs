@@ -203,7 +203,7 @@ impl Selectors {
     /// Returns whether the given element matches this list of selectors.
     #[inline]
     pub fn matches(&self, element: &NodeDataRef<ElementData>) -> bool {
-        matching::matches(&self.0, element, None)
+        matching::matches(&self.0, element, None, matching::MatchingReason::Other)
     }
 
     /// Filter an element iterator, yielding those matching this list of selectors.
