@@ -1,6 +1,6 @@
 [package]
 name = "kuchiki"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Simon Sapin <simon.sapin@exyr.org>"]
 license = "MIT"
 description = "(朽木) HTML/XML tree manipulation library"
