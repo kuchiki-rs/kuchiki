@@ -2,9 +2,9 @@ use move_cell::MoveCell;
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::ops::Deref;
+use std::rc::{Rc, Weak};
 use html5ever::tree_builder::QuirksMode;
 use html5ever::QualName;
-use rc::{Rc, Weak};
 
 use attributes::Attributes;
 use iter::NodeIterator;

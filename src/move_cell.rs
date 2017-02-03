@@ -1,6 +1,6 @@
-use rc::{Rc, Weak};
 use std::cell::UnsafeCell;
 use std::mem;
+use std::rc::{Rc, Weak};
 
 /// Like `Cell<T>`, but doesn’t require `T: Copy`.
 /// Specialization of https://github.com/SimonSapin/rust-movecell
