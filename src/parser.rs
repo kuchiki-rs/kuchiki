@@ -23,7 +23,7 @@ pub fn parse_html() -> html5ever::Parser<Sink> {
     parse_html_with_options(ParseOpts::default())
 }
 
-/// Parse an HTML document with html5ever.
+/// Parse an HTML document with html5ever with custom configuration.
 pub fn parse_html_with_options(opts: ParseOpts) -> html5ever::Parser<Sink> {
     let sink = Sink {
         document_node: NodeRef::new_document(),
