@@ -15,9 +15,9 @@ unstable = ["html5ever/unstable"]
 
 [dependencies]
 cssparser = "0.7"
-matches = "0.1.2"
-html5ever = "0.9.0"
-html5ever-atoms = "0.1"
+matches = "0.1.4"
+html5ever = "0.13.1"
+html5ever-atoms = "0.2.1"
 hyper = {version = ">=0.7, <0.11", optional = true}
 selectors = "0.14"
 
