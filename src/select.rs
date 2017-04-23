@@ -1,8 +1,10 @@
 use cssparser::ToCss;
 use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
+use ref_slice::ref_slice;
 use selectors::{self, parser, matching, Element};
-use selectors::parser::{AttrSelector, NamespaceConstraint, Selector, SelectorImpl, ParserContext};
+use selectors::parser::{AttrSelector, NamespaceConstraint, SelectorImpl, ParserContext};
+use selectors::parser::Selector as GenericSelector;
 use std::ascii::AsciiExt;
 use std::fmt;
 use html5ever::{LocalName, Namespace};
@@ -191,19 +193,33 @@ impl selectors::MatchAttrGeneric for NodeDataRef<ElementData> {
 
 
 /// A pre-compiled list of CSS Selectors.
-pub struct Selectors(Vec<Selector<KuchikiSelectors>>);
+pub struct Selectors(pub Vec<Selector>);
+
+/// A pre-compiled CSS Selector.
+pub struct Selector(GenericSelector<KuchikiSelectors>);
+
+/// The specificity of a selector.
+///
+/// Opaque, but ordered.
+///
+/// Determines precedence in the cascading algorithm.
+/// When equal, a rule later in source order takes precedence.
+#[derive(Copy, Clone, Hash, Eq, PartialEq, Ord, PartialOrd)]
+pub struct Specificity(u32);
 
 impl Selectors {
     /// Compile a list of selectors. This may fail on syntax errors or unsupported selectors.
     #[inline]
     pub fn compile(s: &str) -> Result<Selectors, ()> {
-        parser::parse_author_origin_selector_list_from_str(s).map(Selectors)
+        parser::parse_author_origin_selector_list_from_str(s).map(|vec| {
+            Selectors(vec.into_iter().map(Selector).collect())
+        })
     }
 
     /// Returns whether the given element matches this list of selectors.
     #[inline]
     pub fn matches(&self, element: &NodeDataRef<ElementData>) -> bool {
-        matching::matches(&self.0, element, None, matching::MatchingReason::Other)
+        self.0.iter().any(|s| s.matches(element))
     }
 
     /// Filter an element iterator, yielding those matching this list of selectors.
@@ -214,6 +230,19 @@ impl Selectors {
             iter: iter,
             selectors: self,
         }
+    }
+}
+
+impl Selector {
+    /// Returns whether the given element matches this selector.
+    #[inline]
+    pub fn matches(&self, element: &NodeDataRef<ElementData>) -> bool {
+        matching::matches(ref_slice(&self.0), element, None, matching::MatchingReason::Other)
+    }
+
+    /// Return the specificity of this selector.
+    pub fn specificity(&self) -> Specificity {
+        Specificity(self.0.specificity)
     }
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "kuchiki"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Simon Sapin <simon.sapin@exyr.org>"]
 license = "MIT"
 description = "(朽木) HTML/XML tree manipulation library"
@@ -19,6 +19,7 @@ matches = "0.1.4"
 html5ever = "0.13.1"
 html5ever-atoms = "0.2.1"
 hyper = {version = ">=0.7, <0.11", optional = true}
+ref_slice = "1.0"
 selectors = "0.14"
 
 [dev-dependencies]

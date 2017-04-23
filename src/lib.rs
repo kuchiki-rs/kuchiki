@@ -10,6 +10,7 @@ extern crate cssparser;
 extern crate html5ever;
 #[macro_use] extern crate html5ever_atoms;
 #[macro_use] extern crate matches;
+extern crate ref_slice;
 extern crate selectors;
 #[cfg(test)] extern crate tempdir;
 
@@ -27,7 +28,7 @@ mod tree;
 pub use attributes::Attributes;
 pub use node_data_ref::NodeDataRef;
 pub use parser::{parse_html, parse_html_with_options, ParseOpts};
-pub use select::Selectors;
+pub use select::{Selectors, Selector, Specificity};
 pub use tree::{NodeRef, Node, NodeData, ElementData, Doctype, DocumentData};
 
 /// This module re-exports a number of traits that are useful when using Kuchiki.

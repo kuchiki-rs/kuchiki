@@ -4,6 +4,7 @@ use std::path::Path;
 use tempdir::TempDir;
 
 use parser::parse_html;
+use select::*;
 use traits::*;
 
 #[test]
@@ -118,4 +119,14 @@ fn from_bytes() {
     let document = parse_html().from_bytes(opts)
         .one(&b"<html><head><title>hey</title></head><body>lol</body></html>"[..]);
     assert_eq!(document.select("title").unwrap().next().unwrap().text_contents(), "hey");
+}
+
+#[test]
+fn specificity() {
+    let selectors = Selectors::compile(".example, :first-child, div").unwrap();
+    let specificities = selectors.0.iter().map(|s| s.specificity()).collect::<Vec<_>>();
+    assert_eq!(specificities.len(), 3);
+    assert!(specificities[0] == specificities[1]);
+    assert!(specificities[0] > specificities[2]);
+    assert!(specificities[1] > specificities[2]);
 }
