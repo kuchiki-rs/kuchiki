@@ -257,3 +257,35 @@ impl ::std::str::FromStr for Selectors {
         Selectors::compile(s)
     }
 }
+
+impl fmt::Display for Selector {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.to_css(f)
+    }
+}
+
+impl fmt::Display for Selectors {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut iter = self.0.iter();
+        let first = iter.next()
+            .expect("Empty Selectors, should contain at least one selector");
+        try!(first.0.to_css(f));
+        for selector in iter {
+            try!(f.write_str(", "));
+            try!(selector.0.to_css(f));
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Debug for Selector {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
+
+impl fmt::Debug for Selectors {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
+}
