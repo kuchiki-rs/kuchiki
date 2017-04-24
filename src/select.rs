@@ -1,11 +1,12 @@
-use cssparser::ToCss;
+use cssparser::{self, ToCss};
 use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
 use ref_slice::ref_slice;
-use selectors::{self, parser, matching, Element};
-use selectors::parser::{AttrSelector, NamespaceConstraint, SelectorImpl, ParserContext};
-use selectors::parser::Selector as GenericSelector;
+use selectors::{self, matching, Element};
+use selectors::parser::{AttrSelector, NamespaceConstraint, SelectorImpl, Parser};
+use selectors::parser::{SelectorList, Selector as GenericSelector};
 use std::ascii::AsciiExt;
+use std::borrow::Cow;
 use std::fmt;
 use html5ever::{LocalName, Namespace};
 use tree::{NodeRef, NodeData, ElementData};
@@ -29,7 +30,15 @@ impl SelectorImpl for KuchikiSelectors {
     type BorrowedLocalName = LocalName;
 
     type NonTSPseudoClass = PseudoClass;
-    fn parse_non_ts_pseudo_class(_context: &ParserContext<Self>, name: &str) -> Result<PseudoClass, ()> {
+    type PseudoElement = PseudoElement;
+}
+
+struct KuchikiParser;
+
+impl Parser for KuchikiParser {
+    type Impl = KuchikiSelectors;
+
+    fn parse_non_ts_pseudo_class(&self, name: Cow<str>) -> Result<PseudoClass, ()> {
         use self::PseudoClass::*;
              if name.eq_ignore_ascii_case("any-link") { Ok(AnyLink) }
         else if name.eq_ignore_ascii_case("link") { Ok(Link) }
@@ -42,11 +51,6 @@ impl SelectorImpl for KuchikiSelectors {
         else if name.eq_ignore_ascii_case("checked") { Ok(Checked) }
         else if name.eq_ignore_ascii_case("indeterminate") { Ok(Indeterminate) }
         else { Err(()) }
-    }
-
-    type PseudoElement = PseudoElement;
-    fn parse_pseudo_element(_context: &ParserContext<Self>, _name: &str) -> Result<PseudoElement, ()> {
-        Err(())
     }
 }
 
@@ -211,8 +215,8 @@ impl Selectors {
     /// Compile a list of selectors. This may fail on syntax errors or unsupported selectors.
     #[inline]
     pub fn compile(s: &str) -> Result<Selectors, ()> {
-        parser::parse_author_origin_selector_list_from_str(s).map(|vec| {
-            Selectors(vec.into_iter().map(Selector).collect())
+        SelectorList::parse(&KuchikiParser, &mut cssparser::Parser::new(s)).map(|list| {
+            Selectors(list.0.into_iter().map(Selector).collect())
         })
     }
 
