@@ -2,15 +2,15 @@ use std::fs::File;
 use std::io::{Write, Result};
 use std::path::Path;
 use std::string::ToString;
-use html5ever::serialize::{Serializable, Serializer, TraversalScope, serialize, SerializeOpts};
+use html5ever::serialize::{Serialize, Serializer, TraversalScope, serialize, SerializeOpts};
 use html5ever::serialize::TraversalScope::*;
 
 use tree::{NodeRef, NodeData};
 
 
-impl Serializable for NodeRef {
-    fn serialize<'wr, Wr: Write>(&self, serializer: &mut Serializer<'wr, Wr>,
-                                 traversal_scope: TraversalScope) -> Result<()> {
+impl Serialize for NodeRef {
+    fn serialize<S: Serializer>(&self, serializer: &mut S,
+                                traversal_scope: TraversalScope) -> Result<()> {
         match (traversal_scope, self.data()) {
             (_, &NodeData::Element(ref element)) => {
                 if traversal_scope == IncludeNode {
@@ -20,7 +20,7 @@ impl Serializable for NodeRef {
                 }
 
                 for child in self.children() {
-                    try!(Serializable::serialize(&child, serializer, IncludeNode));
+                    try!(Serialize::serialize(&child, serializer, IncludeNode));
                 }
 
                 if traversal_scope == IncludeNode {
@@ -32,7 +32,7 @@ impl Serializable for NodeRef {
             (_, &NodeData::DocumentFragment) |
             (_, &NodeData::Document(_)) => {
                 for child in self.children() {
-                    try!(Serializable::serialize(&child, serializer, IncludeNode));
+                    try!(Serialize::serialize(&child, serializer, IncludeNode));
                 }
                 Ok(())
             }
@@ -42,6 +42,10 @@ impl Serializable for NodeRef {
             (IncludeNode, &NodeData::Doctype(ref doctype)) => serializer.write_doctype(&doctype.name),
             (IncludeNode, &NodeData::Text(ref text)) => serializer.write_text(&text.borrow()),
             (IncludeNode, &NodeData::Comment(ref text)) => serializer.write_comment(&text.borrow()),
+            (IncludeNode, &NodeData::ProcessingInstruction(ref contents)) => {
+                let contents = contents.borrow();
+                serializer.write_processing_instruction(&contents.0, &contents.1)
+            }
         }
     }
 }

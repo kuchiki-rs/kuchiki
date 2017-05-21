@@ -1,7 +1,7 @@
 use std::borrow::Cow;
-use html5ever::{self, Attribute, QualName};
+use html5ever::{self, Attribute, QualName, ExpandedName};
 use html5ever::tendril::StrTendril;
-use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode};
+use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode, ElementFlags};
 
 use tree::NodeRef;
 
@@ -66,17 +66,18 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn same_node(&self, x: NodeRef, y: NodeRef) -> bool {
+    fn same_node(&self, x: &NodeRef, y: &NodeRef) -> bool {
         x == y
     }
 
     #[inline]
-    fn elem_name(&self, target: NodeRef) -> QualName {
-        target.as_element().unwrap().name.clone()
+    fn elem_name<'a>(&self, target: &'a NodeRef) -> ExpandedName<'a> {
+        target.as_element().unwrap().name.expanded()
     }
 
     #[inline]
-    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>) -> NodeRef {
+    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>, _flags: ElementFlags)
+                      -> NodeRef {
         let attrs = attrs.into_iter().map(|Attribute { name, value }| (name, value.into()));
         NodeRef::new_element(name, attrs)
     }
@@ -87,7 +88,17 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn append(&mut self, parent: NodeRef, child: NodeOrText<NodeRef>) {
+    fn create_pi(&mut self, target: StrTendril, data: StrTendril) -> NodeRef {
+        NodeRef::new_processing_instruction(target, data)
+    }
+
+    #[inline]
+    fn has_parent_node(&self, node: &NodeRef) -> bool {
+        node.parent().is_some()
+    }
+
+    #[inline]
+    fn append(&mut self, parent: &NodeRef, child: NodeOrText<NodeRef>) {
         match child {
             NodeOrText::AppendNode(node) => parent.append(node),
             NodeOrText::AppendText(text) => {
@@ -103,24 +114,19 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn append_before_sibling(&mut self, sibling: NodeRef, child: NodeOrText<NodeRef>)
-                             -> Result<(), NodeOrText<NodeRef>> {
-        if sibling.parent().is_none() {
-            return Err(child)
-        }
+    fn append_before_sibling(&mut self, sibling: &NodeRef, child: NodeOrText<NodeRef>) {
         match child {
             NodeOrText::AppendNode(node) => sibling.insert_before(node),
             NodeOrText::AppendText(text) => {
                 if let Some(previous_sibling) = sibling.previous_sibling() {
                     if let Some(existing) = previous_sibling.as_text() {
                         existing.borrow_mut().push_str(&text);
-                        return Ok(())
+                        return
                     }
                 }
                 sibling.insert_before(NodeRef::new_text(text))
             }
         }
-        Ok(())
     }
 
     #[inline]
@@ -130,7 +136,7 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn add_attrs_if_missing(&mut self, target: NodeRef, attrs: Vec<Attribute>) {
+    fn add_attrs_if_missing(&mut self, target: &NodeRef, attrs: Vec<Attribute>) {
         let element = target.as_element().unwrap();
         let mut attributes = element.attributes.borrow_mut();
         for Attribute { name, value } in attrs {
@@ -139,12 +145,12 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn remove_from_parent(&mut self, target: NodeRef) {
+    fn remove_from_parent(&mut self, target: &NodeRef) {
         target.detach()
     }
 
     #[inline]
-    fn reparent_children(&mut self, node: NodeRef, new_parent: NodeRef) {
+    fn reparent_children(&mut self, node: &NodeRef, new_parent: &NodeRef) {
         // FIXME: Can this be done more effciently in rctree,
         // by moving the whole linked list of children at once?
         for child in node.children() {
@@ -153,12 +159,12 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn mark_script_already_started(&mut self, _node: NodeRef) {
+    fn mark_script_already_started(&mut self, _node: &NodeRef) {
         // FIXME: Is this useful outside of a browser?
     }
 
     #[inline]
-    fn get_template_contents(&mut self, target: NodeRef) -> NodeRef {
+    fn get_template_contents(&mut self, target: &NodeRef) -> NodeRef {
         target.as_element().unwrap().template_contents.clone().unwrap()
     }
 }

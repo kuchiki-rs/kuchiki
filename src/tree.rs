@@ -4,7 +4,7 @@ use std::fmt;
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
 use html5ever::tree_builder::QuirksMode;
-use html5ever::QualName;
+use html5ever::{QualName, ExpandedName};
 
 use attributes::Attributes;
 use iter::NodeIterator;
@@ -21,6 +21,9 @@ pub enum NodeData {
 
     /// Comment node
     Comment(RefCell<String>),
+
+    /// Processing instruction node
+    ProcessingInstruction(RefCell<(String, String)>),
 
     /// Doctype node
     Doctype(Doctype),
@@ -209,7 +212,7 @@ impl NodeRef {
     pub fn new_element<I>(name: QualName, attributes: I) -> NodeRef
                           where I: IntoIterator<Item=(QualName, String)> {
         NodeRef::new(NodeData::Element(ElementData {
-            template_contents: if name == qualname!(html, "template") {
+            template_contents: if name.expanded() == expanded_name!(html "template") {
                 Some(NodeRef::new(NodeData::DocumentFragment))
             } else {
                 None
@@ -231,6 +234,13 @@ impl NodeRef {
     #[inline]
     pub fn new_comment<T: Into<String>>(value: T) -> NodeRef {
         NodeRef::new(NodeData::Comment(RefCell::new(value.into())))
+    }
+
+    /// Create a new processing instruction node.
+    #[inline]
+    pub fn new_processing_instruction<T1, T2>(target: T1, data: T2) -> NodeRef
+                                              where T1: Into<String>, T2: Into<String> {
+        NodeRef::new(NodeData::ProcessingInstruction(RefCell::new((target.into(), data.into()))))
     }
 
     /// Create a new doctype node.

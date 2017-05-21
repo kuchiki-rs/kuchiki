@@ -10,14 +10,10 @@ repository = "https://github.com/SimonSapin/kuchiki"
 name = "kuchiki"
 doctest = false
 
-[features]
-unstable = ["html5ever/unstable"]
-
 [dependencies]
 cssparser = "0.7"
 matches = "0.1.4"
-html5ever = "0.13.1"
-html5ever-atoms = "0.2.1"
+html5ever = "0.16"
 ref_slice = "1.0"
 selectors = "0.15"
 
