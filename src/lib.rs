@@ -15,7 +15,6 @@ extern crate selectors;
 #[cfg(test)] extern crate tempdir;
 
 mod attributes;
-#[cfg(feature = "hyper")] mod hyper;
 pub mod iter;
 mod move_cell;
 mod node_data_ref;
@@ -40,6 +39,5 @@ pub use tree::{NodeRef, Node, NodeData, ElementData, Doctype, DocumentData};
 pub mod traits {
     pub use html5ever::tendril::TendrilSink;
     pub use iter::{NodeIterator, ElementIterator};
-    #[cfg(feature = "hyper")] pub use hyper::{ParserExt, IntoResponse};
 }
 
