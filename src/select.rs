@@ -1,10 +1,9 @@
 use cssparser::{self, ToCss};
 use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
-use ref_slice::ref_slice;
-use selectors::{self, matching, Element};
-use selectors::parser::{AttrSelector, NamespaceConstraint, SelectorImpl, Parser};
-use selectors::parser::{SelectorList, Selector as GenericSelector};
+use selectors::{self, matching};
+use selectors::attr::{AttrSelectorOperation, NamespaceConstraint};
+use selectors::parser::{SelectorImpl, Parser, SelectorList, Selector as GenericSelector};
 use std::ascii::AsciiExt;
 use std::borrow::Cow;
 use std::fmt;
@@ -16,7 +15,7 @@ use tree::{NodeRef, NodeData, ElementData};
 /// Copied from rust-selectors.
 static SELECTOR_WHITESPACE: &'static [char] = &[' ', '\t', '\n', '\r', '\x0C'];
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct KuchikiSelectors;
 
 impl SelectorImpl for KuchikiSelectors {
@@ -85,6 +84,15 @@ impl ToCss for PseudoClass {
     }
 }
 
+impl selectors::parser::SelectorMethods for PseudoClass {
+    type Impl = KuchikiSelectors;
+
+    fn visit<V>(&self, _visitor: &mut V) -> bool
+        where V: selectors::visitor::SelectorVisitor<Impl = Self::Impl> {
+        true
+    }
+}
+
 #[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub enum PseudoElement {}
 
@@ -95,7 +103,13 @@ impl ToCss for PseudoElement {
     }
 }
 
+impl selectors::parser::PseudoElement for PseudoElement {
+    type Impl = KuchikiSelectors;
+}
+
 impl selectors::Element for NodeDataRef<ElementData> {
+    type Impl = KuchikiSelectors;
+
     #[inline]
     fn parent_element(&self) -> Option<Self> {
         self.as_node().parent().and_then(NodeRef::into_element_ref)
@@ -153,18 +167,33 @@ impl selectors::Element for NodeDataRef<ElementData> {
             false
         }
     }
+
     #[inline]
-    fn each_class<F>(&self, mut callback: F) where F: FnMut(&LocalName) {
-        if let Some(class_attr) = self.attributes.borrow().get(local_name!("class")) {
-            for class in class_attr.split(SELECTOR_WHITESPACE) {
-                if !class.is_empty() {
-                    callback(&LocalName::from(class))
-                }
-            }
-        }
+    fn attr_matches(&self,
+                    ns: &NamespaceConstraint<&Namespace>,
+                    local_name: &LocalName,
+                    operation: &AttrSelectorOperation<&String>)
+                    -> bool {
+        self.attributes.borrow().map.iter().any(|(key, value)| {
+            !matches!(*ns, NamespaceConstraint::Specific(url) if *url != key.ns) &&
+            key.local == *local_name &&
+            operation.eval_str(value)
+        })
     }
 
-    fn match_non_ts_pseudo_class(&self, pseudo: &PseudoClass) -> bool {
+    fn match_pseudo_element(&self,
+                            pseudo: &PseudoElement,
+                            _context: &mut matching::MatchingContext)
+                            -> bool {
+        match *pseudo {}
+    }
+
+    fn match_non_ts_pseudo_class<F>(&self,
+                                    pseudo: &PseudoClass,
+                                    _context: &mut matching::MatchingContext,
+                                    _flags_setter: &mut F) -> bool
+        where F: FnMut(&Self, matching::ElementSelectorFlags)
+    {
         use self::PseudoClass::*;
         match *pseudo {
             Active | Focus | Hover | Enabled | Disabled | Checked | Indeterminate | Visited => false,
@@ -176,25 +205,6 @@ impl selectors::Element for NodeDataRef<ElementData> {
         }
     }
 }
-
-impl selectors::MatchAttrGeneric for NodeDataRef<ElementData> {
-    type Impl = KuchikiSelectors;
-
-    #[inline]
-    fn match_attr<F>(&self, attr: &AttrSelector<Self::Impl>, test: F) -> bool where F: Fn(&str) -> bool {
-        let name = if self.is_html_element_in_html_document() {
-            &attr.lower_name
-        } else {
-            &attr.name
-        };
-        self.attributes.borrow().map.iter().any(|(key, value)| {
-            !matches!(attr.namespace, NamespaceConstraint::Specific(ref ns) if ns.url != key.ns) &&
-            key.local == *name &&
-            test(value)
-        })
-    }
-}
-
 
 /// A pre-compiled list of CSS Selectors.
 pub struct Selectors(pub Vec<Selector>);
@@ -241,12 +251,13 @@ impl Selector {
     /// Returns whether the given element matches this selector.
     #[inline]
     pub fn matches(&self, element: &NodeDataRef<ElementData>) -> bool {
-        matching::matches(ref_slice(&self.0), element, None, matching::MatchingReason::Other)
+        let mut context = matching::MatchingContext::new(matching::MatchingMode::Normal, None);
+        matching::matches_selector(&self.0.inner, element, &mut context, &mut |_, _| {})
     }
 
     /// Return the specificity of this selector.
     pub fn specificity(&self) -> Specificity {
-        Specificity(self.0.specificity)
+        Specificity(self.0.specificity())
     }
 }
 

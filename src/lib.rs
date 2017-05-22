@@ -9,7 +9,6 @@ Kuchiki (朽木), a HTML/XML tree manipulation library for Rust.
 extern crate cssparser;
 #[macro_use] extern crate html5ever;
 #[macro_use] extern crate matches;
-extern crate ref_slice;
 extern crate selectors;
 #[cfg(test)] extern crate tempdir;
 
