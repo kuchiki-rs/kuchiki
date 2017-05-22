@@ -164,9 +164,9 @@ impl selectors::Element for NodeDataRef<ElementData> {
         }
     }
 
-    fn match_non_ts_pseudo_class(&self, pseudo: PseudoClass) -> bool {
+    fn match_non_ts_pseudo_class(&self, pseudo: &PseudoClass) -> bool {
         use self::PseudoClass::*;
-        match pseudo {
+        match *pseudo {
             Active | Focus | Hover | Enabled | Disabled | Checked | Indeterminate | Visited => false,
             AnyLink | Link => {
                 self.name.ns == ns!(html) &&
