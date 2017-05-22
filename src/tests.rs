@@ -109,19 +109,6 @@ fn to_string() {
 }
 
 #[test]
-fn from_bytes() {
-    use html5ever::driver::BytesOpts;
-    use html5ever::encoding::label::encoding_from_whatwg_label;
-    let opts = BytesOpts {
-        transport_layer_encoding: encoding_from_whatwg_label("utf-8")
-    };
-
-    let document = parse_html().from_bytes(opts)
-        .one(&b"<html><head><title>hey</title></head><body>lol</body></html>"[..]);
-    assert_eq!(document.select("title").unwrap().next().unwrap().text_contents(), "hey");
-}
-
-#[test]
 fn specificity() {
     let selectors = Selectors::compile(".example, :first-child, div").unwrap();
     let specificities = selectors.0.iter().map(|s| s.specificity()).collect::<Vec<_>>();
