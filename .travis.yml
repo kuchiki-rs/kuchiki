@@ -7,5 +7,3 @@ rust:
 script:
   - ([ $TRAVIS_RUST_VERSION != nightly ] || cargo test --features unstable)
   - cargo test
-  - cargo test --features hyper
-  - cargo build
