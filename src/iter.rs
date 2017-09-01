@@ -140,6 +140,13 @@ impl NodeRef {
     pub fn select(&self, selectors: &str) -> Result<Select<Elements<Descendants>>, ()> {
         self.inclusive_descendants().select(selectors)
     }
+
+    /// Return the first inclusive descendants element that match the given selector list.
+    #[inline]
+    pub fn select_first(&self, selectors: &str) -> Result<NodeDataRef<ElementData>, ()> {
+        let mut elements = self.select(selectors)?;
+        elements.nth(0).ok_or(())
+    }
 }
 
 
