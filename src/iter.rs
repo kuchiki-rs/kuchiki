@@ -145,7 +145,7 @@ impl NodeRef {
     #[inline]
     pub fn select_first(&self, selectors: &str) -> Result<NodeDataRef<ElementData>, ()> {
         let mut elements = self.select(selectors)?;
-        elements.nth(0).ok_or(())
+        elements.next().ok_or(())
     }
 }
 
