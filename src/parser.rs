@@ -168,13 +168,12 @@ impl TreeSink for Sink {
         target.as_element().unwrap().template_contents.clone().unwrap()
     }
 
-    fn append_based_on_parent_node(
-        &mut self,
-        _element: &NodeRef,
-        _prev_element: &NodeRef,
-        _child: NodeOrText<NodeRef>,
-    ) {
-        // FIXME: What to do?
-        unimplemented!();
+    fn append_based_on_parent_node(&mut self, element: &NodeRef,
+                                   prev_element: &NodeRef, child: NodeOrText<NodeRef>) {
+        if self.has_parent_node(element) {
+            self.append_before_sibling(element, child)
+        } else {
+            self.append(prev_element, child)
+        }
     }
 }
