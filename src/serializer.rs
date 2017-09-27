@@ -12,8 +12,8 @@ impl Serialize for NodeRef {
     fn serialize<S: Serializer>(&self, serializer: &mut S,
                                 traversal_scope: TraversalScope) -> Result<()> {
         match (traversal_scope, self.data()) {
-            (_, &NodeData::Element(ref element)) => {
-                if traversal_scope == IncludeNode {
+            (ref scope, &NodeData::Element(ref element)) => {
+                if *scope == IncludeNode {
                     try!(serializer.start_elem(
                         element.name.clone(),
                         element.attributes.borrow().map.iter().map(|(name, value)| (name, &**value))));
@@ -23,7 +23,7 @@ impl Serialize for NodeRef {
                     try!(Serialize::serialize(&child, serializer, IncludeNode));
                 }
 
-                if traversal_scope == IncludeNode {
+                if *scope == IncludeNode {
                     try!(serializer.end_elem(element.name.clone()));
                 }
                 Ok(())
@@ -37,7 +37,7 @@ impl Serialize for NodeRef {
                 Ok(())
             }
 
-            (ChildrenOnly, _) => Ok(()),
+            (ChildrenOnly(_), _) => Ok(()),
 
             (IncludeNode, &NodeData::Doctype(ref doctype)) => serializer.write_doctype(&doctype.name),
             (IncludeNode, &NodeData::Text(ref text)) => serializer.write_text(&text.borrow()),

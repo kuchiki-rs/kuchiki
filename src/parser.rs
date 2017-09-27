@@ -167,4 +167,14 @@ impl TreeSink for Sink {
     fn get_template_contents(&mut self, target: &NodeRef) -> NodeRef {
         target.as_element().unwrap().template_contents.clone().unwrap()
     }
+
+    fn append_based_on_parent_node(
+        &mut self,
+        _element: &NodeRef,
+        _prev_element: &NodeRef,
+        _child: NodeOrText<NodeRef>,
+    ) {
+        // FIXME: What to do?
+        unimplemented!();
+    }
 }
