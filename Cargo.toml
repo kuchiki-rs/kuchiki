@@ -11,9 +11,9 @@ name = "kuchiki"
 doctest = false
 
 [dependencies]
-cssparser = "0.13"
+cssparser = "0.13"  # outdated: waiting for selector 0.19 to be published
 matches = "0.1.4"
-html5ever = "0.20"
+html5ever = "0.21"
 selectors = "0.18"
 
 [dev-dependencies]
