@@ -93,11 +93,6 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn has_parent_node(&self, node: &NodeRef) -> bool {
-        node.parent().is_some()
-    }
-
-    #[inline]
     fn append(&mut self, parent: &NodeRef, child: NodeOrText<NodeRef>) {
         match child {
             NodeOrText::AppendNode(node) => parent.append(node),
@@ -170,7 +165,7 @@ impl TreeSink for Sink {
 
     fn append_based_on_parent_node(&mut self, element: &NodeRef,
                                    prev_element: &NodeRef, child: NodeOrText<NodeRef>) {
-        if self.has_parent_node(element) {
+        if element.parent().is_some() {
             self.append_before_sibling(element, child)
         } else {
             self.append(prev_element, child)

@@ -4,6 +4,7 @@ use node_data_ref::NodeDataRef;
 use selectors::{self, matching};
 use selectors::attr::{AttrSelectorOperation, NamespaceConstraint};
 use selectors::parser::{SelectorImpl, Parser, SelectorList, Selector as GenericSelector};
+#[allow(unused_imports)]
 use std::ascii::AsciiExt;
 use std::borrow::Cow;
 use std::fmt;
