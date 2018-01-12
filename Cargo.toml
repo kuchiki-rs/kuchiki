@@ -11,10 +11,10 @@ name = "kuchiki"
 doctest = false
 
 [dependencies]
-cssparser = "0.13"  # outdated: waiting for selector 0.19 to be published
+cssparser = "0.23"
 matches = "0.1.4"
 html5ever = "0.21"
-selectors = "0.18"
+selectors = "0.19"
 
 [dev-dependencies]
 tempdir = "0.3"

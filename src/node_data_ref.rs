@@ -74,6 +74,17 @@ impl<T> Deref for NodeDataRef<T> {
     #[inline] fn deref(&self) -> &T { unsafe { &*self._reference } }
 }
 
+// #[derive(Clone)] would have an unnecessary `T: Clone` bound
+impl<T> Clone for NodeDataRef<T> {
+    #[inline]
+    fn clone(&self) -> Self {
+        NodeDataRef {
+            _keep_alive: self._keep_alive.clone(),
+            _reference: self._reference,
+        }
+    }
+}
+
 impl<T: fmt::Debug> fmt::Debug for NodeDataRef<T> {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
