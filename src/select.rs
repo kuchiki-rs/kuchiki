@@ -11,6 +11,7 @@ use selectors::OpaqueElement;
 use std::ascii::AsciiExt;
 use std::fmt;
 use html5ever::{LocalName, Namespace};
+use attributes::ExpandedName;
 use tree::{Node, NodeRef, NodeData, ElementData};
 
 /// The definition of whitespace per CSS Selectors Level 3 § 4.
@@ -172,10 +173,8 @@ impl selectors::Element for NodeDataRef<ElementData> {
     fn is_link(&self) -> bool {
         self.name.ns == ns!(html) &&
         matches!(self.name.local, local_name!("a") | local_name!("area") | local_name!("link")) &&
-        self.attr_matches(
-            &NamespaceConstraint::Specific(&ns!()),
-            &local_name!("href"),
-            &AttrSelectorOperation::Exists,
+        self.attributes.borrow().map.contains_key(
+            &ExpandedName::new(ns!(), local_name!("href"))
         )
     }
 
@@ -204,11 +203,19 @@ impl selectors::Element for NodeDataRef<ElementData> {
                     local_name: &LocalName,
                     operation: &AttrSelectorOperation<&String>)
                     -> bool {
-        self.attributes.borrow().map.iter().any(|(name, attr)| {
-            !matches!(*ns, NamespaceConstraint::Specific(url) if *url != name.ns) &&
-            name.local == *local_name &&
-            operation.eval_str(&attr.value)
-        })
+        let attrs = self.attributes.borrow();
+        match *ns {
+            NamespaceConstraint::Any => {
+                attrs.map.iter().any(|(name, attr)| {
+                    name.local == *local_name &&
+                    operation.eval_str(&attr.value)
+                })
+            }
+            NamespaceConstraint::Specific(ref ns_url) => {
+                attrs.map.get(&ExpandedName::new(ns_url.clone(), local_name.clone()))
+                    .map_or(false, |attr| operation.eval_str(&attr.value))
+            }
+        }
     }
 
     fn match_pseudo_element(&self,

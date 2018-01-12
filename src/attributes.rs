@@ -19,7 +19,7 @@ pub struct ExpandedName {
 
 impl ExpandedName {
     /// Trivial constructor
-    fn new<N: Into<Namespace>, L: Into<LocalName>>(ns: N, local: L) -> Self {
+    pub fn new<N: Into<Namespace>, L: Into<LocalName>>(ns: N, local: L) -> Self {
         ExpandedName {
             ns: ns.into(),
             local: local.into(),
