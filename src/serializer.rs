@@ -2,11 +2,11 @@ use std::fs::File;
 use std::io::{Write, Result};
 use std::path::Path;
 use std::string::ToString;
+use html5ever::QualName;
 use html5ever::serialize::{Serialize, Serializer, TraversalScope, serialize, SerializeOpts};
 use html5ever::serialize::TraversalScope::*;
 
 use tree::{NodeRef, NodeData};
-
 
 impl Serialize for NodeRef {
     fn serialize<S: Serializer>(&self, serializer: &mut S,
@@ -14,17 +14,27 @@ impl Serialize for NodeRef {
         match (traversal_scope, self.data()) {
             (ref scope, &NodeData::Element(ref element)) => {
                 if *scope == IncludeNode {
-                    try!(serializer.start_elem(
+                    let attrs = element.attributes.borrow();
+
+                    // Unfortunately we need to allocate something to hold these &'a QualName
+                    let attrs = attrs.map.iter().map(|(name, attr)| {
+                        (QualName::new(
+                            attr.prefix.clone(), name.ns.clone(), name.local.clone()
+                        ), &attr.value)
+                    }).collect::<Vec<_>>();
+
+                    serializer.start_elem(
                         element.name.clone(),
-                        element.attributes.borrow().map.iter().map(|(name, value)| (name, &**value))));
+                        attrs.iter().map(|&(ref name, value)| (name, &**value))
+                    )?
                 }
 
                 for child in self.children() {
-                    try!(Serialize::serialize(&child, serializer, IncludeNode));
+                    Serialize::serialize(&child, serializer, IncludeNode)?
                 }
 
                 if *scope == IncludeNode {
-                    try!(serializer.end_elem(element.name.clone()));
+                    serializer.end_elem(element.name.clone())?
                 }
                 Ok(())
             }
@@ -32,7 +42,7 @@ impl Serialize for NodeRef {
             (_, &NodeData::DocumentFragment) |
             (_, &NodeData::Document(_)) => {
                 for child in self.children() {
-                    try!(Serialize::serialize(&child, serializer, IncludeNode));
+                    Serialize::serialize(&child, serializer, IncludeNode)?
                 }
                 Ok(())
             }
@@ -73,7 +83,7 @@ impl NodeRef {
     /// Serialize this node and its descendants in HTML syntax to a new file at the given path.
     #[inline]
     pub fn serialize_to_file<P: AsRef<Path>>(&self, path: P) -> Result<()>{
-        let mut file = try!(File::create(&path));
+        let mut file = File::create(&path)?;
         self.serialize(&mut file)
     }
 }

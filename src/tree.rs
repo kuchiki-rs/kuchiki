@@ -4,9 +4,9 @@ use std::fmt;
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
 use html5ever::tree_builder::QuirksMode;
-use html5ever::{QualName, ExpandedName};
+use html5ever::QualName;
 
-use attributes::Attributes;
+use attributes::{Attributes, ExpandedName, Attribute};
 use iter::NodeIterator;
 
 
@@ -210,7 +210,7 @@ impl NodeRef {
     /// Create a new element node.
     #[inline]
     pub fn new_element<I>(name: QualName, attributes: I) -> NodeRef
-                          where I: IntoIterator<Item=(QualName, String)> {
+                          where I: IntoIterator<Item=(ExpandedName, Attribute)> {
         NodeRef::new(NodeData::Element(ElementData {
             template_contents: if name.expanded() == expanded_name!(html "template") {
                 Some(NodeRef::new(NodeData::DocumentFragment))

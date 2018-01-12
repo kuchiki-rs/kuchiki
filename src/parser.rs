@@ -3,6 +3,7 @@ use html5ever::{self, Attribute, QualName, ExpandedName};
 use html5ever::tendril::StrTendril;
 use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode, ElementFlags};
 
+use attributes;
 use tree::NodeRef;
 
 /// Options for the HTML parser.
@@ -78,8 +79,11 @@ impl TreeSink for Sink {
     #[inline]
     fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>, _flags: ElementFlags)
                       -> NodeRef {
-        let attrs = attrs.into_iter().map(|Attribute { name, value }| (name, value.into()));
-        NodeRef::new_element(name, attrs)
+        NodeRef::new_element(name, attrs.into_iter().map(|attr| {
+            let Attribute { name: QualName { prefix, ns, local }, value } = attr;
+            let value = String::from(value);
+            (attributes::ExpandedName { ns, local }, attributes::Attribute { prefix, value })
+        }))
     }
 
     #[inline]
@@ -134,8 +138,12 @@ impl TreeSink for Sink {
     fn add_attrs_if_missing(&mut self, target: &NodeRef, attrs: Vec<Attribute>) {
         let element = target.as_element().unwrap();
         let mut attributes = element.attributes.borrow_mut();
-        for Attribute { name, value } in attrs {
-            attributes.map.entry(name).or_insert_with(|| value.into());
+
+        for Attribute { name: QualName { prefix, ns, local }, value } in attrs {
+            attributes.map.entry(attributes::ExpandedName { ns, local }).or_insert_with(|| {
+                let value = String::from(value);
+                attributes::Attribute { prefix, value }
+            });
         }
     }
 

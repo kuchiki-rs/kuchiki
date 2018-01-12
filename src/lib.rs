@@ -22,7 +22,7 @@ mod serializer;
 #[cfg(test)] mod tests;
 mod tree;
 
-pub use attributes::Attributes;
+pub use attributes::{Attributes, ExpandedName, Attribute};
 pub use node_data_ref::NodeDataRef;
 pub use parser::{parse_html, parse_html_with_options, ParseOpts};
 pub use select::{Selectors, Selector, Specificity};

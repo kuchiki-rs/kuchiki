@@ -204,10 +204,10 @@ impl selectors::Element for NodeDataRef<ElementData> {
                     local_name: &LocalName,
                     operation: &AttrSelectorOperation<&String>)
                     -> bool {
-        self.attributes.borrow().map.iter().any(|(key, value)| {
-            !matches!(*ns, NamespaceConstraint::Specific(url) if *url != key.ns) &&
-            key.local == *local_name &&
-            operation.eval_str(value)
+        self.attributes.borrow().map.iter().any(|(name, attr)| {
+            !matches!(*ns, NamespaceConstraint::Specific(url) if *url != name.ns) &&
+            name.local == *local_name &&
+            operation.eval_str(&attr.value)
         })
     }
 
