@@ -17,11 +17,13 @@ impl Serialize for NodeRef {
                     let attrs = element.attributes.borrow();
 
                     // Unfortunately we need to allocate something to hold these &'a QualName
-                    let attrs = attrs.map.iter().map(|(name, attr)| {
+                    let mut attrs = attrs.map.iter().map(|(name, attr)| {
                         (QualName::new(
                             attr.prefix.clone(), name.ns.clone(), name.local.clone()
                         ), &attr.value)
                     }).collect::<Vec<_>>();
+
+                    attrs.sort_unstable();
 
                     serializer.start_elem(
                         element.name.clone(),
