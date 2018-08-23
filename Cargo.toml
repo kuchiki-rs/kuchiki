@@ -1,6 +1,6 @@
 [package]
 name = "kuchiki"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["Simon Sapin <simon.sapin@exyr.org>"]
 license = "MIT"
 description = "(朽木) HTML/XML tree manipulation library"
@@ -11,10 +11,10 @@ name = "kuchiki"
 doctest = false
 
 [dependencies]
-cssparser = "0.23"
+cssparser = "0.24"
 matches = "0.1.4"
 html5ever = "0.22"
-selectors = "0.19"
+selectors = "0.20"
 
 [dev-dependencies]
 tempdir = "0.3"

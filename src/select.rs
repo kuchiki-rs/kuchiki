@@ -3,8 +3,8 @@ use iter::{NodeIterator, Select};
 use node_data_ref::NodeDataRef;
 use selectors::{self, matching};
 use selectors::attr::{AttrSelectorOperation, NamespaceConstraint, CaseSensitivity};
-use selectors::context::{VisitedHandlingMode, QuirksMode};
-use selectors::parser::{SelectorImpl, Parser, SelectorList, Selector as GenericSelector};
+use selectors::context::QuirksMode;
+use selectors::parser::{SelectorImpl, Parser, SelectorList, Selector as GenericSelector, NonTSPseudoClass};
 use selectors::parser::SelectorParseErrorKind;
 use selectors::OpaqueElement;
 #[allow(unused_imports)]
@@ -36,11 +36,6 @@ impl SelectorImpl for KuchikiSelectors {
     type PseudoElement = PseudoElement;
 
     type ExtraMatchingData = ();
-
-    fn is_active_or_hover(pseudo_class: &PseudoClass) -> bool {
-        matches!(*pseudo_class, PseudoClass::Active |
-                                PseudoClass::Hover)
-    }
 }
 
 struct KuchikiParser;
@@ -84,6 +79,14 @@ pub enum PseudoClass {
     Indeterminate,
 }
 
+impl NonTSPseudoClass for PseudoClass {
+    type Impl = KuchikiSelectors;
+
+    fn is_active_or_hover(&self) -> bool {
+        matches!(*self, PseudoClass::Active | PseudoClass::Hover)
+    }
+}
+
 impl ToCss for PseudoClass {
     fn to_css<W>(&self, dest: &mut W) -> fmt::Result where W: fmt::Write {
         dest.write_str(match *self {
@@ -125,16 +128,21 @@ impl selectors::Element for NodeDataRef<ElementData> {
     }
 
     #[inline]
+    fn is_html_slot_element(&self) -> bool {
+        false
+    }
+    #[inline]
+    fn parent_node_is_shadow_root(&self) -> bool {
+        false
+    }
+    #[inline]
+    fn containing_shadow_host(&self) -> Option<Self> {
+        None
+    }
+
+    #[inline]
     fn parent_element(&self) -> Option<Self> {
         self.as_node().parent().and_then(NodeRef::into_element_ref)
-    }
-    #[inline]
-    fn first_child_element(&self) -> Option<Self> {
-        self.as_node().children().elements().next()
-    }
-    #[inline]
-    fn last_child_element(&self) -> Option<Self> {
-        self.as_node().children().rev().elements().next()
     }
     #[inline]
     fn prev_sibling_element(&self) -> Option<Self> {
@@ -166,8 +174,8 @@ impl selectors::Element for NodeDataRef<ElementData> {
         self.name.ns == ns!(html)
     }
 
-    #[inline] fn get_local_name<'a>(&'a self) -> &'a LocalName { &self.name.local }
-    #[inline] fn get_namespace<'a>(&'a self) -> &'a Namespace { &self.name.ns }
+    #[inline] fn local_name<'a>(&'a self) -> &'a LocalName { &self.name.local }
+    #[inline] fn namespace<'a>(&'a self) -> &'a Namespace { &self.name.ns }
 
     #[inline]
     fn is_link(&self) -> bool {
@@ -228,7 +236,6 @@ impl selectors::Element for NodeDataRef<ElementData> {
     fn match_non_ts_pseudo_class<F>(&self,
                                     pseudo: &PseudoClass,
                                     _context: &mut matching::MatchingContext<KuchikiSelectors>,
-                                    _visited_handling: VisitedHandlingMode,
                                     _flags_setter: &mut F) -> bool
         where F: FnMut(&Self, matching::ElementSelectorFlags)
     {
