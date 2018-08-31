@@ -90,6 +90,10 @@ fn select() {
     assert_eq!(&**child.as_text().unwrap().borrow(), "Foo\n");
     assert_eq!(matching[0].attributes.borrow().get("class"), Some("foo"));
     assert_eq!(matching[0].attributes.borrow().get(local_name!("class")), Some("foo"));
+
+    let selectors = Selectors::compile("p.foo").unwrap();
+    let matching2 = selectors.filter(document.descendants().elements()).collect::<Vec<_>>();
+    assert_eq!(matching, matching2);
 }
 
 #[test]
