@@ -37,6 +37,7 @@ impl NodeRef {
 
 
 /// Holds a strong reference to a node, but dereferences to some component inside of it.
+#[derive(Eq)]
 pub struct NodeDataRef<T> {
     _keep_alive: NodeRef,
     _reference: *const T
@@ -72,6 +73,14 @@ impl<T> NodeDataRef<T> {
 impl<T> Deref for NodeDataRef<T> {
     type Target = T;
     #[inline] fn deref(&self) -> &T { unsafe { &*self._reference } }
+}
+
+// #[derive(PartialEq)] would compare both fields
+impl<T> PartialEq for NodeDataRef<T> {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self._keep_alive == other._keep_alive
+    }
 }
 
 // #[derive(Clone)] would have an unnecessary `T: Clone` bound
