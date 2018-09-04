@@ -37,6 +37,24 @@ pub fn parse_html_with_options(opts: ParseOpts) -> html5ever::Parser<Sink> {
     html5ever::parse_document(sink, html5opts)
 }
 
+/// Parse an HTML fragment with html5ever and the default configuration.
+pub fn parse_fragment(ctx_name: QualName, ctx_attr: Vec<Attribute>) -> html5ever::Parser<Sink> {
+    parse_fragment_with_options(ParseOpts::default(), ctx_name, ctx_attr)
+}
+
+/// Parse an HTML fragment with html5ever with custom configuration.
+pub fn parse_fragment_with_options(opts: ParseOpts, ctx_name: QualName, ctx_attr: Vec<Attribute>) -> html5ever::Parser<Sink> {
+    let sink = Sink {
+        document_node: NodeRef::new_document(),
+        on_parse_error: opts.on_parse_error,
+    };
+    let html5opts = html5ever::ParseOpts {
+        tokenizer: opts.tokenizer,
+        tree_builder: opts.tree_builder,
+    };
+    html5ever::parse_fragment(sink, html5opts, ctx_name, ctx_attr)
+}
+
 /// Receives new tree nodes during parsing.
 pub struct Sink {
     document_node: NodeRef,
