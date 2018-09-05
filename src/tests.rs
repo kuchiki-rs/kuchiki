@@ -1,9 +1,10 @@
 use html5ever::tree_builder::QuirksMode;
+use html5ever::QualName;
 use std::path::Path;
 
 use tempdir::TempDir;
 
-use crate::parser::parse_html;
+use crate::parser::{parse_html, parse_fragment};
 use crate::select::*;
 use crate::traits::*;
 
@@ -53,6 +54,16 @@ fn parse_and_serialize() {
         r"<!DOCTYPE html><html><head><title>Test case</title>
 </head><body><p>Content</p></body></html>"
     );
+}
+
+#[test]
+fn parse_and_serialize_fragment() {
+    let html = r"<tbody><tr><td>Test case";
+
+    let ctx_name = QualName::new(None, ns!(html), local_name!("tbody"));
+    let document = parse_fragment(ctx_name, vec![]).one(html);
+    assert_eq!(document.as_document().unwrap().quirks_mode(), QuirksMode::NoQuirks);
+    assert_eq!(document.to_string(), r"<html><tr><td>Test case</td></tr></html>");
 }
 
 #[test]
