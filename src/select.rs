@@ -9,8 +9,7 @@ use selectors::parser::SelectorParseErrorKind;
 use selectors::parser::{
     NonTSPseudoClass, Parser, Selector as GenericSelector, SelectorImpl, SelectorList,
 };
-use selectors::OpaqueElement;
-use selectors::{self, matching};
+use selectors::{self, matching, OpaqueElement};
 use std::fmt;
 use crate::tree::{ElementData, Node, NodeData, NodeRef};
 
