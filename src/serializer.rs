@@ -79,6 +79,15 @@ impl NodeRef {
             ..Default::default()
         })
     }
+    
+    /// Serialize this node with ability to specify traversal scope in HTML syntax to the given stream.
+    #[inline]
+    pub fn serialize_with_scope<W: Write>(&self, writer: &mut W, traversal_scope: TraversalScope) -> Result<()> {
+        serialize(writer, self, SerializeOpts {
+            traversal_scope,
+            ..Default::default()
+        })
+    }
 
     /// Serialize this node and its descendants in HTML syntax to a new file at the given path.
     #[inline]
