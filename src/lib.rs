@@ -13,8 +13,8 @@ extern crate selectors;
 #[cfg(test)] extern crate tempdir;
 
 mod attributes;
+mod cell_extras;
 pub mod iter;
-mod move_cell;
 mod node_data_ref;
 mod parser;
 mod select;

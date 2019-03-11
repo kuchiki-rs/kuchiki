@@ -1,4 +1,3 @@
-use move_cell::MoveCell;
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::ops::Deref;
@@ -7,6 +6,7 @@ use html5ever::tree_builder::QuirksMode;
 use html5ever::QualName;
 
 use attributes::{Attributes, ExpandedName, Attribute};
+use cell_extras::*;
 use iter::NodeIterator;
 
 
@@ -116,11 +116,11 @@ impl PartialEq for NodeRef {
 
 /// A node inside a DOM-like tree.
 pub struct Node {
-    parent: MoveCell<Option<Weak<Node>>>,
-    previous_sibling: MoveCell<Option<Weak<Node>>>,
-    next_sibling: MoveCell<Option<Rc<Node>>>,
-    first_child: MoveCell<Option<Rc<Node>>>,
-    last_child: MoveCell<Option<Weak<Node>>>,
+    parent: Cell<Option<Weak<Node>>>,
+    previous_sibling: Cell<Option<Weak<Node>>>,
+    next_sibling: Cell<Option<Rc<Node>>>,
+    first_child: Cell<Option<Rc<Node>>>,
+    last_child: Cell<Option<Weak<Node>>>,
     data: NodeData,
 }
 
@@ -175,7 +175,7 @@ impl Drop for Node {
                     // Since it was unique, the corresponding `Node` is dropped as well.
                     // `<Node as Drop>::drop` does not call `drop_rc`
                     // as both the first child and next sibling were already taken.
-                    // Weak reference counts decremented here for `MoveCell`s that are `Some`:
+                    // Weak reference counts decremented here for `Cell`s that are `Some`:
                     // * `rc.parent`: still has a strong reference in `stack` or elsewhere
                     // * `rc.last_child`: this is the last weak ref. Deallocated now.
                     // * `rc.previous_sibling`: this is the last weak ref. Deallocated now.
@@ -198,11 +198,11 @@ impl NodeRef {
     #[inline]
     pub fn new(data: NodeData) -> NodeRef {
         NodeRef(Rc::new(Node {
-            parent: MoveCell::new(None),
-            first_child: MoveCell::new(None),
-            last_child: MoveCell::new(None),
-            previous_sibling: MoveCell::new(None),
-            next_sibling: MoveCell::new(None),
+            parent: Cell::new(None),
+            first_child: Cell::new(None),
+            last_child: Cell::new(None),
+            previous_sibling: Cell::new(None),
+            next_sibling: Cell::new(None),
             data: data,
         }))
     }
