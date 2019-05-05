@@ -11,8 +11,6 @@ use selectors::parser::{
 };
 use selectors::OpaqueElement;
 use selectors::{self, matching};
-#[allow(unused_imports)]
-use std::ascii::AsciiExt;
 use std::fmt;
 use tree::{ElementData, Node, NodeData, NodeRef};
 
