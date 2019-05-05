@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::fmt;
 use std::ops::Deref;
-use tree::{Node, NodeRef, ElementData, Doctype, DocumentData};
+use tree::{Doctype, DocumentData, ElementData, Node, NodeRef};
 
 impl NodeRef {
     /// If this node is an element, return a strong reference to element-specific data.
@@ -35,18 +35,20 @@ impl NodeRef {
     }
 }
 
-
 /// Holds a strong reference to a node, but dereferences to some component inside of it.
 #[derive(Eq)]
 pub struct NodeDataRef<T> {
     _keep_alive: NodeRef,
-    _reference: *const T
+    _reference: *const T,
 }
 
 impl<T> NodeDataRef<T> {
     /// Create a `NodeDataRef` for a component in a given node.
     #[inline]
-    pub fn new<F>(rc: NodeRef, f: F) -> NodeDataRef<T> where F: FnOnce(&Node) -> &T {
+    pub fn new<F>(rc: NodeRef, f: F) -> NodeDataRef<T>
+    where
+        F: FnOnce(&Node) -> &T,
+    {
         NodeDataRef {
             _reference: f(&*rc),
             _keep_alive: rc,
@@ -56,7 +58,9 @@ impl<T> NodeDataRef<T> {
     /// Create a `NodeDataRef` for and a component that may or may not be in a given node.
     #[inline]
     pub fn new_opt<F>(rc: NodeRef, f: F) -> Option<NodeDataRef<T>>
-        where F: FnOnce(&Node) -> Option<&T> {
+    where
+        F: FnOnce(&Node) -> Option<&T>,
+    {
         f(&*rc).map(|r| r as *const T).map(move |r| NodeDataRef {
             _reference: r,
             _keep_alive: rc,
@@ -72,7 +76,10 @@ impl<T> NodeDataRef<T> {
 
 impl<T> Deref for NodeDataRef<T> {
     type Target = T;
-    #[inline] fn deref(&self) -> &T { unsafe { &*self._reference } }
+    #[inline]
+    fn deref(&self) -> &T {
+        unsafe { &*self._reference }
+    }
 }
 
 // #[derive(PartialEq)] would compare both fields

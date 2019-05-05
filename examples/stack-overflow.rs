@@ -4,7 +4,6 @@ fn main() {
     let mut depth = 2;
     // 20 M nodes is a few GB of memory.
     while depth <= 20_000_000 {
-
         let mut node = kuchiki::NodeRef::new_text("");
         for _ in 0..depth {
             let parent = kuchiki::NodeRef::new_text("");

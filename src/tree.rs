@@ -1,14 +1,13 @@
+use html5ever::tree_builder::QuirksMode;
+use html5ever::QualName;
 use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
-use html5ever::tree_builder::QuirksMode;
-use html5ever::QualName;
 
-use attributes::{Attributes, ExpandedName, Attribute};
+use attributes::{Attribute, Attributes, ExpandedName};
 use cell_extras::*;
 use iter::NodeIterator;
-
 
 /// Node data specific to the node type.
 #[derive(Debug, PartialEq, Clone)]
@@ -168,7 +167,7 @@ impl Drop for Node {
                 if let Some(child) = rc.first_child.take_if_unique_strong() {
                     stack.push(rc);
                     rc = child;
-                    continue
+                    continue;
                 }
                 if let Some(sibling) = rc.next_sibling.take_if_unique_strong() {
                     // The previous value of `rc: Rc<Node>` is dropped here.
@@ -180,14 +179,14 @@ impl Drop for Node {
                     // * `rc.last_child`: this is the last weak ref. Deallocated now.
                     // * `rc.previous_sibling`: this is the last weak ref. Deallocated now.
                     rc = sibling;
-                    continue
+                    continue;
                 }
                 if let Some(parent) = stack.pop() {
                     // Same as in the above comment.
                     rc = parent;
-                    continue
+                    continue;
                 }
-                return
+                return;
             }
         }
     }
@@ -210,7 +209,9 @@ impl NodeRef {
     /// Create a new element node.
     #[inline]
     pub fn new_element<I>(name: QualName, attributes: I) -> NodeRef
-                          where I: IntoIterator<Item=(ExpandedName, Attribute)> {
+    where
+        I: IntoIterator<Item = (ExpandedName, Attribute)>,
+    {
         NodeRef::new(NodeData::Element(ElementData {
             template_contents: if name.expanded() == expanded_name!(html "template") {
                 Some(NodeRef::new(NodeData::DocumentFragment))
@@ -219,7 +220,7 @@ impl NodeRef {
             },
             name: name,
             attributes: RefCell::new(Attributes {
-                map: attributes.into_iter().collect()
+                map: attributes.into_iter().collect(),
             }),
         }))
     }
@@ -239,14 +240,24 @@ impl NodeRef {
     /// Create a new processing instruction node.
     #[inline]
     pub fn new_processing_instruction<T1, T2>(target: T1, data: T2) -> NodeRef
-                                              where T1: Into<String>, T2: Into<String> {
-        NodeRef::new(NodeData::ProcessingInstruction(RefCell::new((target.into(), data.into()))))
+    where
+        T1: Into<String>,
+        T2: Into<String>,
+    {
+        NodeRef::new(NodeData::ProcessingInstruction(RefCell::new((
+            target.into(),
+            data.into(),
+        ))))
     }
 
     /// Create a new doctype node.
     #[inline]
     pub fn new_doctype<T1, T2, T3>(name: T1, public_id: T2, system_id: T3) -> NodeRef
-                                   where T1: Into<String>, T2: Into<String>, T3: Into<String> {
+    where
+        T1: Into<String>,
+        T2: Into<String>,
+        T3: Into<String>,
+    {
         NodeRef::new(NodeData::Doctype(Doctype {
             name: name.into(),
             public_id: public_id.into(),
@@ -284,7 +295,7 @@ impl Node {
     pub fn as_element(&self) -> Option<&ElementData> {
         match self.data {
             NodeData::Element(ref value) => Some(value),
-            _ => None
+            _ => None,
         }
     }
 
@@ -293,7 +304,7 @@ impl Node {
     pub fn as_text(&self) -> Option<&RefCell<String>> {
         match self.data {
             NodeData::Text(ref value) => Some(value),
-            _ => None
+            _ => None,
         }
     }
 
@@ -302,7 +313,7 @@ impl Node {
     pub fn as_comment(&self) -> Option<&RefCell<String>> {
         match self.data {
             NodeData::Comment(ref value) => Some(value),
-            _ => None
+            _ => None,
         }
     }
 
@@ -311,7 +322,7 @@ impl Node {
     pub fn as_doctype(&self) -> Option<&Doctype> {
         match self.data {
             NodeData::Doctype(ref value) => Some(value),
-            _ => None
+            _ => None,
         }
     }
 
@@ -320,7 +331,7 @@ impl Node {
     pub fn as_document(&self) -> Option<&DocumentData> {
         match self.data {
             NodeData::Document(ref value) => Some(value),
-            _ => None
+            _ => None,
         }
     }
 
@@ -362,10 +373,14 @@ impl Node {
         let previous_sibling_weak = self.previous_sibling.take();
         let next_sibling_strong = self.next_sibling.take();
 
-        let previous_sibling_opt = previous_sibling_weak.as_ref().and_then(|weak| weak.upgrade());
+        let previous_sibling_opt = previous_sibling_weak
+            .as_ref()
+            .and_then(|weak| weak.upgrade());
 
         if let Some(next_sibling_ref) = next_sibling_strong.as_ref() {
-            next_sibling_ref.previous_sibling.replace(previous_sibling_weak);
+            next_sibling_ref
+                .previous_sibling
+                .replace(previous_sibling_weak);
         } else if let Some(parent_ref) = parent_weak.as_ref() {
             if let Some(parent_strong) = parent_ref.upgrade() {
                 parent_strong.last_child.replace(previous_sibling_weak);
@@ -373,7 +388,9 @@ impl Node {
         }
 
         if let Some(previous_sibling_strong) = previous_sibling_opt {
-            previous_sibling_strong.next_sibling.replace(next_sibling_strong);
+            previous_sibling_strong
+                .next_sibling
+                .replace(next_sibling_strong);
         } else if let Some(parent_ref) = parent_weak.as_ref() {
             if let Some(parent_strong) = parent_ref.upgrade() {
                 parent_strong.first_child.replace(next_sibling_strong);
@@ -394,7 +411,7 @@ impl NodeRef {
                 new_child.previous_sibling.replace(Some(last_child_weak));
                 debug_assert!(last_child.next_sibling.is_none());
                 last_child.next_sibling.replace(Some(new_child.0));
-                return
+                return;
             }
         }
         debug_assert!(self.first_child.is_none());
@@ -409,7 +426,9 @@ impl NodeRef {
         new_child.parent.replace(Some(Rc::downgrade(&self.0)));
         if let Some(first_child) = self.first_child.take() {
             debug_assert!(first_child.previous_sibling.is_none());
-            first_child.previous_sibling.replace(Some(Rc::downgrade(&new_child.0)));
+            first_child
+                .previous_sibling
+                .replace(Some(Rc::downgrade(&new_child.0)));
             new_child.next_sibling.replace(Some(first_child));
         } else {
             debug_assert!(self.first_child.is_none());
@@ -424,14 +443,20 @@ impl NodeRef {
     pub fn insert_after(&self, new_sibling: NodeRef) {
         new_sibling.detach();
         new_sibling.parent.replace(self.parent.clone_inner());
-        new_sibling.previous_sibling.replace(Some(Rc::downgrade(&self.0)));
+        new_sibling
+            .previous_sibling
+            .replace(Some(Rc::downgrade(&self.0)));
         if let Some(next_sibling) = self.next_sibling.take() {
             debug_assert!(next_sibling.previous_sibling().unwrap() == *self);
-            next_sibling.previous_sibling.replace(Some(Rc::downgrade(&new_sibling.0)));
+            next_sibling
+                .previous_sibling
+                .replace(Some(Rc::downgrade(&new_sibling.0)));
             new_sibling.next_sibling.replace(Some(next_sibling));
         } else if let Some(parent) = self.parent() {
             debug_assert!(parent.last_child().unwrap() == *self);
-            parent.last_child.replace(Some(Rc::downgrade(&new_sibling.0)));
+            parent
+                .last_child
+                .replace(Some(Rc::downgrade(&new_sibling.0)));
         }
         self.next_sibling.replace(Some(new_sibling.0));
     }
@@ -443,13 +468,17 @@ impl NodeRef {
         new_sibling.detach();
         new_sibling.parent.replace(self.parent.clone_inner());
         new_sibling.next_sibling.replace(Some(self.0.clone()));
-        if let Some(previous_sibling_weak) = self.previous_sibling.replace(
-                Some(Rc::downgrade(&new_sibling.0))) {
+        if let Some(previous_sibling_weak) = self
+            .previous_sibling
+            .replace(Some(Rc::downgrade(&new_sibling.0)))
+        {
             if let Some(previous_sibling) = previous_sibling_weak.upgrade() {
-                new_sibling.previous_sibling.replace(Some(previous_sibling_weak));
+                new_sibling
+                    .previous_sibling
+                    .replace(Some(previous_sibling_weak));
                 debug_assert!(previous_sibling.next_sibling().unwrap() == *self);
                 previous_sibling.next_sibling.replace(Some(new_sibling.0));
-                return
+                return;
             }
         }
         if let Some(parent) = self.parent() {

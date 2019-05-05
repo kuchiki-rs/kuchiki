@@ -16,8 +16,15 @@ fn text_nodes() {
     let document = parse_html().one(html);
     let paragraph = document.select("p").unwrap().collect::<Vec<_>>();
     assert_eq!(paragraph.len(), 1);
-    assert_eq!(paragraph[0].text_contents(), "Content contains Important data");
-    let texts = paragraph[0].as_node().descendants().text_nodes().collect::<Vec<_>>();
+    assert_eq!(
+        paragraph[0].text_contents(),
+        "Content contains Important data"
+    );
+    let texts = paragraph[0]
+        .as_node()
+        .descendants()
+        .text_nodes()
+        .collect::<Vec<_>>();
     assert_eq!(texts.len(), 3);
     assert_eq!(&*texts[0].borrow(), "Content contains ");
     assert_eq!(&*texts[1].borrow(), "Important");
@@ -37,9 +44,15 @@ fn parse_and_serialize() {
 <title>Test case</title>
 <p>Content";
     let document = parse_html().one(html);
-    assert_eq!(document.as_document().unwrap().quirks_mode(), QuirksMode::NoQuirks);
-    assert_eq!(document.to_string(), r"<!DOCTYPE html><html><head><title>Test case</title>
-</head><body><p>Content</p></body></html>");
+    assert_eq!(
+        document.as_document().unwrap().quirks_mode(),
+        QuirksMode::NoQuirks
+    );
+    assert_eq!(
+        document.to_string(),
+        r"<!DOCTYPE html><html><head><title>Test case</title>
+</head><body><p>Content</p></body></html>"
+    );
 }
 
 #[test]
@@ -89,10 +102,15 @@ fn select() {
     let child = matching[0].as_node().first_child().unwrap();
     assert_eq!(&**child.as_text().unwrap().borrow(), "Foo\n");
     assert_eq!(matching[0].attributes.borrow().get("class"), Some("foo"));
-    assert_eq!(matching[0].attributes.borrow().get(local_name!("class")), Some("foo"));
+    assert_eq!(
+        matching[0].attributes.borrow().get(local_name!("class")),
+        Some("foo")
+    );
 
     let selectors = Selectors::compile("p.foo").unwrap();
-    let matching2 = selectors.filter(document.descendants().elements()).collect::<Vec<_>>();
+    let matching2 = selectors
+        .filter(document.descendants().elements())
+        .collect::<Vec<_>>();
     assert_eq!(matching, matching2);
 }
 
@@ -110,7 +128,10 @@ fn select_first() {
     let child = matching.as_node().first_child().unwrap();
     assert_eq!(&**child.as_text().unwrap().borrow(), "Foo\n");
     assert_eq!(matching.attributes.borrow().get("class"), Some("foo"));
-    assert_eq!(matching.attributes.borrow().get(local_name!("class")), Some("foo"));
+    assert_eq!(
+        matching.attributes.borrow().get(local_name!("class")),
+        Some("foo")
+    );
 
     assert!(document.select_first("p.bar").is_err());
 }
@@ -128,13 +149,24 @@ fn to_string() {
 </html>";
 
     let document = parse_html().one(html);
-    assert_eq!(document.inclusive_descendants().nth(11).unwrap().to_string(), "<p class=\"foo\">Foo\n    \n</p>");
+    assert_eq!(
+        document
+            .inclusive_descendants()
+            .nth(11)
+            .unwrap()
+            .to_string(),
+        "<p class=\"foo\">Foo\n    \n</p>"
+    );
 }
 
 #[test]
 fn specificity() {
     let selectors = Selectors::compile(".example, :first-child, div").unwrap();
-    let specificities = selectors.0.iter().map(|s| s.specificity()).collect::<Vec<_>>();
+    let specificities = selectors
+        .0
+        .iter()
+        .map(|s| s.specificity())
+        .collect::<Vec<_>>();
     assert_eq!(specificities.len(), 3);
     assert!(specificities[0] == specificities[1]);
     assert!(specificities[0] > specificities[2]);

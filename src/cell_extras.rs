@@ -64,9 +64,7 @@ pub trait CellOption {
 impl<T> CellOption for Cell<Option<T>> {
     #[inline]
     fn is_none(&self) -> bool {
-        unsafe {
-            (*self.as_ptr()).is_none()
-        }
+        unsafe { (*self.as_ptr()).is_none() }
     }
 }
 
@@ -78,16 +76,12 @@ pub trait CellOptionWeak<T> {
 impl<T> CellOptionWeak<T> for Cell<Option<Weak<T>>> {
     #[inline]
     fn upgrade(&self) -> Option<Rc<T>> {
-        unsafe {
-            (*self.as_ptr()).as_ref().and_then(Weak::upgrade)
-        }
+        unsafe { (*self.as_ptr()).as_ref().and_then(Weak::upgrade) }
     }
 
     #[inline]
     fn clone_inner(&self) -> Option<Weak<T>> {
-        unsafe {
-            (*self.as_ptr()).clone()
-        }
+        unsafe { (*self.as_ptr()).clone() }
     }
 }
 
@@ -114,8 +108,6 @@ impl<T> CellOptionRc<T> for Cell<Option<Rc<T>>> {
 
     #[inline]
     fn clone_inner(&self) -> Option<Rc<T>> {
-        unsafe {
-            (*self.as_ptr()).clone()
-        }
+        unsafe { (*self.as_ptr()).clone() }
     }
 }
