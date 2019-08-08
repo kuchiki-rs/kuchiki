@@ -11,10 +11,10 @@ name = "kuchiki"
 doctest = false
 
 [dependencies]
-cssparser = "0.24"
-matches = "0.1.4"
-html5ever = "0.22"
-selectors = "0.20"
+cssparser = "0.25"
+matches = "0.1"
+html5ever = "0.24"
+selectors = "0.21"
 
 [dev-dependencies]
 tempdir = "0.3"
