@@ -16,7 +16,7 @@ pub struct ParseOpts {
     pub tree_builder: html5ever::tree_builder::TreeBuilderOpts,
 
     /// A callback for HTML parse errors (which are never fatal).
-    pub on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
+    pub on_parse_error: Option<Box<dyn FnMut(Cow<'static, str>)>>,
 }
 
 /// Parse an HTML document with html5ever and the default configuration.
@@ -39,7 +39,7 @@ pub fn parse_html_with_options(opts: ParseOpts) -> html5ever::Parser<Sink> {
 
 pub struct Sink {
     document_node: NodeRef,
-    on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
+    on_parse_error: Option<Box<dyn FnMut(Cow<'static, str>)>>,
 }
 
 impl TreeSink for Sink {
