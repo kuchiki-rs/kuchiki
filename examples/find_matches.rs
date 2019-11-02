@@ -1,5 +1,3 @@
-extern crate kuchiki;
-
 use kuchiki::traits::*;
 
 fn main() {

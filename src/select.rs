@@ -1,8 +1,9 @@
-use attributes::ExpandedName;
+use crate::attributes::ExpandedName;
+use crate::iter::{NodeIterator, Select};
+use crate::node_data_ref::NodeDataRef;
+use crate::tree::{ElementData, Node, NodeData, NodeRef};
 use cssparser::{self, CowRcStr, ParseError, SourceLocation, ToCss};
 use html5ever::{LocalName, Namespace};
-use iter::{NodeIterator, Select};
-use node_data_ref::NodeDataRef;
 use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
 use selectors::context::QuirksMode;
 use selectors::parser::SelectorParseErrorKind;
@@ -12,7 +13,6 @@ use selectors::parser::{
 use selectors::OpaqueElement;
 use selectors::{self, matching};
 use std::fmt;
-use tree::{ElementData, Node, NodeData, NodeRef};
 
 /// The definition of whitespace per CSS Selectors Level 3 § 4.
 ///
@@ -263,7 +263,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     fn match_pseudo_element(
         &self,
         pseudo: &PseudoElement,
-        _context: &mut matching::MatchingContext<KuchikiSelectors>,
+        _context: &mut matching::MatchingContext<'_, KuchikiSelectors>,
     ) -> bool {
         match *pseudo {}
     }
@@ -271,7 +271,7 @@ impl selectors::Element for NodeDataRef<ElementData> {
     fn match_non_ts_pseudo_class<F>(
         &self,
         pseudo: &PseudoClass,
-        _context: &mut matching::MatchingContext<KuchikiSelectors>,
+        _context: &mut matching::MatchingContext<'_, KuchikiSelectors>,
         _flags_setter: &mut F,
     ) -> bool
     where
@@ -367,34 +367,34 @@ impl ::std::str::FromStr for Selectors {
 }
 
 impl fmt::Display for Selector {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.to_css(f)
     }
 }
 
 impl fmt::Display for Selectors {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut iter = self.0.iter();
         let first = iter
             .next()
             .expect("Empty Selectors, should contain at least one selector");
-        try!(first.0.to_css(f));
+        first.0.to_css(f)?;
         for selector in iter {
-            try!(f.write_str(", "));
-            try!(selector.0.to_css(f));
+            f.write_str(", ")?;
+            selector.0.to_css(f)?;
         }
         Ok(())
     }
 }
 
 impl fmt::Debug for Selector {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(self, f)
     }
 }
 
 impl fmt::Debug for Selectors {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(self, f)
     }
 }

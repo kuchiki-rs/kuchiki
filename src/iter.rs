@@ -4,9 +4,9 @@ use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::iter::Rev;
 
-use node_data_ref::NodeDataRef;
-use select::Selectors;
-use tree::{ElementData, NodeRef};
+use crate::node_data_ref::NodeDataRef;
+use crate::select::Selectors;
+use crate::tree::{ElementData, NodeRef};
 
 impl NodeRef {
     /// Return an iterator of references to this node and its ancestors.

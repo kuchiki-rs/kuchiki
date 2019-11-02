@@ -1,7 +1,7 @@
+use crate::tree::{Doctype, DocumentData, ElementData, Node, NodeRef};
 use std::cell::RefCell;
 use std::fmt;
 use std::ops::Deref;
-use tree::{Doctype, DocumentData, ElementData, Node, NodeRef};
 
 impl NodeRef {
     /// If this node is an element, return a strong reference to element-specific data.
@@ -103,7 +103,7 @@ impl<T> Clone for NodeDataRef<T> {
 
 impl<T: fmt::Debug> fmt::Debug for NodeDataRef<T> {
     #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         fmt::Debug::fmt(&**self, f)
     }
 }
