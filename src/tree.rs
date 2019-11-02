@@ -486,4 +486,20 @@ impl NodeRef {
             parent.first_child.replace(Some(new_sibling.0));
         }
     }
+
+    /// Wrap a NodeRef inside another NodeRef
+    fn wrap_with(self, new_parent: NodeRef) {
+        match self.next_sibling() {
+            Some(sibling) => {
+                new_parent.append(self);
+                sibling.insert_before(new_parent);
+            }
+            None => {
+                let parent = self.parent().expect("No parent or sibling NodeRef found.");
+                new_parent.append(self);
+                parent.append(new_parent);
+            }
+        }
+    }
+
 }
