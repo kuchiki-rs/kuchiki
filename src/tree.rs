@@ -5,9 +5,9 @@ use std::fmt;
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
 
-use attributes::{Attribute, Attributes, ExpandedName};
-use cell_extras::*;
-use iter::NodeIterator;
+use crate::attributes::{Attribute, Attributes, ExpandedName};
+use crate::cell_extras::*;
+use crate::iter::NodeIterator;
 
 /// Node data specific to the node type.
 #[derive(Debug, PartialEq, Clone)]

@@ -6,7 +6,7 @@ use std::io::{Result, Write};
 use std::path::Path;
 use std::string::ToString;
 
-use tree::{NodeData, NodeRef};
+use crate::tree::{NodeData, NodeRef};
 
 impl Serialize for NodeRef {
     fn serialize<S: Serializer>(
