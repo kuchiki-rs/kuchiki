@@ -40,5 +40,5 @@ pub use tree::{Doctype, DocumentData, ElementData, Node, NodeData, NodeRef};
 /// ```
 pub mod traits {
     pub use html5ever::tendril::TendrilSink;
-    pub use iter::{ElementIterator, NodeIterator};
+    pub use crate::iter::{ElementIterator, NodeIterator};
 }

@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::fmt;
 use std::ops::Deref;
-use tree::{Doctype, DocumentData, ElementData, Node, NodeRef};
+use crate::tree::{Doctype, DocumentData, ElementData, Node, NodeRef};
 
 impl NodeRef {
     /// If this node is an element, return a strong reference to element-specific data.
