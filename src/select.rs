@@ -378,10 +378,10 @@ impl fmt::Display for Selectors {
         let first = iter
             .next()
             .expect("Empty Selectors, should contain at least one selector");
-        try!(first.0.to_css(f));
+        first.0.to_css(f)?;
         for selector in iter {
-            try!(f.write_str(", "));
-            try!(selector.0.to_css(f));
+            f.write_str(", ")?;
+            selector.0.to_css(f)?;
         }
         Ok(())
     }
