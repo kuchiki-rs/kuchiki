@@ -4,9 +4,9 @@ use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::iter::Rev;
 
-use tree::{NodeRef, ElementData};
-use select::Selectors;
-use node_data_ref::NodeDataRef;
+use crate::node_data_ref::NodeDataRef;
+use crate::select::Selectors;
+use crate::tree::{ElementData, NodeRef};
 
 impl NodeRef {
     /// Return an iterator of references to this node and its ancestors.
@@ -28,13 +28,20 @@ impl NodeRef {
             Some(parent) => {
                 let first_sibling = parent.first_child().unwrap();
                 debug_assert!(self.previous_sibling().is_some() || *self == first_sibling);
-                Siblings(Some(State { next: first_sibling, next_back: self.clone() }))
+                Siblings(Some(State {
+                    next: first_sibling,
+                    next_back: self.clone(),
+                }))
             }
             None => {
                 debug_assert!(self.previous_sibling().is_none());
-                Siblings(Some(State { next: self.clone(), next_back: self.clone() }))
+                Siblings(Some(State {
+                    next: self.clone(),
+                    next_back: self.clone(),
+                }))
             }
-        }.rev()
+        }
+        .rev()
     }
 
     /// Return an iterator of references to this node’s siblings before it.
@@ -43,10 +50,14 @@ impl NodeRef {
         match (self.parent(), self.previous_sibling()) {
             (Some(parent), Some(previous_sibling)) => {
                 let first_sibling = parent.first_child().unwrap();
-                Siblings(Some(State { next: first_sibling, next_back: previous_sibling }))
+                Siblings(Some(State {
+                    next: first_sibling,
+                    next_back: previous_sibling,
+                }))
             }
-            _ => Siblings(None)
-        }.rev()
+            _ => Siblings(None),
+        }
+        .rev()
     }
 
     /// Return an iterator of references to this node and the siblings after it.
@@ -56,11 +67,17 @@ impl NodeRef {
             Some(parent) => {
                 let last_sibling = parent.last_child().unwrap();
                 debug_assert!(self.next_sibling().is_some() || *self == last_sibling);
-                Siblings(Some(State { next: self.clone(), next_back: last_sibling }))
+                Siblings(Some(State {
+                    next: self.clone(),
+                    next_back: last_sibling,
+                }))
             }
             None => {
                 debug_assert!(self.next_sibling().is_none());
-                Siblings(Some(State { next: self.clone(), next_back: self.clone() }))
+                Siblings(Some(State {
+                    next: self.clone(),
+                    next_back: self.clone(),
+                }))
             }
         }
     }
@@ -71,9 +88,12 @@ impl NodeRef {
         match (self.parent(), self.next_sibling()) {
             (Some(parent), Some(next_sibling)) => {
                 let last_sibling = parent.last_child().unwrap();
-                Siblings(Some(State { next: next_sibling, next_back: last_sibling }))
+                Siblings(Some(State {
+                    next: next_sibling,
+                    next_back: last_sibling,
+                }))
             }
-            _ => Siblings(None)
+            _ => Siblings(None),
         }
     }
 
@@ -81,11 +101,12 @@ impl NodeRef {
     #[inline]
     pub fn children(&self) -> Siblings {
         match (self.first_child(), self.last_child()) {
-            (Some(first_child), Some(last_child)) => {
-                Siblings(Some(State { next: first_child, next_back: last_child }))
-            }
+            (Some(first_child), Some(last_child)) => Siblings(Some(State {
+                next: first_child,
+                next_back: last_child,
+            })),
             (None, None) => Siblings(None),
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 
@@ -124,14 +145,12 @@ impl NodeRef {
     #[inline]
     pub fn traverse(&self) -> Traverse {
         match (self.first_child(), self.last_child()) {
-            (Some(first_child), Some(last_child)) => {
-                Traverse(Some(State {
-                    next: NodeEdge::Start(first_child),
-                    next_back: NodeEdge::End(last_child)
-                }))
-            }
+            (Some(first_child), Some(last_child)) => Traverse(Some(State {
+                next: NodeEdge::Start(first_child),
+                next_back: NodeEdge::End(last_child),
+            })),
             (None, None) => Traverse(None),
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 
@@ -149,13 +168,11 @@ impl NodeRef {
     }
 }
 
-
 #[derive(Debug, Clone)]
 struct State<T> {
     next: T,
     next_back: T,
 }
-
 
 /// A double-ended iterator of sibling nodes.
 #[derive(Debug, Clone)]
@@ -186,7 +203,6 @@ impl DoubleEndedIterator for Siblings {
     siblings_next!(next_back, next, previous_sibling);
 }
 
-
 /// An iterator on ancestor nodes.
 #[derive(Debug, Clone)]
 pub struct Ancestors(Option<NodeRef>);
@@ -202,7 +218,6 @@ impl Iterator for Ancestors {
         })
     }
 }
-
 
 /// An iterator of references to a given node and its descendants, in tree order.
 #[derive(Debug, Clone)]
@@ -245,7 +260,6 @@ pub enum NodeEdge<T> {
     /// In HTML or XML, this corresponds to a closing tag like `</div>`
     End(T),
 }
-
 
 /// An iterator of the start and end edges of the nodes in a given subtree.
 #[derive(Debug, Clone)]
@@ -293,39 +307,44 @@ impl DoubleEndedIterator for Traverse {
     traverse_next!(next_back, next, last_child, previous_sibling, End, Start);
 }
 
-
 macro_rules! filter_map_like_iterator {
     (#[$doc: meta] $name: ident: $f: expr, $from: ty => $to: ty) => {
         #[$doc]
         #[derive(Debug, Clone)]
         pub struct $name<I>(pub I);
 
-        impl<I> Iterator for $name<I> where I: Iterator<Item=$from> {
+        impl<I> Iterator for $name<I>
+        where
+            I: Iterator<Item = $from>,
+        {
             type Item = $to;
 
             #[inline]
             fn next(&mut self) -> Option<$to> {
                 for x in self.0.by_ref() {
                     if let Some(y) = ($f)(x) {
-                        return Some(y)
+                        return Some(y);
                     }
                 }
                 None
             }
         }
 
-        impl<I> DoubleEndedIterator for $name<I> where I: DoubleEndedIterator<Item=$from> {
+        impl<I> DoubleEndedIterator for $name<I>
+        where
+            I: DoubleEndedIterator<Item = $from>,
+        {
             #[inline]
             fn next_back(&mut self) -> Option<$to> {
                 for x in self.0.by_ref().rev() {
                     if let Some(y) = ($f)(x) {
-                        return Some(y)
+                        return Some(y);
                     }
                 }
                 None
             }
         }
-    }
+    };
 }
 
 filter_map_like_iterator! {
@@ -343,11 +362,12 @@ filter_map_like_iterator! {
     TextNodes: NodeRef::into_text_ref, NodeRef => NodeDataRef<RefCell<String>>
 }
 
-
 /// An element iterator adaptor that yields elements maching given selectors.
-pub struct Select<I, S=Selectors>
-where I: Iterator<Item=NodeDataRef<ElementData>>,
-      S: Borrow<Selectors> {
+pub struct Select<I, S = Selectors>
+where
+    I: Iterator<Item = NodeDataRef<ElementData>>,
+    S: Borrow<Selectors>,
+{
     /// The underlying iterator.
     pub iter: I,
 
@@ -356,15 +376,17 @@ where I: Iterator<Item=NodeDataRef<ElementData>>,
 }
 
 impl<I, S> Iterator for Select<I, S>
-where I: Iterator<Item=NodeDataRef<ElementData>>,
-      S: Borrow<Selectors> {
+where
+    I: Iterator<Item = NodeDataRef<ElementData>>,
+    S: Borrow<Selectors>,
+{
     type Item = NodeDataRef<ElementData>;
 
     #[inline]
     fn next(&mut self) -> Option<NodeDataRef<ElementData>> {
         for element in self.iter.by_ref() {
             if self.selectors.borrow().matches(&element) {
-                return Some(element)
+                return Some(element);
             }
         }
         None
@@ -372,22 +394,23 @@ where I: Iterator<Item=NodeDataRef<ElementData>>,
 }
 
 impl<I, S> DoubleEndedIterator for Select<I, S>
-where I: DoubleEndedIterator<Item=NodeDataRef<ElementData>>,
-      S: Borrow<Selectors> {
+where
+    I: DoubleEndedIterator<Item = NodeDataRef<ElementData>>,
+    S: Borrow<Selectors>,
+{
     #[inline]
     fn next_back(&mut self) -> Option<NodeDataRef<ElementData>> {
         for element in self.iter.by_ref().rev() {
             if self.selectors.borrow().matches(&element) {
-                return Some(element)
+                return Some(element);
             }
         }
         None
     }
 }
 
-
 /// Convenience methods for node iterators.
-pub trait NodeIterator: Sized + Iterator<Item=NodeRef> {
+pub trait NodeIterator: Sized + Iterator<Item = NodeRef> {
     /// Filter this element iterator to elements.
     #[inline]
     fn elements(self) -> Elements<Self> {
@@ -414,7 +437,7 @@ pub trait NodeIterator: Sized + Iterator<Item=NodeRef> {
 }
 
 /// Convenience methods for element iterators.
-pub trait ElementIterator: Sized + Iterator<Item=NodeDataRef<ElementData>> {
+pub trait ElementIterator: Sized + Iterator<Item = NodeDataRef<ElementData>> {
     /// Filter this element iterator to elements maching the given selectors.
     #[inline]
     fn select(self, selectors: &str) -> Result<Select<Self>, ()> {
@@ -425,5 +448,5 @@ pub trait ElementIterator: Sized + Iterator<Item=NodeDataRef<ElementData>> {
     }
 }
 
-impl<I> NodeIterator for I where I: Iterator<Item=NodeRef> {}
-impl<I> ElementIterator for I where I: Iterator<Item=NodeDataRef<ElementData>> {}
+impl<I> NodeIterator for I where I: Iterator<Item = NodeRef> {}
+impl<I> ElementIterator for I where I: Iterator<Item = NodeDataRef<ElementData>> {}

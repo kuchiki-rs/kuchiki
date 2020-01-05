@@ -1,10 +1,10 @@
-use std::borrow::Cow;
-use html5ever::{self, Attribute, QualName, ExpandedName};
 use html5ever::tendril::StrTendril;
-use html5ever::tree_builder::{TreeSink, NodeOrText, QuirksMode, ElementFlags};
+use html5ever::tree_builder::{ElementFlags, NodeOrText, QuirksMode, TreeSink};
+use html5ever::{self, Attribute, ExpandedName, QualName};
+use std::borrow::Cow;
 
-use attributes;
-use tree::NodeRef;
+use crate::attributes;
+use crate::tree::NodeRef;
 
 /// Options for the HTML parser.
 #[derive(Default)]
@@ -16,7 +16,7 @@ pub struct ParseOpts {
     pub tree_builder: html5ever::tree_builder::TreeBuilderOpts,
 
     /// A callback for HTML parse errors (which are never fatal).
-    pub on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
+    pub on_parse_error: Option<Box<dyn FnMut(Cow<'static, str>)>>,
 }
 
 /// Parse an HTML document with html5ever and the default configuration.
@@ -39,13 +39,15 @@ pub fn parse_html_with_options(opts: ParseOpts) -> html5ever::Parser<Sink> {
 
 pub struct Sink {
     document_node: NodeRef,
-    on_parse_error: Option<Box<FnMut(Cow<'static, str>)>>,
+    on_parse_error: Option<Box<dyn FnMut(Cow<'static, str>)>>,
 }
 
 impl TreeSink for Sink {
     type Output = NodeRef;
 
-    fn finish(self) -> NodeRef { self.document_node }
+    fn finish(self) -> NodeRef {
+        self.document_node
+    }
 
     type Handle = NodeRef;
 
@@ -63,7 +65,11 @@ impl TreeSink for Sink {
 
     #[inline]
     fn set_quirks_mode(&mut self, mode: QuirksMode) {
-        self.document_node.as_document().unwrap()._quirks_mode.set(mode)
+        self.document_node
+            .as_document()
+            .unwrap()
+            ._quirks_mode
+            .set(mode)
     }
 
     #[inline]
@@ -77,13 +83,26 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn create_element(&mut self, name: QualName, attrs: Vec<Attribute>, _flags: ElementFlags)
-                      -> NodeRef {
-        NodeRef::new_element(name, attrs.into_iter().map(|attr| {
-            let Attribute { name: QualName { prefix, ns, local }, value } = attr;
-            let value = String::from(value);
-            (attributes::ExpandedName { ns, local }, attributes::Attribute { prefix, value })
-        }))
+    fn create_element(
+        &mut self,
+        name: QualName,
+        attrs: Vec<Attribute>,
+        _flags: ElementFlags,
+    ) -> NodeRef {
+        NodeRef::new_element(
+            name,
+            attrs.into_iter().map(|attr| {
+                let Attribute {
+                    name: QualName { prefix, ns, local },
+                    value,
+                } = attr;
+                let value = String::from(value);
+                (
+                    attributes::ExpandedName { ns, local },
+                    attributes::Attribute { prefix, value },
+                )
+            }),
+        )
     }
 
     #[inline]
@@ -104,7 +123,7 @@ impl TreeSink for Sink {
                 if let Some(last_child) = parent.last_child() {
                     if let Some(existing) = last_child.as_text() {
                         existing.borrow_mut().push_str(&text);
-                        return
+                        return;
                     }
                 }
                 parent.append(NodeRef::new_text(text))
@@ -120,7 +139,7 @@ impl TreeSink for Sink {
                 if let Some(previous_sibling) = sibling.previous_sibling() {
                     if let Some(existing) = previous_sibling.as_text() {
                         existing.borrow_mut().push_str(&text);
-                        return
+                        return;
                     }
                 }
                 sibling.insert_before(NodeRef::new_text(text))
@@ -129,9 +148,14 @@ impl TreeSink for Sink {
     }
 
     #[inline]
-    fn append_doctype_to_document(&mut self, name: StrTendril, public_id: StrTendril,
-                                  system_id: StrTendril) {
-        self.document_node.append(NodeRef::new_doctype(name, public_id, system_id))
+    fn append_doctype_to_document(
+        &mut self,
+        name: StrTendril,
+        public_id: StrTendril,
+        system_id: StrTendril,
+    ) {
+        self.document_node
+            .append(NodeRef::new_doctype(name, public_id, system_id))
     }
 
     #[inline]
@@ -139,11 +163,18 @@ impl TreeSink for Sink {
         let element = target.as_element().unwrap();
         let mut attributes = element.attributes.borrow_mut();
 
-        for Attribute { name: QualName { prefix, ns, local }, value } in attrs {
-            attributes.map.entry(attributes::ExpandedName { ns, local }).or_insert_with(|| {
-                let value = String::from(value);
-                attributes::Attribute { prefix, value }
-            });
+        for Attribute {
+            name: QualName { prefix, ns, local },
+            value,
+        } in attrs
+        {
+            attributes
+                .map
+                .entry(attributes::ExpandedName { ns, local })
+                .or_insert_with(|| {
+                    let value = String::from(value);
+                    attributes::Attribute { prefix, value }
+                });
         }
     }
 
@@ -168,11 +199,20 @@ impl TreeSink for Sink {
 
     #[inline]
     fn get_template_contents(&mut self, target: &NodeRef) -> NodeRef {
-        target.as_element().unwrap().template_contents.clone().unwrap()
+        target
+            .as_element()
+            .unwrap()
+            .template_contents
+            .clone()
+            .unwrap()
     }
 
-    fn append_based_on_parent_node(&mut self, element: &NodeRef,
-                                   prev_element: &NodeRef, child: NodeOrText<NodeRef>) {
+    fn append_based_on_parent_node(
+        &mut self,
+        element: &NodeRef,
+        prev_element: &NodeRef,
+        child: NodeOrText<NodeRef>,
+    ) {
         if element.parent().is_some() {
             self.append_before_sibling(element, child)
         } else {

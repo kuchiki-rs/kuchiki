@@ -6,27 +6,27 @@ Kuchiki (朽木), a HTML/XML tree manipulation library for Rust.
 
 #![deny(missing_docs)]
 
-extern crate cssparser;
-#[macro_use] extern crate html5ever;
-#[macro_use] extern crate matches;
-extern crate selectors;
-#[cfg(test)] extern crate tempdir;
+#[macro_use]
+extern crate html5ever;
+#[macro_use]
+extern crate matches;
 
 mod attributes;
+mod cell_extras;
 pub mod iter;
-mod move_cell;
 mod node_data_ref;
 mod parser;
 mod select;
 mod serializer;
-#[cfg(test)] mod tests;
+#[cfg(test)]
+mod tests;
 mod tree;
 
-pub use attributes::{Attributes, ExpandedName, Attribute};
+pub use attributes::{Attribute, Attributes, ExpandedName};
 pub use node_data_ref::NodeDataRef;
 pub use parser::{parse_html, parse_html_with_options, ParseOpts};
-pub use select::{Selectors, Selector, Specificity};
-pub use tree::{NodeRef, Node, NodeData, ElementData, Doctype, DocumentData};
+pub use select::{Selector, Selectors, Specificity};
+pub use tree::{Doctype, DocumentData, ElementData, Node, NodeData, NodeRef};
 
 /// This module re-exports a number of traits that are useful when using Kuchiki.
 /// It can be used with:
@@ -36,6 +36,5 @@ pub use tree::{NodeRef, Node, NodeData, ElementData, Doctype, DocumentData};
 /// ```
 pub mod traits {
     pub use html5ever::tendril::TendrilSink;
-    pub use iter::{NodeIterator, ElementIterator};
+    pub use crate::iter::{ElementIterator, NodeIterator};
 }
-

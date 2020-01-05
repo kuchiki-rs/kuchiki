@@ -1,20 +1,21 @@
 [package]
 name = "kuchiki"
-version = "0.7.2"
+version = "0.8.0"
 authors = ["Simon Sapin <simon.sapin@exyr.org>"]
 license = "MIT"
 description = "(朽木) HTML/XML tree manipulation library"
 repository = "https://github.com/SimonSapin/kuchiki"
+edition = "2018"
 
 [lib]
 name = "kuchiki"
 doctest = false
 
 [dependencies]
-cssparser = "0.25"
-matches = "0.1"
-html5ever = "0.24"
-selectors = "0.21"
+cssparser = "0.27"
+matches = "0.1.4"
+html5ever = "0.25"
+selectors = "0.22"
 
 [dev-dependencies]
 tempdir = "0.3"

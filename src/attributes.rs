@@ -1,4 +1,4 @@
-use html5ever::{LocalName, Prefix, Namespace};
+use html5ever::{LocalName, Namespace, Prefix};
 use std::collections::btree_map::{BTreeMap, Entry};
 
 /// Convenience wrapper around a btreemap that adds method for attributes in the null namespace.
@@ -44,12 +44,16 @@ impl Attributes {
 
     /// Like BTreeMap::get
     pub fn get<A: Into<LocalName>>(&self, local_name: A) -> Option<&str> {
-        self.map.get(&ExpandedName::new(ns!(), local_name)).map(|attr| &*attr.value)
+        self.map
+            .get(&ExpandedName::new(ns!(), local_name))
+            .map(|attr| &*attr.value)
     }
 
     /// Like BTreeMap::get_mut
     pub fn get_mut<A: Into<LocalName>>(&mut self, local_name: A) -> Option<&mut String> {
-        self.map.get_mut(&ExpandedName::new(ns!(), local_name)).map(|attr| &mut attr.value)
+        self.map
+            .get_mut(&ExpandedName::new(ns!(), local_name))
+            .map(|attr| &mut attr.value)
     }
 
     /// Like BTreeMap::entry
@@ -58,8 +62,18 @@ impl Attributes {
     }
 
     /// Like BTreeMap::insert
-    pub fn insert<A: Into<LocalName>>(&mut self, local_name: A, value: String) -> Option<Attribute> {
-        self.map.insert(ExpandedName::new(ns!(), local_name), Attribute { prefix: None, value })
+    pub fn insert<A: Into<LocalName>>(
+        &mut self,
+        local_name: A,
+        value: String,
+    ) -> Option<Attribute> {
+        self.map.insert(
+            ExpandedName::new(ns!(), local_name),
+            Attribute {
+                prefix: None,
+                value,
+            },
+        )
     }
 
     /// Like BTreeMap::remove
