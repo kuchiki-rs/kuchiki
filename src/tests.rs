@@ -3,9 +3,9 @@ use std::path::Path;
 
 use tempdir::TempDir;
 
-use parser::parse_html;
-use select::*;
-use traits::*;
+use crate::parser::parse_html;
+use crate::select::*;
+use crate::traits::*;
 
 #[test]
 fn text_nodes() {

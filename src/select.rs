@@ -1,8 +1,8 @@
-use attributes::ExpandedName;
+use crate::attributes::ExpandedName;
 use cssparser::{self, CowRcStr, ParseError, SourceLocation, ToCss};
 use html5ever::{LocalName, Namespace};
-use iter::{NodeIterator, Select};
-use node_data_ref::NodeDataRef;
+use crate::iter::{NodeIterator, Select};
+use crate::node_data_ref::NodeDataRef;
 use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
 use selectors::context::QuirksMode;
 use selectors::parser::SelectorParseErrorKind;
@@ -12,7 +12,7 @@ use selectors::parser::{
 use selectors::OpaqueElement;
 use selectors::{self, matching};
 use std::fmt;
-use tree::{ElementData, Node, NodeData, NodeRef};
+use crate::tree::{ElementData, Node, NodeData, NodeRef};
 
 /// The definition of whitespace per CSS Selectors Level 3 § 4.
 ///
@@ -27,6 +27,7 @@ impl SelectorImpl for KuchikiSelectors {
     type Identifier = LocalName;
     type ClassName = LocalName;
     type LocalName = LocalName;
+    type PartName = LocalName;
     type NamespacePrefix = LocalName;
     type NamespaceUrl = Namespace;
     type BorrowedNamespaceUrl = Namespace;
@@ -99,6 +100,14 @@ impl NonTSPseudoClass for PseudoClass {
 
     fn is_active_or_hover(&self) -> bool {
         matches!(*self, PseudoClass::Active | PseudoClass::Hover)
+    }
+
+    fn is_user_action_state(&self) -> bool {
+        matches!(*self, PseudoClass::Active | PseudoClass::Hover | PseudoClass::Focus)
+    }
+
+    fn has_zero_specificity(&self) -> bool {
+        false
     }
 }
 
@@ -195,12 +204,37 @@ impl selectors::Element for NodeDataRef<ElementData> {
     }
 
     #[inline]
-    fn local_name<'a>(&'a self) -> &'a LocalName {
-        &self.name.local
+    fn has_local_name(&self, name: &LocalName) -> bool {
+        self.name.local == *name
     }
     #[inline]
-    fn namespace<'a>(&'a self) -> &'a Namespace {
-        &self.name.ns
+    fn has_namespace(&self, namespace: &Namespace) -> bool {
+        self.name.ns == *namespace
+    }
+
+    #[inline]
+    fn is_part(&self, _name: &LocalName) -> bool {
+        false
+    }
+
+    #[inline]
+    fn exported_part(&self, _: &LocalName) -> Option<LocalName> {
+        None
+    }
+
+    #[inline]
+    fn imported_part(&self, _: &LocalName) -> Option<LocalName> {
+        None
+    }
+
+    #[inline]
+    fn is_pseudo_element(&self) -> bool {
+        false
+    }
+
+    #[inline]
+    fn is_same_type(&self, other: &Self) -> bool {
+        self.name == other.name
     }
 
     #[inline]
@@ -378,10 +412,10 @@ impl fmt::Display for Selectors {
         let first = iter
             .next()
             .expect("Empty Selectors, should contain at least one selector");
-        try!(first.0.to_css(f));
+        first.0.to_css(f)?;
         for selector in iter {
-            try!(f.write_str(", "));
-            try!(selector.0.to_css(f));
+            f.write_str(", ")?;
+            selector.0.to_css(f)?;
         }
         Ok(())
     }

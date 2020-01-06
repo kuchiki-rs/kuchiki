@@ -3,8 +3,8 @@ use html5ever::tree_builder::{ElementFlags, NodeOrText, QuirksMode, TreeSink};
 use html5ever::{self, Attribute, ExpandedName, QualName};
 use std::borrow::Cow;
 
-use attributes;
-use tree::NodeRef;
+use crate::attributes;
+use crate::tree::NodeRef;
 
 /// Options for the HTML parser.
 #[derive(Default)]
