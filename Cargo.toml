@@ -13,7 +13,7 @@ doctest = false
 
 [dependencies]
 cssparser = "0.27"
-matches = "0.1.4"
+matches = "0.1"
 html5ever = "0.25"
 selectors = "0.22"
 
