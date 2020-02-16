@@ -359,7 +359,7 @@ impl Node {
         self.previous_sibling.upgrade().map(NodeRef)
     }
 
-    /// Return a reference to the previous sibling of this node, unless it is a last child.
+    /// Return a reference to the next sibling of this node, unless it is a last child.
     #[inline]
     pub fn next_sibling(&self) -> Option<NodeRef> {
         self.next_sibling.clone_inner().map(NodeRef)
