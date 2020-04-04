@@ -24,7 +24,7 @@ mod tree;
 
 pub use attributes::{Attribute, Attributes, ExpandedName};
 pub use node_data_ref::NodeDataRef;
-pub use parser::{parse_html, parse_html_with_options, ParseOpts};
+pub use parser::{parse_html, parse_html_with_options, ParseOpts, Sink};
 pub use select::{Selector, Selectors, Specificity};
 pub use tree::{Doctype, DocumentData, ElementData, Node, NodeData, NodeRef};
 

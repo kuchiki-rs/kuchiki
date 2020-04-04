@@ -37,6 +37,7 @@ pub fn parse_html_with_options(opts: ParseOpts) -> html5ever::Parser<Sink> {
     html5ever::parse_document(sink, html5opts)
 }
 
+/// Receives new tree nodes during parsing.
 pub struct Sink {
     document_node: NodeRef,
     on_parse_error: Option<Box<dyn FnMut(Cow<'static, str>)>>,
