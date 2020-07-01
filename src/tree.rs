@@ -202,7 +202,7 @@ impl NodeRef {
             last_child: Cell::new(None),
             previous_sibling: Cell::new(None),
             next_sibling: Cell::new(None),
-            data: data,
+            data,
         }))
     }
 
@@ -218,7 +218,7 @@ impl NodeRef {
             } else {
                 None
             },
-            name: name,
+            name,
             attributes: RefCell::new(Attributes {
                 map: attributes.into_iter().collect(),
             }),
