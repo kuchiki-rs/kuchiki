@@ -13,22 +13,22 @@ use crate::iter::NodeIterator;
 #[derive(Debug, PartialEq, Clone)]
 pub enum NodeData {
     /// Element node
-    Element(ElementData),
+    Element(Box<ElementData>),
 
     /// Text node
-    Text(RefCell<String>),
+    Text(Box<RefCell<String>>),
 
     /// Comment node
-    Comment(RefCell<String>),
+    Comment(Box<RefCell<String>>),
 
     /// Processing instruction node
-    ProcessingInstruction(RefCell<(String, String)>),
+    ProcessingInstruction(Box<RefCell<(String, String)>>),
 
     /// Doctype node
-    Doctype(Doctype),
+    Doctype(Box<Doctype>),
 
     /// Document node
-    Document(DocumentData),
+    Document(Box<DocumentData>),
 
     /// Document fragment node
     DocumentFragment,
@@ -212,7 +212,7 @@ impl NodeRef {
     where
         I: IntoIterator<Item = (ExpandedName, Attribute)>,
     {
-        NodeRef::new(NodeData::Element(ElementData {
+        NodeRef::new(NodeData::Element(Box::new(ElementData {
             template_contents: if name.expanded() == expanded_name!(html "template") {
                 Some(NodeRef::new(NodeData::DocumentFragment))
             } else {
@@ -222,19 +222,19 @@ impl NodeRef {
             attributes: RefCell::new(Attributes {
                 map: attributes.into_iter().collect(),
             }),
-        }))
+        })))
     }
 
     /// Create a new text node.
     #[inline]
     pub fn new_text<T: Into<String>>(value: T) -> NodeRef {
-        NodeRef::new(NodeData::Text(RefCell::new(value.into())))
+        NodeRef::new(NodeData::Text(Box::new(RefCell::new(value.into()))))
     }
 
     /// Create a new comment node.
     #[inline]
     pub fn new_comment<T: Into<String>>(value: T) -> NodeRef {
-        NodeRef::new(NodeData::Comment(RefCell::new(value.into())))
+        NodeRef::new(NodeData::Comment(Box::new(RefCell::new(value.into()))))
     }
 
     /// Create a new processing instruction node.
@@ -244,10 +244,10 @@ impl NodeRef {
         T1: Into<String>,
         T2: Into<String>,
     {
-        NodeRef::new(NodeData::ProcessingInstruction(RefCell::new((
+        NodeRef::new(NodeData::ProcessingInstruction(Box::new(RefCell::new((
             target.into(),
             data.into(),
-        ))))
+        )))))
     }
 
     /// Create a new doctype node.
@@ -258,19 +258,19 @@ impl NodeRef {
         T2: Into<String>,
         T3: Into<String>,
     {
-        NodeRef::new(NodeData::Doctype(Doctype {
+        NodeRef::new(NodeData::Doctype(Box::new(Doctype {
             name: name.into(),
             public_id: public_id.into(),
             system_id: system_id.into(),
-        }))
+        })))
     }
 
     /// Create a new document node.
     #[inline]
     pub fn new_document() -> NodeRef {
-        NodeRef::new(NodeData::Document(DocumentData {
+        NodeRef::new(NodeData::Document(Box::new(DocumentData {
             _quirks_mode: Cell::new(QuirksMode::NoQuirks),
-        }))
+        })))
     }
 
     /// Return the concatenation of all text nodes in this subtree.
