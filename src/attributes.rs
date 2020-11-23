@@ -1,11 +1,11 @@
 use html5ever::{LocalName, Namespace, Prefix};
-use std::collections::btree_map::{BTreeMap, Entry};
+use indexmap::{map::Entry, IndexMap};
 
-/// Convenience wrapper around a btreemap that adds method for attributes in the null namespace.
+/// Convenience wrapper around a indexmap that adds method for attributes in the null namespace.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Attributes {
     /// A map of attributes whose name can have namespaces.
-    pub map: BTreeMap<ExpandedName, Attribute>,
+    pub map: IndexMap<ExpandedName, Attribute>,
 }
 
 /// <https://www.w3.org/TR/REC-xml-names/#dt-expname>
@@ -37,31 +37,31 @@ pub struct Attribute {
 }
 
 impl Attributes {
-    /// Like BTreeMap::contains
+    /// Like IndexMap::contains
     pub fn contains<A: Into<LocalName>>(&self, local_name: A) -> bool {
         self.map.contains_key(&ExpandedName::new(ns!(), local_name))
     }
 
-    /// Like BTreeMap::get
+    /// Like IndexMap::get
     pub fn get<A: Into<LocalName>>(&self, local_name: A) -> Option<&str> {
         self.map
             .get(&ExpandedName::new(ns!(), local_name))
             .map(|attr| &*attr.value)
     }
 
-    /// Like BTreeMap::get_mut
+    /// Like IndexMap::get_mut
     pub fn get_mut<A: Into<LocalName>>(&mut self, local_name: A) -> Option<&mut String> {
         self.map
             .get_mut(&ExpandedName::new(ns!(), local_name))
             .map(|attr| &mut attr.value)
     }
 
-    /// Like BTreeMap::entry
+    /// Like IndexMap::entry
     pub fn entry<A: Into<LocalName>>(&mut self, local_name: A) -> Entry<ExpandedName, Attribute> {
         self.map.entry(ExpandedName::new(ns!(), local_name))
     }
 
-    /// Like BTreeMap::insert
+    /// Like IndexMap::insert
     pub fn insert<A: Into<LocalName>>(
         &mut self,
         local_name: A,
@@ -76,7 +76,7 @@ impl Attributes {
         )
     }
 
-    /// Like BTreeMap::remove
+    /// Like IndexMap::remove
     pub fn remove<A: Into<LocalName>>(&mut self, local_name: A) -> Option<Attribute> {
         self.map.remove(&ExpandedName::new(ns!(), local_name))
     }
