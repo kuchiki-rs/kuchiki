@@ -57,8 +57,20 @@ pub fn parse_fragment_with_options(opts: ParseOpts, ctx_name: QualName, ctx_attr
 
 /// Receives new tree nodes during parsing.
 pub struct Sink {
-    document_node: NodeRef,
-    on_parse_error: Option<Box<dyn FnMut(Cow<'static, str>)>>,
+    /// The `Document` itself.
+    pub document_node: NodeRef,
+
+    /// The Sink will invoke this callback if it encounters a parse error.
+    pub on_parse_error: Option<Box<dyn FnMut(Cow<'static, str>)>>,
+}
+
+impl Default for Sink {
+    fn default() -> Sink {
+        Sink {
+            document_node: NodeRef::new_document(),
+            on_parse_error: None,
+        }
+    }
 }
 
 impl TreeSink for Sink {
