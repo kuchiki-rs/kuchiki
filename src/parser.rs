@@ -74,10 +74,10 @@ impl Default for Sink {
 }
 
 impl TreeSink for Sink {
-    type Output = NodeRef;
+    type Output = Self;
 
-    fn finish(self) -> NodeRef {
-        self.document_node
+    fn finish(self) -> Self {
+        self
     }
 
     type Handle = NodeRef;
