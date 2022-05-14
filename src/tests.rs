@@ -2,7 +2,7 @@ use html5ever::tree_builder::QuirksMode;
 use html5ever::QualName;
 use std::path::Path;
 
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 use crate::parser::{parse_html, parse_fragment};
 use crate::select::*;
@@ -86,7 +86,7 @@ fn parse_file() {
 
 #[test]
 fn serialize_and_read_file() {
-    let tempdir = TempDir::new("test_rm_tempdir").unwrap();
+    let tempdir = TempDir::new().unwrap();
     let mut path = tempdir.path().to_path_buf();
     path.push("temp.html");
 
