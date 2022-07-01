@@ -4,7 +4,7 @@ use kuchiki::traits::*;
 
 fn main() {
     let html = r"
-        <DOCTYPE html>
+        <!DOCTYPE html>
         <html>
         <head></head>
         <body>
