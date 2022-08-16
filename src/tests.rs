@@ -57,6 +57,24 @@ fn parse_and_serialize() {
 }
 
 #[test]
+fn parse_and_serialize_with_template() {
+    let html = r"
+<!doctype html>
+<title>Test case</title>
+<template><p>Content</p></template>";
+    let document = parse_html().one(html);
+    assert_eq!(
+        document.as_document().unwrap().quirks_mode(),
+        QuirksMode::NoQuirks
+    );
+    assert_eq!(
+        document.to_string(),
+        r"<!DOCTYPE html><html><head><title>Test case</title>
+<template><p>Content</p></template></head><body></body></html>"
+    );
+}
+
+#[test]
 fn parse_and_serialize_fragment() {
     let html = r"<tbody><tr><td>Test case";
 

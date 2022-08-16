@@ -41,7 +41,12 @@ impl Serialize for NodeRef {
                     )?
                 }
 
-                for child in self.children() {
+                let children = match element.template_contents.as_ref() {
+                    Some(template_root) => template_root.children(),
+                    None => self.children(),
+                };
+
+                for child in children {
                     Serialize::serialize(&child, serializer, IncludeNode)?
                 }
 
