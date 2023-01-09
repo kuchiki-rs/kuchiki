@@ -156,12 +156,14 @@ impl NodeRef {
 
     /// Return an iterator of the inclusive descendants element that match the given selector list.
     #[inline]
+    #[allow(clippy::result_unit_err)]
     pub fn select(&self, selectors: &str) -> Result<Select<Elements<Descendants>>, ()> {
         self.inclusive_descendants().select(selectors)
     }
 
     /// Return the first inclusive descendants element that match the given selector list.
     #[inline]
+    #[allow(clippy::result_unit_err)]
     pub fn select_first(&self, selectors: &str) -> Result<NodeDataRef<ElementData>, ()> {
         let mut elements = self.select(selectors)?;
         elements.next().ok_or(())
@@ -399,12 +401,8 @@ where
 
     #[inline]
     fn next(&mut self) -> Option<NodeDataRef<ElementData>> {
-        for element in self.iter.by_ref() {
-            if self.selectors.borrow().matches(&element) {
-                return Some(element);
-            }
-        }
-        None
+        let select = self.selectors.borrow();
+        self.iter.by_ref().find(|element| select.matches(element))
     }
 }
 
@@ -415,12 +413,11 @@ where
 {
     #[inline]
     fn next_back(&mut self) -> Option<NodeDataRef<ElementData>> {
-        for element in self.iter.by_ref().rev() {
-            if self.selectors.borrow().matches(&element) {
-                return Some(element);
-            }
-        }
-        None
+        let select = self.selectors.borrow();
+        self.iter
+            .by_ref()
+            .rev()
+            .find(|element| select.matches(element))
     }
 }
 
@@ -446,6 +443,7 @@ pub trait NodeIterator: Sized + Iterator<Item = NodeRef> {
 
     /// Filter this node iterator to elements maching the given selectors.
     #[inline]
+    #[allow(clippy::result_unit_err)]
     fn select(self, selectors: &str) -> Result<Select<Elements<Self>>, ()> {
         self.elements().select(selectors)
     }
@@ -455,6 +453,7 @@ pub trait NodeIterator: Sized + Iterator<Item = NodeRef> {
 pub trait ElementIterator: Sized + Iterator<Item = NodeDataRef<ElementData>> {
     /// Filter this element iterator to elements maching the given selectors.
     #[inline]
+    #[allow(clippy::result_unit_err)]
     fn select(self, selectors: &str) -> Result<Select<Self>, ()> {
         Selectors::compile(selectors).map(|s| Select {
             iter: self,

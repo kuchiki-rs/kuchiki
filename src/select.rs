@@ -348,6 +348,7 @@ pub struct Specificity(u32);
 impl Selectors {
     /// Compile a list of selectors. This may fail on syntax errors or unsupported selectors.
     #[inline]
+    #[allow(clippy::result_unit_err)]
     pub fn compile(s: &str) -> Result<Selectors, ()> {
         let mut input = cssparser::ParserInput::new(s);
         match SelectorList::parse(&KuchikiParser, &mut cssparser::Parser::new(&mut input)) {

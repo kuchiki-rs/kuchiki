@@ -99,7 +99,7 @@ impl Deref for NodeRef {
     type Target = Node;
     #[inline]
     fn deref(&self) -> &Node {
-        &*self.0
+        &self.0
     }
 }
 

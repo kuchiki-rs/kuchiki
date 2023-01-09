@@ -50,7 +50,7 @@ impl<T> NodeDataRef<T> {
         F: FnOnce(&Node) -> &T,
     {
         NodeDataRef {
-            _reference: f(&*rc),
+            _reference: f(&rc),
             _keep_alive: rc,
         }
     }
@@ -61,7 +61,7 @@ impl<T> NodeDataRef<T> {
     where
         F: FnOnce(&Node) -> Option<&T>,
     {
-        f(&*rc).map(|r| r as *const T).map(move |r| NodeDataRef {
+        f(&rc).map(|r| r as *const T).map(move |r| NodeDataRef {
             _reference: r,
             _keep_alive: rc,
         })
