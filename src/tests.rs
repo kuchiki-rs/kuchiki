@@ -7,6 +7,7 @@ use tempfile::TempDir;
 use crate::parser::{parse_fragment, parse_html};
 use crate::select::*;
 use crate::traits::*;
+use crate::tree::NodeRef;
 
 #[test]
 fn text_nodes() {
@@ -188,4 +189,23 @@ fn specificity() {
     assert!(specificities[0] == specificities[1]);
     assert!(specificities[0] > specificities[2]);
     assert!(specificities[1] > specificities[2]);
+}
+
+#[test]
+fn no_parent_sublings() {
+    let first = NodeRef::new_doctype("html", "", "");
+    let second = NodeRef::new_text("text");
+    first.insert_after(second.clone());
+    assert_eq!(second.previous_sibling(), Some(first.clone()));
+    assert_eq!(first.next_sibling(), Some(second.clone()));
+
+    let sibs: Vec<_> = second.preceding_siblings().collect();
+    assert_eq!(*sibs, [first.clone()]);
+    let sibs: Vec<_> = first.following_siblings().collect();
+    assert_eq!(*sibs, [second.clone()]);
+
+    let sibs: Vec<_> = second.inclusive_preceding_siblings().collect();
+    assert_eq!(*sibs, [second.clone(), first.clone()]);
+    let sibs: Vec<_> = first.inclusive_following_siblings().collect();
+    assert_eq!(*sibs, [first.clone(), second.clone()]);
 }

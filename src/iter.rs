@@ -21,80 +21,76 @@ impl NodeRef {
         Ancestors(self.parent())
     }
 
+    /// Return this node's first sibling
+    #[inline]
+    fn first_sibling(&self) -> Self {
+        match self.parent() {
+            Some(parent) => parent.first_child().unwrap(),
+            None => {
+                let mut first_sibling = self.clone();
+                while let Some(prev) = first_sibling.previous_sibling() {
+                    first_sibling = prev;
+                }
+                first_sibling
+            }
+        }
+    }
+
     /// Return an iterator of references to this node and the siblings before it.
     #[inline]
     pub fn inclusive_preceding_siblings(&self) -> Rev<Siblings> {
-        match self.parent() {
-            Some(parent) => {
-                let first_sibling = parent.first_child().unwrap();
-                debug_assert!(self.previous_sibling().is_some() || *self == first_sibling);
-                Siblings(Some(State {
-                    next: first_sibling,
-                    next_back: self.clone(),
-                }))
-            }
-            None => {
-                debug_assert!(self.previous_sibling().is_none());
-                Siblings(Some(State {
-                    next: self.clone(),
-                    next_back: self.clone(),
-                }))
-            }
-        }
+        let first_sibling = self.first_sibling();
+        debug_assert!(self.previous_sibling().is_some() || *self == first_sibling);
+        Siblings(Some(State {
+            next: first_sibling,
+            next_back: self.clone(),
+        }))
         .rev()
     }
 
     /// Return an iterator of references to this node’s siblings before it.
     #[inline]
     pub fn preceding_siblings(&self) -> Rev<Siblings> {
-        match (self.parent(), self.previous_sibling()) {
-            (Some(parent), Some(previous_sibling)) => {
-                let first_sibling = parent.first_child().unwrap();
-                Siblings(Some(State {
-                    next: first_sibling,
-                    next_back: previous_sibling,
-                }))
-            }
-            _ => Siblings(None),
-        }
+        Siblings(self.previous_sibling().map(|previous_sibling| State {
+            next: self.first_sibling(),
+            next_back: previous_sibling,
+        }))
         .rev()
+    }
+
+    /// Return this node's first sibling
+    #[inline]
+    fn last_sibling(&self) -> Self {
+        match self.parent() {
+            Some(parent) => parent.last_child().unwrap(),
+            None => {
+                let mut last_sibling = self.clone();
+                while let Some(next) = last_sibling.next_sibling() {
+                    last_sibling = next;
+                }
+                last_sibling
+            }
+        }
     }
 
     /// Return an iterator of references to this node and the siblings after it.
     #[inline]
     pub fn inclusive_following_siblings(&self) -> Siblings {
-        match self.parent() {
-            Some(parent) => {
-                let last_sibling = parent.last_child().unwrap();
-                debug_assert!(self.next_sibling().is_some() || *self == last_sibling);
-                Siblings(Some(State {
-                    next: self.clone(),
-                    next_back: last_sibling,
-                }))
-            }
-            None => {
-                debug_assert!(self.next_sibling().is_none());
-                Siblings(Some(State {
-                    next: self.clone(),
-                    next_back: self.clone(),
-                }))
-            }
-        }
+        let last_sibling = self.last_sibling();
+        debug_assert!(self.next_sibling().is_some() || *self == last_sibling);
+        Siblings(Some(State {
+            next: self.clone(),
+            next_back: last_sibling,
+        }))
     }
 
     /// Return an iterator of references to this node’s siblings after it.
     #[inline]
     pub fn following_siblings(&self) -> Siblings {
-        match (self.parent(), self.next_sibling()) {
-            (Some(parent), Some(next_sibling)) => {
-                let last_sibling = parent.last_child().unwrap();
-                Siblings(Some(State {
-                    next: next_sibling,
-                    next_back: last_sibling,
-                }))
-            }
-            _ => Siblings(None),
-        }
+        Siblings(self.next_sibling().map(|next_sibling| State {
+            next: next_sibling,
+            next_back: self.last_sibling(),
+        }))
     }
 
     /// Return an iterator of references to this node’s children.
