@@ -1,8 +1,9 @@
 use crate::attributes::ExpandedName;
-use cssparser::{self, CowRcStr, ParseError, SourceLocation, ToCss};
-use html5ever::{LocalName, Namespace};
 use crate::iter::{NodeIterator, Select};
 use crate::node_data_ref::NodeDataRef;
+use crate::tree::{ElementData, Node, NodeData, NodeRef};
+use cssparser::{self, CowRcStr, ParseError, SourceLocation, ToCss};
+use html5ever::{LocalName, Namespace};
 use selectors::attr::{AttrSelectorOperation, CaseSensitivity, NamespaceConstraint};
 use selectors::context::QuirksMode;
 use selectors::parser::SelectorParseErrorKind;
@@ -11,7 +12,6 @@ use selectors::parser::{
 };
 use selectors::{self, matching, OpaqueElement};
 use std::fmt;
-use crate::tree::{ElementData, Node, NodeData, NodeRef};
 
 /// The definition of whitespace per CSS Selectors Level 3 § 4.
 ///
@@ -102,7 +102,10 @@ impl NonTSPseudoClass for PseudoClass {
     }
 
     fn is_user_action_state(&self) -> bool {
-        matches!(*self, PseudoClass::Active | PseudoClass::Hover | PseudoClass::Focus)
+        matches!(
+            *self,
+            PseudoClass::Active | PseudoClass::Hover | PseudoClass::Focus
+        )
     }
 
     fn has_zero_specificity(&self) -> bool {

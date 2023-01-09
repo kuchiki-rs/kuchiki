@@ -4,7 +4,7 @@ use std::path::Path;
 
 use tempfile::TempDir;
 
-use crate::parser::{parse_html, parse_fragment};
+use crate::parser::{parse_fragment, parse_html};
 use crate::select::*;
 use crate::traits::*;
 
@@ -62,8 +62,14 @@ fn parse_and_serialize_fragment() {
 
     let ctx_name = QualName::new(None, ns!(html), local_name!("tbody"));
     let document = parse_fragment(ctx_name, vec![]).one(html);
-    assert_eq!(document.as_document().unwrap().quirks_mode(), QuirksMode::NoQuirks);
-    assert_eq!(document.to_string(), r"<html><tr><td>Test case</td></tr></html>");
+    assert_eq!(
+        document.as_document().unwrap().quirks_mode(),
+        QuirksMode::NoQuirks
+    );
+    assert_eq!(
+        document.to_string(),
+        r"<html><tr><td>Test case</td></tr></html>"
+    );
 }
 
 #[test]
