@@ -1,10 +1,13 @@
-Kuchiki (朽木)
-==============
+## Archived
 
-HTML/XML¹ tree manipulation library for Rust.
+This repository is archived to reflect its level of (in)activity and set maintenance expectations.
 
-[Documentation](https://docs.rs/kuchiki)
+If some ideas or code in it are useful to you, feel free to use them in other repositories and crates
+in accordance with the license.
 
-See [users.rust-lang.org discussion](https://users.rust-lang.org/t/kuchiki-a-edit-no-longer-vaporware-html-xml-tree-manipulation-library/435).
+Note however that tree data structure design in Rust is full of trade-offs,
+maybe some approach other than `Rc`/`Weak` would work better for you.
+(For example [`Vec` + indices][1], if it’s acceptable
+not to recover memory for dropped nodes before the entire document is dropped.)
 
-¹ There is no support for XML syntax yet. The plan is to integrate with an existing parser.
+[1]: https://github.com/SimonSapin/victor/blob/fdb11f3e87f6d2d59170d10169fa6deb94e53b94/victor/src/dom/mod.rs#L19-L29
